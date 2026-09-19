@@ -37,7 +37,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: 'npm'
 
       - name: Install Dependencies
         run: npm ci
@@ -84,7 +83,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: 'npm'
 
       - name: Install Dependencies
         run: npm ci
@@ -124,8 +122,6 @@ jobs:
             ghcr.io/vesviet-team/vietnam-accounting-learning-web:${{ github.sha }}
             ghcr.io/vesviet-team/vietnam-accounting-learning-web:main
             ghcr.io/vesviet-team/vietnam-accounting-learning-web:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
 
       - name: Generate SBOM
         uses: anchore/sbom-action@v0
