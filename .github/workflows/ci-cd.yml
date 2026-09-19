@@ -174,7 +174,7 @@ jobs:
           echo "========================================================"
           echo "Testing internal CoreDNS probe..."
           for i in {1..10}; do
-            if curl -fsS http://vietnam-accounting-web.vietnam-accounting.svc.cluster.local/healthz; then
+            if curl --connect-timeout 3 -fsS http://vietnam-accounting-web.vietnam-accounting.svc.cluster.local:8810/healthz; then
               echo "✅ CoreDNS probe passed."
               break
             fi
@@ -183,6 +183,6 @@ jobs:
           done
 
           echo "Testing LAN IP probes..."
-          curl -fsS http://192.168.1.114:8810/healthz
-          curl -fsS http://192.168.1.116:8810/healthz
+          curl --connect-timeout 3 -fsS http://192.168.1.114:8810/healthz
+          curl --connect-timeout 3 -fsS http://192.168.1.116:8810/healthz
           echo "🎉 All health probes passed!"
