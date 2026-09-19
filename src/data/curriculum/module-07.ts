@@ -1,0 +1,150 @@
+import { DailyLesson } from '@/types/curriculum';
+
+export const MODULE_7_LESSONS: DailyLesson[] = [
+  {
+    day: 19,
+    moduleNumber: 7,
+    moduleTitleVi: 'Khối 7: Kế Toán Chi Phí Sản Xuất & Tính Giá Thành (TT 200 vs 133)',
+    dayTitleVi: 'Ngày 19: Tập Hợp Chi Phí Sản Xuất Theo Thông Tư 200 (TK 621, 622, 623, 627)',
+    estimatedMinutes: 20,
+    isMilestoneDay: false,
+    concepts: [
+      {
+        id: 'c19-1',
+        titleVi: '3 Khoản Mục Chi Phí Sản Xuất Trực Tiếp Trong Thông Tư 200',
+        summaryVi: 'Chi phí nguyên vật liệu trực tiếp (621), Chi phí nhân công trực tiếp (622) và Chi phí sử dụng máy thi công (623).',
+        contentVi: 'Trong doanh nghiệp sản xuất theo Thông tư 200: (1) TK 621: Tập hợp trị giá nguyên vật liệu chính, vật liệu phụ xuất kho dùng trực tiếp chế tạo sản phẩm (Nợ 621 / Có 152); (2) TK 622: Tập hợp tiền lương và các khoản trích bảo hiểm tính theo lương của công nhân trực tiếp sản xuất (Nợ 622 / Có 334, 338); (3) TK 623: Dùng cho các doanh nghiệp xây lắp thi công công trình.',
+        keyTakeawayVi: 'TK 621 và 622 chỉ phản ánh chi phí liên quan trực tiếp đến việc gia công chế tạo sản phẩm.',
+      },
+      {
+        id: 'c19-2',
+        titleVi: 'Chi Phí Sản Xuất Chung (TK 627) & Tiêu Thức Phân Bổ',
+        summaryVi: 'TK 627 tập hợp chi phí phục vụ tại phân xưởng sản xuất: lương quản đốc (6271), khấu hao máy móc (6274), chi phí dịch vụ mua ngoài (6277).',
+        contentVi: 'Chi phí sản xuất chung là chi phí gián tiếp phát sinh tại các phân xưởng, tổ đội sản xuất. Do phục vụ cho nhiều loại sản phẩm cùng lúc, cuối tháng kế toán phải lựa chọn tiêu thức phân bổ hợp lý (theo giờ công lao động trực tiếp, theo chi phí nguyên vật liệu chính hoặc theo công suất máy) để phân bổ chi phí TK 627 cho từng đối tượng tính giá thành.',
+        keyTakeawayVi: 'Lựa chọn tiêu thức phân bổ chi phí sản xuất chung nhất quán ảnh hưởng trực tiếp đến giá thành từng sản phẩm.',
+      },
+      {
+        id: 'c19-3',
+        titleVi: 'Bút Toán Kết Chuyển Chi Phí Sản Xuất Cuối Kỳ Vào TK 154',
+        summaryVi: 'Toàn bộ số phát sinh của TK 621, 622, 627 cuối tháng được kết chuyển hết sang Nợ TK 154; TK 621/622/627 không có số dư.',
+        contentVi: 'Cuối kỳ kế toán, sau khi kiểm tra định mức sản xuất, kế toán thực hiện bút toán kết chuyển chi phí sản xuất để tính giá thành: Ghi NỢ TK 154 (Chi phí sản xuất kinh doanh dở dang) / CÓ TK 621 (Tổng NVL trực tiếp) / CÓ TK 622 (Tổng nhân công trực tiếp) / CÓ TK 627 (Tổng sản xuất chung). Các tài khoản 621, 622, 627 sau khi kết chuyển có số dư cuối kỳ bằng 0.',
+        journalExamples: [
+          {
+            descriptionVi: 'Kết chuyển chi phí sản xuất phân xưởng cơ khí tháng 9 vào TK 154 để tính giá thành',
+            entries: [
+              { debitCredit: 'DEBIT', accountCode: '154', accountNameVi: 'Chi phí sản xuất, kinh doanh dở dang', amount: 180000000 },
+              { debitCredit: 'CREDIT', accountCode: '621', accountNameVi: 'Chi phí nguyên liệu, vật liệu trực tiếp', amount: 100000000 },
+              { debitCredit: 'CREDIT', accountCode: '622', accountNameVi: 'Chi phí nhân công trực tiếp', amount: 50000000 },
+              { debitCredit: 'CREDIT', accountCode: '627', accountNameVi: 'Chi phí sản xuất chung', amount: 30000000 },
+            ],
+            statutoryNoteVi: 'Cuối kỳ TK 621, 622, 627 hoàn toàn sạch số dư, toàn bộ chi phí dồn vào Nợ TK 154.',
+          },
+        ],
+        keyTakeawayVi: 'TK 154 là trạm trung chuyển tổng hợp toàn bộ chi phí để tính giá thành sản phẩm hoàn thành.',
+      },
+    ],
+  },
+  {
+    day: 20,
+    moduleNumber: 7,
+    moduleTitleVi: 'Khối 7: Kế Toán Chi Phí Sản Xuất & Tính Giá Thành (TT 200 vs 133)',
+    dayTitleVi: 'Ngày 20: Tập Hợp Chi Phí Sản Xuất Theo Thông Tư 133 (Cấm 621, 622, 627, Dồn Vào 154)',
+    estimatedMinutes: 20,
+    isMilestoneDay: false,
+    concepts: [
+      {
+        id: 'c20-1',
+        titleVi: 'Nguyên Tắc Cấm Tài Khoản 621, 622, 623, 627 Trong Thông Tư 133',
+        summaryVi: 'Thông tư 133 triệt tiêu hoàn toàn các tài khoản chi phí sản xuất Loại 6 để đơn giản hóa cho SME.',
+        contentVi: 'Bộ Tài chính xây dựng Thông tư 133 với triết lý giảm bớt tầng nấc kế toán cho doanh nghiệp vừa và nhỏ. Do đó, các tài khoản TK 621, 622, 623, 627 bị BỎ HOÀN TOÀN. Mọi chi phí phát sinh trực tiếp hay gián tiếp phục vụ chế tạo sản phẩm hoặc cung cấp dịch vụ đều được định khoản trực tiếp vào BÊN NỢ TÀI KHOẢN 154 ngay khi phát sinh nghiệp vụ kinh tế.',
+        keyTakeawayVi: 'Doanh nghiệp SME theo TT 133 phát sinh chi phí sản xuất là ghi ngay Nợ TK 154, không qua tài khoản đầu 6.',
+      },
+      {
+        id: 'c20-2',
+        titleVi: 'Hệ Thống Tiểu Khoản Theo Dõi Chi Phí Sản Xuất Của TK 154 Trong TT 133',
+        summaryVi: 'Doanh nghiệp mở các tiểu khoản 1541, 1542, 1543, 1544 để phân loại yếu tố chi phí.',
+        contentVi: 'Mặc dù không dùng tài khoản Loại 6, doanh nghiệp áp dụng TT 133 vẫn quản lý chặt chẽ chi phí thông qua tiểu khoản chi tiết: (1) TK 1541: Chi phí nguyên liệu, vật liệu trực tiếp (Nợ 1541 / Có 152); (2) TK 1542: Chi phí nhân công trực tiếp (Nợ 1542 / Có 334, 338); (3) TK 1543: Chi phí sử dụng máy thi công; (4) TK 1544: Chi phí sản xuất chung (Nợ 1544 / Có 214, 111, 112, 153).',
+        detailedTAccounts: [
+          {
+            accountCode: '154',
+            accountNameVi: 'Chi phí sản xuất, kinh doanh dở dang (TT 133)',
+            accountClass: 1,
+            normalBalance: 'DEBIT',
+            openingBalance: { side: 'DEBIT', amount: 15000000 },
+            entries: [
+              { id: 'sx1', description: 'Xuất kho gỗ chế tạo bàn ghế (tiểu khoản 1541)', amount: 45000000, side: 'DEBIT', counterAccountCode: '152' },
+              { id: 'sx2', description: 'Lương thợ mộc sản xuất (tiểu khoản 1542)', amount: 25000000, side: 'DEBIT', counterAccountCode: '334' },
+              { id: 'sx3', description: 'Khấu hao máy cưa xưởng gỗ (tiểu khoản 1544)', amount: 8000000, side: 'DEBIT', counterAccountCode: '214' },
+              { id: 'sx4', description: 'Nhập kho 50 bộ bàn ghế thành phẩm hoàn thành', amount: 80000000, side: 'CREDIT', counterAccountCode: '155' },
+            ],
+            explanationVi: 'Chi phí dở dang cuối kỳ = 15.000.000 + 45.000.000 + 25.000.000 + 8.000.000 - 80.000.000 = 13.000.000 VNĐ (Dư Nợ).',
+          },
+        ],
+        keyTakeawayVi: 'TK 154 trong TT 133 vừa đóng vai trò tập hợp chi phí hàng ngày, vừa là tài khoản tính giá thành cuối kỳ.',
+      },
+      {
+        id: 'c20-3',
+        titleVi: 'So Sánh Đối Chiếu Định Khoản Sản Xuất Giữa TT 200 & TT 133',
+        summaryVi: 'Bảng đối chiếu trực quan giúp kế toán không bị nhầm lẫn khi chuyển đổi giữa hai chế độ kế toán.',
+        contentVi: 'Nghiệp vụ xuất kho NVL sản xuất: TT 200 ghi `Nợ 621 / Có 152` -> TT 133 ghi `Nợ 154 (1541) / Có 152`. Nghiệp vụ tính lương công nhân: TT 200 ghi `Nợ 622 / Có 334` -> TT 133 ghi `Nợ 154 (1542) / Có 334`. Nghiệp vụ trích khấu hao máy xưởng: TT 200 ghi `Nợ 627 / Có 214` -> TT 133 ghi `Nợ 154 (1544) / Có 214`.',
+        keyTakeawayVi: 'Nhớ quy tắc quy đổi: Mọi tài khoản 621, 622, 623, 627 của TT 200 đều được thay thế hoàn toàn bằng TK 154 trong TT 133.',
+      },
+    ],
+  },
+  {
+    day: 21,
+    moduleNumber: 7,
+    moduleTitleVi: 'Khối 7: Kế Toán Chi Phí Sản Xuất & Tính Giá Thành (TT 200 vs 133)',
+    dayTitleVi: 'Ngày 21: Đánh Giá SP Dở Dang, Tính Giá Thành Thành Phẩm (TK 155) & Giá Vốn Xuất Kho',
+    estimatedMinutes: 20,
+    isMilestoneDay: true,
+    concepts: [
+      {
+        id: 'c21-1',
+        titleVi: 'Công Thức Tính Tổng Giá Thành Sản Xuất Sản Phẩm Hoàn Thành',
+        summaryVi: 'Tổng giá thành SX = Chi phí dở dang đầu kỳ + Chi phí phát sinh trong kỳ - Chi phí dở dang cuối kỳ.',
+        contentVi: 'Phương trình tính giá thành sản phẩm: Z = Dđk + C - Dck. Trong đó: Z là tổng giá thành sản xuất sản phẩm hoàn thành nhập kho; Dđk là giá trị sản phẩm dở dang đầu kỳ (số dư Nợ đầu kỳ TK 154); C là tổng chi phí sản xuất phát sinh trong kỳ (phát sinh Nợ TK 154); Dck là giá trị sản phẩm dở dang cuối kỳ được đánh giá kiểm kê. Giá thành đơn vị = Z / Số lượng sản phẩm hoàn thành nhập kho.',
+        keyTakeawayVi: 'Giá thành sản xuất đơn vị là thước đo cốt lõi đánh giá hiệu quả sản xuất và làm căn cứ xác định giá bán.',
+      },
+      {
+        id: 'c21-2',
+        titleVi: 'Phương Pháp Đánh Giá Sản Phẩm Dở Dang Cuối Kỳ',
+        summaryVi: 'Hai phương pháp thông dụng: Theo chi phí nguyên vật liệu trực tiếp hoặc theo sản lượng hoàn thành tương đương.',
+        contentVi: '(1) Phương pháp theo chi phí NVL trực tiếp: Toàn bộ chi phí nhân công và sản xuất chung tính hết cho thành phẩm hoàn thành, sản phẩm dở dang chỉ chịu chi phí NVL chính. Thích hợp cho doanh nghiệp có tỷ trọng chi phí NVL chiếm trên 70-80% giá thành; (2) Phương pháp theo sản lượng hoàn thành tương đương: Quy đổi sản phẩm dở dang thành sản phẩm hoàn thành dựa trên mức độ hoàn thành (ví dụ: 100 sản phẩm dở dang mức độ 50% = 50 sản phẩm hoàn thành tương đương).',
+        keyTakeawayVi: 'Doanh nghiệp phải áp dụng phương pháp đánh giá dở dang nhất quán trong suốt niên độ kế toán.',
+      },
+      {
+        id: 'c21-3',
+        titleVi: 'Bút Toán Nhập Kho Thành Phẩm & Xuất Kho Tiêu Thụ (Mẫu 02-VT)',
+        summaryVi: 'Nhập kho thành phẩm ghi Nợ TK 155 / Có TK 154; khi xuất kho bán ghi Nợ TK 632 / Có TK 155.',
+        contentVi: 'Khi sản phẩm hoàn thành nghiệm thu chuyển về nhập kho thành phẩm: Kế toán lập Phiếu nhập kho (01-VT) và ghi Nợ TK 155 (Thành phẩm) / Có TK 154 (Chi phí SXKD dở dang). Khi xuất bán cho khách hàng: Kế toán lập Phiếu xuất kho (02-VT) và ghi nhận giá vốn Nợ TK 632 / Có TK 155.',
+        vouchers: [
+          {
+            type: 'GOODS_ISSUE_02_VT',
+            titleVi: 'Phiếu xuất kho số PXK-028: Xuất kho thành phẩm giao cho đại lý',
+            voucherNumber: 'PXK-2026-028',
+            date: '2026-09-21',
+            receiverName: 'Nguyễn Văn Mạnh (Nhân viên giao nhận)',
+            department: 'Phòng Điều vận - Bán hàng',
+            reason: 'Xuất kho giao thành phẩm cho Siêu thị Điện máy Xanh theo Hợp đồng số 112/HĐMB',
+            warehouseName: 'Kho Thành Phẩm Số 2 - Nhà máy Cơ khí Việt Hàn',
+            debitAccount: 'TK 632',
+            creditAccount: 'TK 155',
+            items: [
+              { sku: 'FAN-SMART-01', name: 'Quạt đứng thông minh Inverter SmartFan F1', unit: 'Chiếc', quantityRequested: 50, quantityDispatched: 50, unitPrice: 800000, amount: 40000000 },
+            ],
+            totalAmount: 40000000,
+            signatures: {
+              director: 'Trần Đình Trọng (Duyệt xuất)',
+              warehouseKeeper: 'Đặng Quốc Huy (Thủ kho)',
+              receiver: 'Nguyễn Văn Mạnh',
+              preparer: 'Phạm Hồng Nhung',
+              chiefAccountant: 'Lê Thu Hà (Kế toán trưởng)',
+            },
+          },
+        ],
+        keyTakeawayVi: 'Phiếu xuất kho 02-VT là căn cứ hợp pháp duy nhất để ghi giảm hàng tồn kho và ghi tăng Giá vốn hàng bán (TK 632).',
+      },
+    ],
+  },
+];
