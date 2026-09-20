@@ -9,8 +9,9 @@ import {
   JournalEntry,
   LedgerAccount,
 } from './indexeddb-adapter';
+import { CogsState } from '@/types/cogs';
 
-export type { WorkbenchState, JournalEntry, LedgerAccount };
+export type { WorkbenchState, JournalEntry, LedgerAccount, CogsState };
 
 export class StorageService implements IStorageAdapter {
   private localAdapter: LocalStorageAdapter;
@@ -144,6 +145,26 @@ export class StorageService implements IStorageAdapter {
       return true;
     } catch (err) {
       console.error('[StorageService] Error saving workbench state:', err);
+      return false;
+    }
+  }
+
+  // --- COGS & Cost Accounting Workbench State Persistence (Milestone 5) ---
+  async loadCogsState(): Promise<CogsState | null> {
+    try {
+      return await this.getItem<CogsState>('cogs_state');
+    } catch (err) {
+      console.error('[StorageService] Error loading cogs state:', err);
+      return null;
+    }
+  }
+
+  async saveCogsState(state: CogsState): Promise<boolean> {
+    try {
+      await this.setItem<CogsState>('cogs_state', state);
+      return true;
+    } catch (err) {
+      console.error('[StorageService] Error saving cogs state:', err);
       return false;
     }
   }

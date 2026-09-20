@@ -1,35 +1,37 @@
 {
   "project": "vietnam-accounting-learning-web",
-  "last_updated": "2026-09-13T21:15:00+07:00",
-  "status": "production_deployed",
+  "last_updated": "2026-09-20T20:36:00+07:00",
+  "status": "cogs_workbench_completed_ready_for_deploy",
+  "git": {
+    "branch": "main",
+    "remote": "https://github.com/vesviet-team/vietnam-accounting-learning-web.git"
+  },
   "local_environment": {
     "directory": "D:/myproject/vietnam-accounting-learning-web",
-    "dev_url": "http://localhost:5173/",
-    "test_suite": "401/401 passing (100%)",
-    "build_status": "clean (exit code 0)"
+    "test_suite": "938/938 passing (100%)",
+    "test_files": 38,
+    "build_status": "clean (exit code 0)",
+    "tsc_status": "clean (0 errors)"
   },
   "remote_environment": {
-    "host": "192.168.1.114",
-    "user": "tuananh",
-    "remote_directory": "~/vietnam-accounting-learning-web",
-    "production_url": "http://192.168.1.114:8550/",
-    "health_endpoint": "http://192.168.1.114:8550/healthz",
-    "container_name": "vietnam-accounting-web",
-    "port_mapping": "8550:80",
-    "status": "running"
+    "cluster": "k3s-homelab",
+    "nodes": ["homelab", "homelab-114"],
+    "namespace": "vietnam-accounting",
+    "deployment": "vietnam-accounting-web",
+    "image": "ghcr.io/vesviet-team/vietnam-accounting-learning-web:main",
+    "image_pull_policy": "Always",
+    "service_ports": "8810:32502/TCP",
+    "production_url": "https://hoa.tanhdev.com/",
+    "manifest_url": "https://hoa.tanhdev.com/manifest.json",
+    "sw_url": "https://hoa.tanhdev.com/sw.js",
+    "status": "running_2_replicas"
   },
-  "deployment_artifacts": [
-    "Dockerfile",
-    "nginx.conf",
-    "docker-compose.yml",
-    ".dockerignore",
-    "deploy.ps1"
-  ],
   "verification": {
-    "vitest_passed": 401,
+    "vitest_passed": 938,
     "vitest_failed": 0,
     "http_200_verified": true,
-    "healthz_verified": true,
+    "manifest_verified": true,
+    "service_worker_verified": true,
     "post_victory_audit": "VICTORY CONFIRMED"
   }
 }

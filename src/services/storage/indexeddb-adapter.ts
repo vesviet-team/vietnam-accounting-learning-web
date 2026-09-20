@@ -1,5 +1,6 @@
 import { openDB, IDBPDatabase } from 'idb';
 import { IStorageAdapter, BackupData } from '@/types/storage';
+import { CogsState } from '@/types/cogs';
 
 const DB_NAME = 'VietnamAccountingLearningDB';
 const DB_VERSION = 1;
@@ -212,5 +213,25 @@ export class IndexedDbAdapter implements IStorageAdapter {
       return false;
     }
   }
+
+  async loadCogsState(): Promise<CogsState | null> {
+    try {
+      return await this.getItem<CogsState>('cogs_state');
+    } catch (err) {
+      console.error('[IndexedDbAdapter] Error loading cogs state:', err);
+      return null;
+    }
+  }
+
+  async saveCogsState(state: CogsState): Promise<boolean> {
+    try {
+      await this.setItem<CogsState>('cogs_state', state);
+      return true;
+    } catch (err) {
+      console.error('[IndexedDbAdapter] Error saving cogs state:', err);
+      return false;
+    }
+  }
 }
+
 

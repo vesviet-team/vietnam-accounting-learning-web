@@ -9,11 +9,12 @@ import { VoucherInspector } from '@/components/workbench/VoucherInspector';
 import { SettingsView } from '@/components/settings/SettingsView';
 import { QuizModal } from '@/components/assessment/QuizModal';
 import { FinancialStatementsView } from '@/components/workbench/FinancialStatementsView';
+import { CogsWorkbench } from '@/components/workbench/cogs/CogsWorkbench';
 import { AccountingRegime } from '@/types/coa';
 import { storageService } from '@/services/storage/storage-service';
 import { StreakEngine, CareerLevel } from '@/engine/streak-engine';
 
-export type AppNavTab = NavTab | 'financial-statements' | 'bctc';
+export type AppNavTab = NavTab | 'financial-statements' | 'bctc' | 'cogs';
 
 export function App() {
   const [activeTab, setActiveTab] = useState<AppNavTab>('coa');
@@ -111,11 +112,28 @@ export function App() {
               >
                 <span>📊 Báo Cáo Tài Chính (B01 &amp; B02)</span>
               </button>
+              <button
+                type="button"
+                data-testid="tab-cogs-workbench"
+                onClick={() => setActiveTab('cogs')}
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                  activeTab === 'cogs'
+                    ? 'bg-emerald-600 text-white shadow-xs'
+                    : 'bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800 hover:bg-amber-100'
+                }`}
+              >
+                <span>🏭 Giá Vốn &amp; Giá Thành (COGS)</span>
+              </button>
             </div>
 
             {(activeTab === 'financial-statements' || activeTab === 'bctc') && (
               <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
                 &bull; B01-DN &amp; B02-DN Đang Mở
+              </span>
+            )}
+            {activeTab === 'cogs' && (
+              <span className="text-[11px] font-semibold text-amber-600 dark:text-amber-400">
+                &bull; COGS &amp; Costing Workbench Đang Mở
               </span>
             )}
           </div>
@@ -151,6 +169,15 @@ export function App() {
               currentRegime={currentRegime}
               onRegimeChange={handleRegimeChange}
               onNavigateToJournalizer={() => setActiveTab('workbench')}
+            />
+          )}
+
+          {activeTab === 'cogs' && (
+            <CogsWorkbench
+              currentRegime={currentRegime}
+              onRegimeChange={handleRegimeChange}
+              onNavigateToJournalizer={() => setActiveTab('workbench')}
+              onNavigateToFinancialStatements={() => setActiveTab('financial-statements')}
             />
           )}
 

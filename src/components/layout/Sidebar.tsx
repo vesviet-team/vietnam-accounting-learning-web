@@ -6,10 +6,11 @@ import {
   FileCheck2,
   HardDrive,
   Info,
+  Factory,
 } from 'lucide-react';
 import { AccountingRegime } from '@/types/coa';
 
-export type NavTab = 'coa' | 'curriculum' | 'workbench' | 'voucher' | 'settings';
+export type NavTab = 'coa' | 'curriculum' | 'workbench' | 'cogs' | 'voucher' | 'settings';
 
 interface SidebarProps {
   activeTab: NavTab;
@@ -59,6 +60,14 @@ export const Sidebar: FC<SidebarProps> = ({
       icon: Scale,
       badge: 'Sẵn sàng',
       milestone: 'M4',
+    },
+    {
+      id: 'cogs',
+      labelVi: 'Giá Vốn & Giá Thành',
+      subtextVi: 'Thẻ kho, Z/z & So sánh BCTC',
+      icon: Factory,
+      badge: 'Mới 2026',
+      milestone: 'M6',
     },
     {
       id: 'voucher',
