@@ -1,4 +1,4 @@
-import { useState, useMemo, type FC } from 'react';
+import { useState, useMemo, useEffect, type FC } from 'react';
 import {
   Scale,
   Plus,
@@ -19,10 +19,12 @@ import { searchAccounts, findAccountByCode } from '@/data/coa-service';
 import { isProhibitedInCircular133, getProhibitedAccountInfo } from '@/data/prohibited-accounts';
 import { TAccountView, formatVnd, determineAccountNature } from '@/components/curriculum/TAccountView';
 import { storageService } from '@/services/storage/storage-service';
+import { SocraticHintLadder } from '@/components/workbench/SocraticHintLadder';
 
 export interface JournalizerProps {
   currentRegime: AccountingRegime;
   onNavigateToCoa?: () => void;
+  onNavigateToFinancialStatements?: () => void;
 }
 
 export interface PracticeScenario {
@@ -222,6 +224,7 @@ export const PRACTICE_SCENARIOS: PracticeScenario[] = [
 export const Journalizer: FC<JournalizerProps> = ({
   currentRegime,
   onNavigateToCoa,
+  onNavigateToFinancialStatements,
 }) => {
   const [selectedScenarioId, setSelectedScenarioId] = useState<string>('scen-01');
   const [entryDescription, setEntryDescription] = useState<string>(
@@ -244,6 +247,28 @@ export const Journalizer: FC<JournalizerProps> = ({
   const [postSuccessMessage, setPostSuccessMessage] = useState<string | null>(null);
   const [postedEntries, setPostedEntries] = useState<PostedJournalEntry[]>([]);
   const [ledgerTAccounts, setLedgerTAccounts] = useState<Record<string, TAccountData>>({});
+
+  // Restore persisted workbench state (postedEntries & ledgerTAccounts) on mount
+  useEffect(() => {
+    let isMounted = true;
+    storageService
+      .loadWorkbenchState()
+      .then((state) => {
+        if (!isMounted) return;
+        if (state.postedEntries && state.postedEntries.length > 0) {
+          setPostedEntries(state.postedEntries as unknown as PostedJournalEntry[]);
+        }
+        if (state.ledgerTAccounts && Object.keys(state.ledgerTAccounts).length > 0) {
+          setLedgerTAccounts(state.ledgerTAccounts as unknown as Record<string, TAccountData>);
+        }
+      })
+      .catch((err) => {
+        console.warn('[Journalizer] Failed to load persisted state:', err);
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   // Current active scenario object
   const currentScenario = useMemo(() => {
@@ -325,6 +350,22 @@ export const Journalizer: FC<JournalizerProps> = ({
         noteVi: '',
       },
     ]);
+  };
+
+  // Reload rows from the selected scenario (for restoring after independent practice)
+  const handleReloadScenarioRows = () => {
+    setPostSuccessMessage(null);
+    if (!currentScenario) return;
+    setRows(
+      currentScenario.rows.map((r, i) => ({
+        id: `row-${Date.now()}-${i}`,
+        accountCode: r.accountCode,
+        accountNameVi: r.accountNameVi,
+        debitAmount: r.debitAmount,
+        creditAmount: r.creditAmount,
+        noteVi: r.noteVi || '',
+      }))
+    );
   };
 
   // Update a field in a row
@@ -485,55 +526,64 @@ export const Journalizer: FC<JournalizerProps> = ({
     };
 
     // Update posted entries history
-    setPostedEntries((prev) => [newPostedEntry, ...prev]);
+    const updatedEntries = [newPostedEntry, ...postedEntries];
+    setPostedEntries(updatedEntries);
 
     // Update Live T-Accounts
-    setLedgerTAccounts((prev) => {
-      const updated = { ...prev };
+    const updatedLedger: Record<string, TAccountData> = { ...ledgerTAccounts };
 
-      // Identify opposing counter account codes for narrative
-      const debitAccounts = rows.filter((r) => r.debitAmount > 0).map((r) => r.accountCode);
-      const creditAccounts = rows.filter((r) => r.creditAmount > 0).map((r) => r.accountCode);
+    // Identify opposing counter account codes for narrative
+    const debitAccounts = rows.filter((r) => r.debitAmount > 0).map((r) => r.accountCode);
+    const creditAccounts = rows.filter((r) => r.creditAmount > 0).map((r) => r.accountCode);
 
-      for (const row of rows) {
-        if (!row.accountCode) continue;
-        const code = row.accountCode;
+    for (const row of rows) {
+      if (!row.accountCode) continue;
+      const code = row.accountCode;
 
-        if (!updated[code]) {
-          const accItem = findAccountByCode(code, currentRegime);
-          const nature = determineAccountNature(code);
-          updated[code] = {
-            accountCode: code,
-            accountNameVi: accItem ? accItem.nameVi : row.accountNameVi || `Tài khoản ${code}`,
-            accountClass: nature.accountClass,
-            isContra: nature.isContraAsset || nature.isContraEquity,
-            normalBalance: nature.normalSide,
-            openingBalance: {
-              side: nature.normalSide === 'CREDIT' ? 'CREDIT' : 'DEBIT',
-              amount: 0,
-            },
-            entries: [],
-          };
-        }
-
-        const isDebit = row.debitAmount > 0;
-        const amount = isDebit ? row.debitAmount : row.creditAmount;
-        const counterCodes = isDebit ? creditAccounts.join(', ') : debitAccounts.join(', ');
-
-        updated[code].entries = [
-          ...updated[code].entries,
-          {
-            id: `entry-${Date.now()}-${Math.random()}`,
-            description: row.noteVi || entryDescription,
-            amount,
-            side: isDebit ? 'DEBIT' : 'CREDIT',
-            counterAccountCode: counterCodes,
+      if (!updatedLedger[code]) {
+        const accItem = findAccountByCode(code, currentRegime);
+        const nature = determineAccountNature(code);
+        updatedLedger[code] = {
+          accountCode: code,
+          accountNameVi: accItem ? accItem.nameVi : row.accountNameVi || `Tài khoản ${code}`,
+          accountClass: nature.accountClass,
+          isContra: nature.isContraAsset || nature.isContraEquity,
+          normalBalance: nature.normalSide,
+          openingBalance: {
+            side: nature.normalSide === 'CREDIT' ? 'CREDIT' : 'DEBIT',
+            amount: 0,
           },
-        ];
+          entries: [],
+        };
       }
 
-      return updated;
-    });
+      const isDebit = row.debitAmount > 0;
+      const amount = isDebit ? row.debitAmount : row.creditAmount;
+      const counterCodes = isDebit ? creditAccounts.join(', ') : debitAccounts.join(', ');
+
+      updatedLedger[code].entries = [
+        ...updatedLedger[code].entries,
+        {
+          id: `entry-${Date.now()}-${Math.random()}`,
+          description: row.noteVi || entryDescription,
+          amount,
+          side: isDebit ? 'DEBIT' : 'CREDIT',
+          counterAccountCode: counterCodes,
+        },
+      ];
+    }
+
+    setLedgerTAccounts(updatedLedger);
+
+    // Save to storageService for persistent offline reload
+    storageService
+      .saveWorkbenchState({
+        postedEntries: updatedEntries as any,
+        ledgerTAccounts: updatedLedger as any,
+      })
+      .catch((err) => {
+        console.warn('[Journalizer] Failed to persist state:', err);
+      });
 
     setPostSuccessMessage(
       `Ghi sổ thành công! Đã ghi nhận bút toán "${entryDescription}" với tổng số tiền ${formatVnd(validation.totalDebit)}. Sơ đồ chữ T đã được cập nhật.`
@@ -541,6 +591,17 @@ export const Journalizer: FC<JournalizerProps> = ({
 
     // Record study activity to advance streak in background
     storageService.recordStreakActivity().catch(() => {});
+  };
+
+  // Clear posted entries and ledger history
+  const handleClearJournalHistory = async () => {
+    setPostedEntries([]);
+    setLedgerTAccounts({});
+    setPostSuccessMessage(null);
+    await storageService.saveWorkbenchState({
+      postedEntries: [],
+      ledgerTAccounts: {},
+    });
   };
 
   return (
@@ -614,9 +675,33 @@ export const Journalizer: FC<JournalizerProps> = ({
         </div>
 
         {/* Selected Scenario Context Box */}
-        <div className="p-3.5 bg-emerald-50/60 dark:bg-emerald-950/30 rounded-xl border border-emerald-200 dark:border-emerald-900 text-xs text-slate-700 dark:text-slate-300 space-y-1">
-          <div className="font-bold text-emerald-900 dark:text-emerald-200">
-            Tình huống: {currentScenario.titleVi}
+        <div className="p-3.5 bg-emerald-50/60 dark:bg-emerald-950/30 rounded-xl border border-emerald-200 dark:border-emerald-900 text-xs text-slate-700 dark:text-slate-300 space-y-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div className="font-bold text-emerald-900 dark:text-emerald-200">
+              Tình huống: {currentScenario.titleVi}
+            </div>
+            <div className="flex items-center space-x-2 shrink-0">
+              <button
+                type="button"
+                onClick={handleResetRows}
+                className="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 border border-emerald-300 dark:border-emerald-700 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/40 text-[11px] font-semibold shadow-2xs transition-all flex items-center gap-1"
+                title="Xóa các dòng định khoản mẫu để tự thử thách với gợi ý Socratic"
+              >
+                <RotateCcw className="w-3 h-3" />
+                <span>Tự thử thách (Xóa mẫu)</span>
+              </button>
+              {currentScenario.id !== 'scen-custom' && (
+                <button
+                  type="button"
+                  onClick={handleReloadScenarioRows}
+                  className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-semibold shadow-2xs transition-all flex items-center gap-1"
+                  title="Tải lại các dòng gợi ý mẫu của tình huống"
+                >
+                  <BookOpen className="w-3 h-3" />
+                  <span>Tải lại mẫu</span>
+                </button>
+              )}
+            </div>
           </div>
           <p className="leading-relaxed">{currentScenario.descriptionVi}</p>
           <div className="text-[11px] text-slate-500 dark:text-slate-400 pt-1">
@@ -628,6 +713,12 @@ export const Journalizer: FC<JournalizerProps> = ({
             </div>
           )}
         </div>
+
+        {/* 3-Tier Graduated Socratic Hint Ladder */}
+        <SocraticHintLadder
+          scenarioId={selectedScenarioId}
+          currentRegime={currentRegime}
+        />
       </div>
 
       {/* Balance Indicator Status Banner */}
@@ -970,6 +1061,18 @@ export const Journalizer: FC<JournalizerProps> = ({
               </button>
             )}
 
+            {onNavigateToFinancialStatements && (
+              <button
+                type="button"
+                onClick={onNavigateToFinancialStatements}
+                className="inline-flex items-center space-x-1.5 px-3.5 py-2 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 rounded-xl text-xs font-bold transition-all shadow-2xs"
+                title="Chuyển đến Bảng Cân Đối Kế Toán (B01-DN) & Báo Cáo KQKD (B02-DN)"
+              >
+                <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
+                <span>Xem Báo Cáo Tài Chính</span>
+              </button>
+            )}
+
             <button
               type="button"
               onClick={handlePostToLedger}
@@ -999,9 +1102,21 @@ export const Journalizer: FC<JournalizerProps> = ({
               <Scale className="w-4 h-4 text-emerald-600" />
               <span>Sơ Đồ Chữ T Của Các Tài Khoản Đã Ghi Sổ (Live T-Account Ledger)</span>
             </div>
-            <span className="text-xs text-slate-400">
-              {Object.keys(ledgerTAccounts).length} tài khoản có phát sinh
-            </span>
+            <div className="flex items-center space-x-3">
+              <span className="text-xs text-slate-400">
+                {Object.keys(ledgerTAccounts).length} tài khoản có phát sinh
+              </span>
+              {onNavigateToFinancialStatements && (
+                <button
+                  type="button"
+                  onClick={onNavigateToFinancialStatements}
+                  className="inline-flex items-center space-x-1 text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline"
+                >
+                  <FileSpreadsheet className="w-3.5 h-3.5" />
+                  <span>Xem BCTC (B01 & B02) &rarr;</span>
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1024,9 +1139,19 @@ export const Journalizer: FC<JournalizerProps> = ({
                 Sổ Nhật Ký Chung (Lịch Sử Các Bút Toán Đã Ghi Sổ)
               </h3>
             </div>
-            <span className="text-xs text-slate-400 font-mono">
-              {postedEntries.length} bút toán đã ghi
-            </span>
+            <div className="flex items-center space-x-3">
+              <span className="text-xs text-slate-400 font-mono">
+                {postedEntries.length} bút toán đã ghi
+              </span>
+              <button
+                type="button"
+                onClick={handleClearJournalHistory}
+                className="px-2.5 py-1 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg transition-colors border border-rose-200 dark:border-rose-900/60"
+                title="Xóa toàn bộ lịch sử bút toán và làm sạch Sơ đồ chữ T"
+              >
+                Xóa lịch sử
+              </button>
+            </div>
           </div>
 
           <div className="divide-y divide-slate-100 dark:divide-slate-800">

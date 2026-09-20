@@ -3,7 +3,14 @@ import { AccountingRegime } from '@/types/coa';
 import { LearnerProgress } from '@/types/curriculum';
 import { StreakEngine, StreakState } from '@/engine/streak-engine';
 import { LocalStorageAdapter } from './local-storage-adapter';
-import { IndexedDbAdapter } from './indexeddb-adapter';
+import {
+  IndexedDbAdapter,
+  WorkbenchState,
+  JournalEntry,
+  LedgerAccount,
+} from './indexeddb-adapter';
+
+export type { WorkbenchState, JournalEntry, LedgerAccount };
 
 export class StorageService implements IStorageAdapter {
   private localAdapter: LocalStorageAdapter;
@@ -76,6 +83,69 @@ export class StorageService implements IStorageAdapter {
 
   async setPreferredRegime(regime: AccountingRegime): Promise<void> {
     await this.localAdapter.setItem('preferred_regime', regime);
+  }
+
+  // --- Workbench State Persistence (Milestone 3 / Offline-First) ---
+  async loadWorkbenchState(): Promise<WorkbenchState> {
+    try {
+      const raw = await this.getItem<WorkbenchState>('workbench_state');
+      if (!raw) {
+        return {
+          postedEntries: [],
+          ledgerTAccounts: {},
+          completedVoucherCases: [],
+          voucherCompletedCases: [],
+          voucherScores: {},
+        };
+      }
+      const completed = raw.completedVoucherCases || raw.voucherCompletedCases || [];
+      return {
+        postedEntries: Array.isArray(raw.postedEntries) ? raw.postedEntries : [],
+        ledgerTAccounts:
+          raw.ledgerTAccounts && typeof raw.ledgerTAccounts === 'object'
+            ? raw.ledgerTAccounts
+            : {},
+        completedVoucherCases: completed,
+        voucherCompletedCases: completed,
+        voucherScores:
+          raw.voucherScores && typeof raw.voucherScores === 'object'
+            ? raw.voucherScores
+            : {},
+      };
+    } catch (err) {
+      console.error('[StorageService] Error loading workbench state:', err);
+      return {
+        postedEntries: [],
+        ledgerTAccounts: {},
+        completedVoucherCases: [],
+        voucherCompletedCases: [],
+        voucherScores: {},
+      };
+    }
+  }
+
+  async saveWorkbenchState(state: Partial<WorkbenchState>): Promise<boolean> {
+    try {
+      const current = await this.loadWorkbenchState();
+      const completed =
+        state.completedVoucherCases ??
+        state.voucherCompletedCases ??
+        current.completedVoucherCases;
+      const merged: WorkbenchState = {
+        ...current,
+        ...state,
+        completedVoucherCases: completed,
+        voucherCompletedCases: completed,
+        postedEntries: state.postedEntries ?? current.postedEntries,
+        ledgerTAccounts: state.ledgerTAccounts ?? current.ledgerTAccounts,
+        voucherScores: state.voucherScores ?? current.voucherScores,
+      };
+      await this.setItem<WorkbenchState>('workbench_state', merged);
+      return true;
+    } catch (err) {
+      console.error('[StorageService] Error saving workbench state:', err);
+      return false;
+    }
   }
 
   // --- Unified 1-Click Backup Export & Import ---

@@ -1,4 +1,4 @@
-import { useState, useMemo, type FC } from 'react';
+import { useState, useMemo, useEffect, type FC } from 'react';
 import {
   FileCheck2,
   AlertTriangle,
@@ -17,6 +17,12 @@ import {
 } from '@/data/voucher-cases';
 import { formatVnd } from '@/components/curriculum/TAccountView';
 import { storageService } from '@/services/storage/storage-service';
+import {
+  evaluateNonCashRule,
+  evaluateVendorTaxStatus,
+  NonCashCheckResult,
+  VendorTaxStatusCheckResult,
+} from '@/services/tax/tax-guardrails';
 
 export interface VoucherInspectorProps {
   currentRegime: AccountingRegime;
@@ -58,12 +64,49 @@ export const VoucherInspector: FC<VoucherInspectorProps> = ({ currentRegime }) =
   const [completedCases, setCompletedCases] = useState<Record<string, number>>({});
   const [taxLookupModalOpen, setTaxLookupModalOpen] = useState(false);
 
+  // Restore persisted completed cases from storageService on mount
+  useEffect(() => {
+    let isMounted = true;
+    storageService
+      .loadWorkbenchState()
+      .then((state) => {
+        if (!isMounted) return;
+        if (state.voucherScores && Object.keys(state.voucherScores).length > 0) {
+          setCompletedCases(state.voucherScores);
+        } else if (state.completedVoucherCases && state.completedVoucherCases.length > 0) {
+          const map: Record<string, number> = {};
+          for (const id of state.completedVoucherCases) {
+            map[id] = 100;
+          }
+          setCompletedCases(map);
+        }
+      })
+      .catch((err) => {
+        console.warn('[VoucherInspector] Failed to load completed cases:', err);
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   // Current selected voucher case
   const currentCase = useMemo<VoucherAuditCaseData>(() => {
     return (
       VOUCHER_AUDIT_CASES.find((c) => c.id === selectedCaseId) || VOUCHER_AUDIT_CASES[0]
     );
   }, [selectedCaseId]);
+
+  // Regulatory tax guardrail evaluations
+  const nonCashCheck = useMemo<NonCashCheckResult>(() => {
+    return evaluateNonCashRule(currentCase.totalAmount, currentCase.paymentMethod);
+  }, [currentCase.totalAmount, currentCase.paymentMethod]);
+
+  const vendorStatusCheck = useMemo<VendorTaxStatusCheckResult>(() => {
+    return evaluateVendorTaxStatus(
+      currentCase.sellerTaxCode || '',
+      currentCase.vendorTaxStatus
+    );
+  }, [currentCase.sellerTaxCode, currentCase.vendorTaxStatus]);
 
   // Switch voucher case
   const handleSelectCase = (caseId: string) => {
@@ -88,6 +131,33 @@ export const VoucherInspector: FC<VoucherInspectorProps> = ({ currentRegime }) =
       overallDecision: null,
     });
     setAuditResult(null);
+  };
+
+  // Reset current case checklist and score
+  const handleResetCurrentCase = async () => {
+    handleResetChecklist();
+    if (completedCases[currentCase.id] !== undefined) {
+      const updated = { ...completedCases };
+      delete updated[currentCase.id];
+      setCompletedCases(updated);
+      const caseIds = Object.keys(updated);
+      await storageService.saveWorkbenchState({
+        completedVoucherCases: caseIds,
+        voucherCompletedCases: caseIds,
+        voucherScores: updated,
+      });
+    }
+  };
+
+  // Reset all completed cases
+  const handleResetAllCases = async () => {
+    handleResetChecklist();
+    setCompletedCases({});
+    await storageService.saveWorkbenchState({
+      completedVoucherCases: [],
+      voucherCompletedCases: [],
+      voucherScores: {},
+    });
   };
 
   // Submit Audit Inspection
@@ -145,7 +215,18 @@ export const VoucherInspector: FC<VoucherInspectorProps> = ({ currentRegime }) =
     };
 
     setAuditResult(result);
-    setCompletedCases((prev) => ({ ...prev, [currentCase.id]: score }));
+    const updatedCompleted = { ...completedCases, [currentCase.id]: score };
+    setCompletedCases(updatedCompleted);
+    const caseIds = Object.keys(updatedCompleted);
+    storageService
+      .saveWorkbenchState({
+        completedVoucherCases: caseIds,
+        voucherCompletedCases: caseIds,
+        voucherScores: updatedCompleted,
+      })
+      .catch((err) => {
+        console.warn('[VoucherInspector] Failed to persist completed cases:', err);
+      });
 
     // Record study activity to advance streak
     storageService.recordStreakActivity().catch(() => {});
@@ -180,9 +261,21 @@ export const VoucherInspector: FC<VoucherInspectorProps> = ({ currentRegime }) =
             <Award className="w-4 h-4 text-emerald-600" />
             <span>Chọn Hồ Sơ Chứng Từ Cần Soát Xét ({VOUCHER_AUDIT_CASES.length} Tình Huống)</span>
           </div>
-          <span className="text-xs text-slate-400">
-            Đã hoàn thành: {Object.keys(completedCases).length}/{VOUCHER_AUDIT_CASES.length}
-          </span>
+          <div className="flex items-center space-x-2">
+            <span className="text-xs text-slate-400">
+              Đã hoàn thành: {Object.keys(completedCases).length}/{VOUCHER_AUDIT_CASES.length}
+            </span>
+            {Object.keys(completedCases).length > 0 && (
+              <button
+                type="button"
+                onClick={handleResetAllCases}
+                className="text-[11px] font-semibold text-rose-600 dark:text-rose-400 hover:underline"
+                title="Đặt lại toàn bộ hồ sơ đã hoàn thành"
+              >
+                (Đặt lại)
+              </button>
+            )}
+          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
@@ -300,6 +393,22 @@ export const VoucherInspector: FC<VoucherInspectorProps> = ({ currentRegime }) =
                         <span>Tra cứu MST</span>
                       </button>
                     </div>
+                    {vendorStatusCheck.vendorTaxStatus !== '00' && (
+                      <div
+                        data-testid="vendor-tax-status-warning"
+                        className={`mt-2 p-2 rounded-lg border text-[11px] space-y-0.5 ${
+                          vendorStatusCheck.isFraudRisk
+                            ? 'bg-rose-50 dark:bg-rose-950/40 border-rose-300 dark:border-rose-800 text-rose-800 dark:text-rose-200'
+                            : 'bg-amber-50 dark:bg-amber-950/40 border-amber-300 dark:border-amber-800 text-amber-800 dark:text-amber-200'
+                        }`}
+                      >
+                        <div className="font-bold flex items-center space-x-1">
+                          <AlertTriangle className="w-3 h-3 text-rose-600 shrink-0" />
+                          <span>{vendorStatusCheck.statusNameVi}</span>
+                        </div>
+                        <p className="text-[10px] leading-tight">{vendorStatusCheck.explanationVi}</p>
+                      </div>
+                    )}
                   </div>
                   <div>
                     <span className="text-slate-400 block text-[11px]">Đơn vị mua hàng:</span>
@@ -392,6 +501,18 @@ export const VoucherInspector: FC<VoucherInspectorProps> = ({ currentRegime }) =
                     ? 'Chứng từ gốc kèm theo: Biên lai thu tiền / Phiếu thu chi / UNC'
                     : 'Số tiền bằng chữ: Năm triệu đồng chẵn'}
                 </div>
+                {nonCashCheck.isViolated && (
+                  <div
+                    data-testid="non-cash-rule-warning"
+                    className="mt-2 p-2 bg-rose-50 dark:bg-rose-950/40 border border-rose-300 dark:border-rose-800 rounded-lg text-xs text-rose-800 dark:text-rose-200 space-y-0.5"
+                  >
+                    <div className="font-bold flex items-center space-x-1 text-rose-700 dark:text-rose-300">
+                      <AlertTriangle className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+                      <span>Cảnh báo Vi phạm Thanh toán Tiền mặt &ge; 20 Triệu VNĐ</span>
+                    </div>
+                    <p className="text-[10px] leading-tight">{nonCashCheck.explanationVi}</p>
+                  </div>
+                )}
               </div>
 
               <div className="text-right space-y-1 font-mono text-xs">
@@ -483,8 +604,9 @@ export const VoucherInspector: FC<VoucherInspectorProps> = ({ currentRegime }) =
               </div>
               <button
                 type="button"
-                onClick={handleResetChecklist}
+                onClick={handleResetCurrentCase}
                 className="text-xs text-slate-400 hover:text-slate-600 flex items-center space-x-1"
+                title="Đặt lại các tiêu chí và kết quả của hồ sơ hiện tại"
               >
                 <RotateCcw className="w-3 h-3" />
                 <span>Đặt lại</span>
@@ -688,6 +810,63 @@ export const VoucherInspector: FC<VoucherInspectorProps> = ({ currentRegime }) =
                   <span className="text-emerald-700 dark:text-emerald-400 font-medium">
                     {currentCase.remedyActionVi}
                   </span>
+                </div>
+
+                {/* Statutory Guardrails Breakdown for VAT Input and CIT Schedule B4 */}
+                <div className="mt-2 pt-2 border-t border-slate-200 dark:border-slate-700 space-y-2">
+                  <div
+                    data-testid="vat-input-consequence-card"
+                    className={`p-2.5 rounded-xl border text-xs space-y-1 ${
+                      nonCashCheck.vatCreditable && vendorStatusCheck.vatCreditable
+                        ? 'bg-emerald-50/60 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-900 text-emerald-900 dark:text-emerald-200'
+                        : 'bg-rose-50 dark:bg-rose-950/30 border-rose-200 dark:border-rose-900 text-rose-900 dark:text-rose-200'
+                    }`}
+                  >
+                    <div className="font-bold flex items-center justify-between text-[11px]">
+                      <span>1. Rào chắn Thuế GTGT đầu vào (TK 133):</span>
+                      <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
+                        nonCashCheck.vatCreditable && vendorStatusCheck.vatCreditable
+                          ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-300'
+                          : 'bg-rose-100 text-rose-800 dark:bg-rose-900 dark:text-rose-300'
+                      }`}>
+                        {nonCashCheck.vatCreditable && vendorStatusCheck.vatCreditable ? 'ĐỦ ĐIỀU KIỆN KHẤU TRỪ' : 'TỪ CHỐI KHẤU TRỪ'}
+                      </span>
+                    </div>
+                    <p className="text-[11px] leading-relaxed">
+                      {!nonCashCheck.vatCreditable
+                        ? 'Vi phạm thanh toán bằng tiền mặt với giá trị từ 20 triệu VNĐ trở lên; toàn bộ số thuế GTGT đầu vào không đủ điều kiện khấu trừ theo luật định.'
+                        : !vendorStatusCheck.vatCreditable
+                        ? `Nhà cung cấp ở trạng thái ${vendorStatusCheck.vendorTaxStatus} (${vendorStatusCheck.statusNameVi}); hóa đơn không có giá trị pháp lý để khấu trừ thuế GTGT.`
+                        : 'Hóa đơn đáp ứng quy chuẩn thanh toán và tư cách người bán để khấu trừ thuế GTGT đầu vào.'}
+                    </p>
+                  </div>
+
+                  <div
+                    data-testid="cit-deductible-consequence-card"
+                    className={`p-2.5 rounded-xl border text-xs space-y-1 ${
+                      nonCashCheck.citDeductible && vendorStatusCheck.citDeductible
+                        ? 'bg-emerald-50/60 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-900 text-emerald-900 dark:text-emerald-200'
+                        : 'bg-rose-50 dark:bg-rose-950/30 border-rose-200 dark:border-rose-900 text-rose-900 dark:text-rose-200'
+                    }`}
+                  >
+                    <div className="font-bold flex items-center justify-between text-[11px]">
+                      <span>2. Rào chắn Chi phí Thuế TNDN & Mục B4:</span>
+                      <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
+                        nonCashCheck.citDeductible && vendorStatusCheck.citDeductible
+                          ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-300'
+                          : 'bg-rose-100 text-rose-800 dark:bg-rose-900 dark:text-rose-300'
+                      }`}>
+                        {nonCashCheck.citDeductible && vendorStatusCheck.citDeductible ? 'ĐỦ ĐIỀU KIỆN TÍNH CP' : 'ĐIỀU CHỈNH TĂNG MỤC B4'}
+                      </span>
+                    </div>
+                    <p className="text-[11px] leading-relaxed">
+                      {!nonCashCheck.citDeductible
+                        ? 'Chi phí mua hàng từ 20 triệu đồng không có chứng từ thanh toán ngân hàng bị loại trừ; bắt buộc cộng vào Chỉ tiêu B4 trên Tờ khai Quyết toán TNDN.'
+                        : !vendorStatusCheck.citDeductible
+                        ? 'Hóa đơn bất hợp pháp của doanh nghiệp tạm ngừng/bỏ trốn không được tính vào chi phí hợp lý; toàn bộ giá trị phải loại sang Chỉ tiêu B4.'
+                        : 'Chi phí mua sắm hợp lý, có đầy đủ hóa đơn chứng từ và phương thức thanh toán hợp lệ theo luật thuế TNDN.'}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>

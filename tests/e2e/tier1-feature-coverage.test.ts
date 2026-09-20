@@ -1,84 +1,32 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { CURRICULUM_30_DAYS } from '../fixtures/curriculum-data';
-import { MILESTONE_ASSESSMENTS } from '../fixtures/milestone-assessments';
+import { getAccountsByRegime, searchAccounts } from '@/data/coa-service';
+import { isProhibitedInCircular133, validateAccountForRegime } from '@/data/prohibited-accounts';
+import { StorageService } from '@/services/storage/storage-service';
+import { VoucherInspector } from '../helpers/domain-engines';
 import { VOUCHER_TEST_CASES } from '../fixtures/voucher-cases';
 import {
-  GatingEngine,
-  GradingEngine,
-  BalanceValidator,
-  VoucherInspector,
-  StreakEngine,
-} from '../helpers/domain-engines';
-import { getAccountsByRegime, searchAccounts, findAccountByCode } from '@/data/coa-service';
-import { isProhibitedInCircular133, validateAccountForRegime } from '@/data/prohibited-accounts';
-import { LocalStorageAdapter } from '@/services/storage/local-storage-adapter';
-import { CATEGORY_METADATA } from '@/types/coa';
+  SocraticEngine,
+  SocraticScenario,
+  FinancialStatementsEngine,
+  LedgerAccountBalance,
+  WorkbenchStorageManager,
+  WorkbenchHistory,
+} from './e2e-contracts';
 import { JournalEntryRow } from '@/types/workbench';
 
-describe('Tier 1: Feature Coverage (Baseline isolated feature verifications)', () => {
-  let storage: LocalStorageAdapter;
+describe('Tier 1: Feature Coverage (Requirement-driven verification of F1-F5)', () => {
+  let storageService: StorageService;
 
   beforeEach(() => {
     window.localStorage.clear();
-    storage = new LocalStorageAdapter('test_vnacc_');
+    storageService = new StorageService();
   });
 
-  // -------------------------------------------------------------
-  // FEAT-01: 30-Day Daily Learning Curriculum Engine
-  // -------------------------------------------------------------
-  describe('FEAT-01: Curriculum Structure & Navigation (R1)', () => {
-    it('T1.1.1: should provide exactly 30 distinct daily lesson modules', () => {
-      expect(CURRICULUM_30_DAYS).toHaveLength(30);
-      const days = CURRICULUM_30_DAYS.map((l) => l.day);
-      expect(days).toEqual(Array.from({ length: 30 }, (_, i) => i + 1));
-    });
-
-    it('T1.1.2: should divide 30 days into exactly 10 distinct 3-day modules', () => {
-      const modules = new Set(CURRICULUM_30_DAYS.map((l) => l.moduleNumber));
-      expect(modules.size).toBe(10);
-      for (let m = 1; m <= 10; m++) {
-        const moduleLessons = CURRICULUM_30_DAYS.filter((l) => l.moduleNumber === m);
-        expect(moduleLessons).toHaveLength(3);
-      }
-    });
-
-    it('T1.1.3: should designate milestone assessments exactly at Days 3, 6, 9, 12, 15, 18, 21, 24, 27, 30', () => {
-      const milestoneLessons = CURRICULUM_30_DAYS.filter((l) => l.isMilestoneDay).map((l) => l.day);
-      expect(milestoneLessons).toEqual([3, 6, 9, 12, 15, 18, 21, 24, 27, 30]);
-      expect(milestoneLessons).toHaveLength(10);
-    });
-
-    it('T1.1.4: should configure cognitive load to 15-20 minutes with 3-5 core interacting concepts', () => {
-      for (const lesson of CURRICULUM_30_DAYS) {
-        expect(lesson.estimatedMinutes).toBeGreaterThanOrEqual(15);
-        expect(lesson.estimatedMinutes).toBeLessThanOrEqual(25);
-        expect(lesson.concepts.length).toBeGreaterThanOrEqual(1);
-        expect(lesson.concepts.length).toBeLessThanOrEqual(5);
-        for (const concept of lesson.concepts) {
-          expect(concept.titleVi).toBeTruthy();
-          expect(concept.summaryVi).toBeTruthy();
-          expect(concept.keyTakeawayVi).toBeTruthy();
-        }
-      }
-    });
-
-    it('T1.1.5: should initialize default unlocked state allowing Day 1 access while subsequent modules are locked', () => {
-      const unlockedDays = [1, 2, 3];
-      const milestoneScores = {};
-
-      expect(GatingEngine.canAccessDay(1, unlockedDays, milestoneScores)).toBe(true);
-      expect(GatingEngine.canAccessDay(2, unlockedDays, milestoneScores)).toBe(true);
-      expect(GatingEngine.canAccessDay(3, unlockedDays, milestoneScores)).toBe(true);
-      expect(GatingEngine.canAccessDay(4, unlockedDays, milestoneScores)).toBe(false);
-      expect(GatingEngine.canAccessDay(7, unlockedDays, milestoneScores)).toBe(false);
-    });
-  });
-
-  // -------------------------------------------------------------
-  // FEAT-02: Chart of Accounts Explorer (TT 200 vs TT 133)
-  // -------------------------------------------------------------
-  describe('FEAT-02: Chart of Accounts Explorer & TT 133/200 Filtering (R1)', () => {
-    it('T1.2.1: should load Circular 200 accounts spanning all 9 account classes', () => {
+  // =========================================================================
+  // F1: COA High-Performance Explorer & Dual Regime Toggle (R1)
+  // =========================================================================
+  describe('F1: COA High-Performance Explorer & Dual Regime Toggle', () => {
+    it('T1.1.1: should load Circular 200 accounts spanning all 9 account classes with >= 70 accounts', () => {
       const accounts200 = getAccountsByRegime('CIRCULAR_200');
       expect(accounts200.length).toBeGreaterThan(70);
 
@@ -88,11 +36,10 @@ describe('Tier 1: Feature Coverage (Baseline isolated feature verifications)', (
       }
     });
 
-    it('T1.2.2: should correctly exclude prohibited accounts under Circular 133', () => {
+    it('T1.1.2: should toggle to Circular 133 and exclude prohibited accounts (621, 622, 623, 627, 641, 521, 413)', () => {
       const accounts133 = getAccountsByRegime('CIRCULAR_133');
       const codes133 = accounts133.map((a) => a.code);
 
-      // Prohibited accounts (621, 622, 623, 627, 641, 521, 413) must NOT exist in Circular 133 COA
       expect(codes133).not.toContain('621');
       expect(codes133).not.toContain('622');
       expect(codes133).not.toContain('623');
@@ -100,36 +47,356 @@ describe('Tier 1: Feature Coverage (Baseline isolated feature verifications)', (
       expect(codes133).not.toContain('641');
       expect(codes133).not.toContain('521');
       expect(codes133).not.toContain('413');
+      expect(accounts133.length).toBeGreaterThan(40);
+    });
 
-      // Prohibited account guard correctly identifies them as prohibited
+    it('T1.1.3: should perform instant search by account code prefix (e.g. 112, 156, 331)', () => {
+      const results112 = searchAccounts('112', 'CIRCULAR_200');
+      expect(results112.length).toBeGreaterThan(0);
+      expect(results112.some((a) => a.code === '1121')).toBe(true);
+
+      const results156 = searchAccounts('156', 'CIRCULAR_200');
+      expect(results156.length).toBeGreaterThan(0);
+      expect(results156.some((a) => a.code.startsWith('156'))).toBe(true);
+    });
+
+    it('T1.1.4: should perform instant search by Vietnamese name with case insensitivity', () => {
+      const lowerSearch = searchAccounts('ngân hàng', 'CIRCULAR_200');
+      const upperSearch = searchAccounts('NGÂN HÀNG', 'CIRCULAR_200');
+
+      expect(lowerSearch.length).toBeGreaterThan(0);
+      expect(upperSearch.length).toBeGreaterThan(0);
+      expect(lowerSearch.length).toBe(upperSearch.length);
+      // Both should find TK 112 (Tiền gửi ngân hàng)
+      expect(lowerSearch.some((a) => a.code.startsWith('112'))).toBe(true);
+      expect(upperSearch.some((a) => a.code.startsWith('112'))).toBe(true);
+    });
+
+    it('T1.1.5: should filter accounts by category tabs (ASSET, LIABILITY, EQUITY, REVENUE, EXPENSE)', () => {
+      const assets = searchAccounts('', 'CIRCULAR_200', 'ASSET');
+      const liabilities = searchAccounts('', 'CIRCULAR_200', 'LIABILITY');
+      const equity = searchAccounts('', 'CIRCULAR_200', 'EQUITY');
+
+      expect(assets.length).toBeGreaterThan(20);
+      expect(assets.every((a) => a.category === 'ASSET')).toBe(true);
+
+      expect(liabilities.length).toBeGreaterThan(10);
+      expect(liabilities.every((a) => a.category === 'LIABILITY')).toBe(true);
+
+      expect(equity.length).toBeGreaterThan(5);
+      expect(equity.every((a) => a.category === 'EQUITY')).toBe(true);
+    });
+  });
+
+  // =========================================================================
+  // F2: Socratic Hint Ladder (3 Levels: Group, Nature, Twin Example) (R2)
+  // =========================================================================
+  describe('F2: 3-Tier Graduated Socratic Hint Ladder in Journalizer', () => {
+    const sampleScenario: SocraticScenario = {
+      id: 'scen-payroll-tt133',
+      titleVi: 'Tính tiền lương công nhân sản xuất trực tiếp trong doanh nghiệp SME',
+      regime: 'CIRCULAR_133',
+      targetAccountCodes: ['154', '334'],
+      hints: {
+        level1: {
+          level: 1,
+          title: 'Nấc 1: Định vị nhóm tài khoản',
+          content: 'Nghiệp vụ này liên quan đến chi phí sản xuất kinh doanh dở dang và nghĩa vụ phải trả cho người lao động.',
+          suggestedAccountGroups: ['Nhóm 15 (Hàng tồn kho & chi phí sản xuất)', 'Nhóm 33 (Nợ phải trả)'],
+        },
+        level2: {
+          level: 2,
+          title: 'Nấc 2: Phân tích bản chất biến động',
+          content: 'Khi trích lương công nhân sản xuất, Chi phí sản xuất tăng lên và Khoản phải trả người lao động tăng lên.',
+          reflectiveQuestions: [
+            'Doanh nghiệp SME theo Thông tư 133 tập hợp chi phí nhân công vào tài khoản nào thay vì TK 622?',
+            'Nợ phải trả người lao động phát sinh tăng được ghi vào bên Nợ hay bên Có của TK 334?',
+          ],
+        },
+        level3: {
+          level: 3,
+          title: 'Nấc 3: Nghiệp vụ song sinh (Twin Analogous Case)',
+          content: 'Ví dụ tương tự: Công ty B tính tiền lương nhân viên trực tiếp gia công là 25.000.000 đ.',
+          twinCase: {
+            scenario: 'Công ty B tính tiền lương bộ phận gia công tháng 1/2026',
+            sampleJournal: [
+              { accountCode: '154', accountName: 'Chi phí SXKD dở dang (chi tiết Nhân công)', debit: 25000000, credit: 0 },
+              { accountCode: '334', accountName: 'Phải trả người lao động', debit: 0, credit: 25000000 },
+            ],
+            explanation: 'Theo TT 133, tập hợp chi phí nhân công trực tiếp vào Nợ TK 154, đối ứng Có TK 334.',
+          },
+        },
+      },
+    };
+
+    beforeEach(() => {
+      SocraticEngine.registerScenario(sampleScenario);
+    });
+
+    it('T1.2.1: Level 1 Positioning hint suggests account groups without naming specific child accounts', () => {
+      const hint1 = SocraticEngine.getHint('scen-payroll-tt133', 1, 1);
+      expect(hint1).toBeDefined();
+      expect(hint1?.level).toBe(1);
+      expect(hint1?.suggestedAccountGroups).toBeDefined();
+      expect(hint1?.suggestedAccountGroups?.length).toBeGreaterThan(0);
+      // Level 1 must not expose twin case solution
+      expect(hint1?.twinCase).toBeUndefined();
+    });
+
+    it('T1.2.2: Level 2 Nature question guides learner on asset/liability/equity movements without giving journal entry', () => {
+      const hint2 = SocraticEngine.getHint('scen-payroll-tt133', 2, 2);
+      expect(hint2).toBeDefined();
+      expect(hint2?.level).toBe(2);
+      expect(hint2?.reflectiveQuestions).toBeDefined();
+      expect(hint2?.reflectiveQuestions?.length).toBeGreaterThanOrEqual(2);
+      expect(hint2?.twinCase).toBeUndefined();
+    });
+
+    it('T1.2.3: Level 3 Twin Case provides an isomorphic business example with balanced journal entries', () => {
+      const hint3 = SocraticEngine.getHint('scen-payroll-tt133', 3, 3);
+      expect(hint3).toBeDefined();
+      expect(hint3?.level).toBe(3);
+      expect(hint3?.twinCase).toBeDefined();
+
+      const validation = SocraticEngine.validateTwinCase(hint3!.twinCase!);
+      expect(validation.isValid).toBe(true);
+      expect(hint3!.twinCase!.sampleJournal.length).toBeGreaterThanOrEqual(2);
+    });
+
+    it('T1.2.4: Socratic ladder structure conforms strictly to PROJECT.md interface contract', () => {
+      const hint = sampleScenario.hints.level3;
+      expect(hint).toHaveProperty('level', 3);
+      expect(hint).toHaveProperty('title');
+      expect(hint).toHaveProperty('content');
+      expect(hint).toHaveProperty('twinCase');
+      expect(hint.twinCase).toHaveProperty('scenario');
+      expect(hint.twinCase).toHaveProperty('sampleJournal');
+      expect(hint.twinCase).toHaveProperty('explanation');
+    });
+
+    it('T1.2.5: Anti-spoil progression: Prevents jumping directly to Level 3 when unlocked level is Level 1', () => {
+      const prematureHint3 = SocraticEngine.getHint('scen-payroll-tt133', 3, 1);
+      expect(prematureHint3).toBeNull();
+
+      const validHint1 = SocraticEngine.getHint('scen-payroll-tt133', 1, 1);
+      expect(validHint1).not.toBeNull();
+
+      // Advancing to level 2 allows access to level 2
+      const level2 = SocraticEngine.advanceLevel(1);
+      expect(level2).toBe(2);
+      expect(SocraticEngine.getHint('scen-payroll-tt133', 2, level2)).not.toBeNull();
+      expect(SocraticEngine.getHint('scen-payroll-tt133', 3, level2)).toBeNull();
+    });
+  });
+
+  // =========================================================================
+  // F3: Offline-First PWA & IndexedDB State Persistence (R3)
+  // =========================================================================
+  describe('F3: Offline-First PWA & IndexedDB State Persistence', () => {
+    it('T1.3.1: IndexedDB persistent state stores postedEntries, ledgerTAccounts, and voucherCompletedCases', async () => {
+      const initialHistory = WorkbenchStorageManager.createDefaultState();
+      const sampleEntry: JournalEntryRow[] = [
+        { id: '1', accountCode: '111', accountNameVi: 'Tiền mặt', debitAmount: 10000000, creditAmount: 0 },
+        { id: '2', accountCode: '112', accountNameVi: 'Tiền gửi ngân hàng', debitAmount: 0, creditAmount: 10000000 },
+      ];
+
+      const updatedHistory = WorkbenchStorageManager.postEntryToLedger(initialHistory, sampleEntry);
+      expect(updatedHistory.postedEntries.length).toBe(2);
+      expect(updatedHistory.ledgerTAccounts['111'].closingDebit).toBe(10000000);
+      expect(updatedHistory.ledgerTAccounts['112'].closingCredit).toBe(10000000);
+
+      await storageService.setItem(WorkbenchStorageManager.STORAGE_KEY, updatedHistory);
+      const retrieved = await storageService.getItem<WorkbenchHistory>(WorkbenchStorageManager.STORAGE_KEY);
+      expect(retrieved).toEqual(updatedHistory);
+    });
+
+    it('T1.3.2: StorageService fallback: seamlessly writes and reads between IndexedDB and LocalStorage', async () => {
+      await storageService.setItem('test_persistence_key', { status: 'offline_verified' });
+      const val = await storageService.getItem<{ status: string }>('test_persistence_key');
+      expect(val).toEqual({ status: 'offline_verified' });
+
+      await storageService.removeItem('test_persistence_key');
+      const removed = await storageService.getItem('test_persistence_key');
+      expect(removed).toBeNull();
+    });
+
+    it('T1.3.3: 1-Click backup export generates valid JSON payload containing application state', async () => {
+      await storageService.setTheme('dark');
+      await storageService.setPreferredRegime('CIRCULAR_133');
+      await storageService.saveLearnerProgress({
+        currentDay: 4,
+        unlockedDays: [1, 2, 3, 4],
+        completedDays: [1, 2, 3],
+        milestoneScores: { 3: 85 },
+        streakDays: 3,
+        lastActiveDate: '2026-09-20',
+      });
+
+      const backupStr = await storageService.exportBackup();
+      const parsed = JSON.parse(backupStr);
+
+      expect(parsed.app).toBe('vietnam-accounting-learning-web');
+      expect(parsed.version).toBe('1.0.0');
+      expect(parsed.theme).toBe('dark');
+      expect(parsed.regime).toBe('CIRCULAR_133');
+      expect(parsed.progress.unlockedDays).toEqual([1, 2, 3, 4]);
+    });
+
+    it('T1.3.4: 1-Click backup import restores workbench history and learner progress completely', async () => {
+      const backupPayload = JSON.stringify({
+        version: '1.0.0',
+        exportedAt: new Date().toISOString(),
+        app: 'vietnam-accounting-learning-web',
+        theme: 'light',
+        regime: 'CIRCULAR_200',
+        progress: {
+          unlockedDays: [1, 2, 3, 4, 5, 6],
+          completedDays: [1, 2, 3],
+          milestoneScores: { 3: 90 },
+        },
+        customData: {
+          indexedDb: {
+            workbench_state: {
+              postedEntries: [],
+              ledgerTAccounts: {},
+              voucherCompletedCases: ['case-01'],
+            },
+          },
+        },
+      });
+
+      const imported = await storageService.importBackup(backupPayload);
+      expect(imported).toBe(true);
+
+      const progress = await storageService.getLearnerProgress();
+      expect(progress?.unlockedDays).toEqual([1, 2, 3, 4, 5, 6]);
+
+      const theme = await storageService.getTheme();
+      expect(theme).toBe('light');
+    });
+
+    it('T1.3.5: Offline simulation: operations succeed when navigator.onLine is false', async () => {
+      // Simulate navigator offline
+      const originalOnLine = navigator.onLine;
+      try {
+        Object.defineProperty(navigator, 'onLine', { value: false, configurable: true });
+        expect(navigator.onLine).toBe(false);
+
+        // Writing and reading from storage must work completely offline without network
+        await storageService.setItem('offline_entry', { offlineSaved: true, timestamp: Date.now() });
+        const res = await storageService.getItem<{ offlineSaved: boolean }>('offline_entry');
+        expect(res?.offlineSaved).toBe(true);
+      } finally {
+        Object.defineProperty(navigator, 'onLine', { value: originalOnLine, configurable: true });
+      }
+    });
+  });
+
+  // =========================================================================
+  // F4: Dynamic Financial Statements (B01-DN & B02-DN) (R4)
+  // =========================================================================
+  describe('F4: Dynamic Financial Statements (B01-DN & B02-DN)', () => {
+    it('T1.4.1: B01-DN Balance Sheet aggregates ledger accounts into short-term (Code 100) and long-term (Code 200) assets', () => {
+      const balances: Record<string, LedgerAccountBalance> = {
+        '111': { accountCode: '111', accountNameVi: 'Tiền mặt', debitTotal: 100000000, creditTotal: 0, closingDebit: 100000000, closingCredit: 0 },
+        '112': { accountCode: '112', accountNameVi: 'Tiền gửi NH', debitTotal: 200000000, creditTotal: 0, closingDebit: 200000000, closingCredit: 0 },
+        '156': { accountCode: '156', accountNameVi: 'Hàng hóa', debitTotal: 150000000, creditTotal: 0, closingDebit: 150000000, closingCredit: 0 },
+        '211': { accountCode: '211', accountNameVi: 'TSCĐ hữu hình', debitTotal: 500000000, creditTotal: 0, closingDebit: 500000000, closingCredit: 0 },
+        '214': { accountCode: '214', accountNameVi: 'Hao mòn TSCĐ', debitTotal: 0, creditTotal: 50000000, closingDebit: 0, closingCredit: 50000000 },
+        '331': { accountCode: '331', accountNameVi: 'Phải trả người bán', debitTotal: 0, creditTotal: 100000000, closingDebit: 0, closingCredit: 100000000 },
+        '411': { accountCode: '411', accountNameVi: 'Vốn đầu tư CSH', debitTotal: 0, creditTotal: 800000000, closingDebit: 0, closingCredit: 800000000 },
+      };
+
+      const report = FinancialStatementsEngine.generateBalanceSheet(balances, 'TT200');
+      // Short term: 100M (111) + 200M (112) + 150M (156) = 450M
+      expect(report.assets.shortTerm.code100).toBe(450000000);
+      // Long term: 500M (211) - 50M (214) = 450M
+      expect(report.assets.longTerm.code200).toBe(450000000);
+      // Total Assets: 900M
+      expect(report.assets.totalAssets).toBe(900000000);
+    });
+
+    it('T1.4.2: B01-DN enforces the accounting invariant Mã 270 === Mã 300 + Mã 400', () => {
+      const balances: Record<string, LedgerAccountBalance> = {
+        '112': { accountCode: '112', accountNameVi: 'Tiền gửi NH', debitTotal: 500000000, creditTotal: 0, closingDebit: 500000000, closingCredit: 0 },
+        '331': { accountCode: '331', accountNameVi: 'Phải trả người bán', debitTotal: 0, creditTotal: 200000000, closingDebit: 0, closingCredit: 200000000 },
+        '411': { accountCode: '411', accountNameVi: 'Vốn đầu tư CSH', debitTotal: 0, creditTotal: 300000000, closingDebit: 0, closingCredit: 300000000 },
+      };
+
+      const report = FinancialStatementsEngine.generateBalanceSheet(balances, 'TT200');
+      expect(report.assets.totalAssets).toBe(500000000); // Mã 270
+      expect(report.resources.liabilities.code300).toBe(200000000); // Mã 300
+      expect(report.resources.equity.code400).toBe(300000000); // Mã 400
+      expect(report.resources.totalResources).toBe(500000000); // Mã 440
+      expect(report.isBalanced).toBe(true);
+      expect(report.discrepancy).toBe(0);
+      expect(report.warnings.length).toBe(0);
+    });
+
+    it('T1.4.3: B01-DN detects balance mismatch (Delta > 0), flags isBalanced = false, and raises explicit warnings', () => {
+      const unbalanced: Record<string, LedgerAccountBalance> = {
+        '112': { accountCode: '112', accountNameVi: 'Tiền gửi NH', debitTotal: 500000000, creditTotal: 0, closingDebit: 500000000, closingCredit: 0 },
+        '411': { accountCode: '411', accountNameVi: 'Vốn đầu tư CSH', debitTotal: 0, creditTotal: 480000000, closingDebit: 0, closingCredit: 480000000 },
+      };
+
+      const report = FinancialStatementsEngine.generateBalanceSheet(unbalanced, 'TT200');
+      expect(report.isBalanced).toBe(false);
+      expect(report.discrepancy).toBe(20000000);
+      expect(report.warnings.length).toBeGreaterThan(0);
+      expect(report.warnings[0]).toContain('CẢNH BÁO MẤT CÂN ĐỐI');
+    });
+
+    it('T1.4.4: B02-DN Income Statement computes 12-item multi-step cascade: Net Revenue = Gross - Deductions', () => {
+      const income = FinancialStatementsEngine.generateIncomeStatement({
+        revenue511: 100000000,
+        deductions521: 10000000,
+        cogs632: 50000000,
+        financialIncome515: 5000000,
+        financialExpense635: 2000000,
+        sellingExpense641: 8000000,
+        adminExpense642: 15000000,
+      });
+
+      expect(income.grossRevenue).toBe(100000000); // Mã 01
+      expect(income.revenueDeductions).toBe(10000000); // Mã 02
+      expect(income.netRevenue).toBe(90000000); // Mã 10 = 01 - 02
+      expect(income.costOfGoodsSold).toBe(50000000); // Mã 11
+      expect(income.grossProfit).toBe(40000000); // Mã 20 = 10 - 11
+    });
+
+    it('T1.4.5: B02-DN completes Operating Profit (30), Pretax Profit (50), CIT Expense (51), and Net Profit After Tax (60)', () => {
+      const income = FinancialStatementsEngine.generateIncomeStatement({
+        revenue511: 100000000,
+        cogs632: 60000000,
+        financialIncome515: 4000000,
+        financialExpense635: 1000000,
+        sellingExpense641: 5000000,
+        adminExpense642: 8000000,
+        otherIncome711: 2000000,
+        otherExpense811: 1000000,
+      });
+
+      // Operating profit: 40M gross + (4M - 1M) - (5M + 8M) = 40M + 3M - 13M = 30M
+      expect(income.operatingProfit).toBe(30000000); // Mã 30
+      // Other profit: 2M - 1M = 1M
+      expect(income.otherProfit).toBe(1000000); // Mã 40
+      // Pretax profit: 30M + 1M = 31M
+      expect(income.accountingProfitBeforeTax).toBe(31000000); // Mã 50
+      // CIT at 20%: 31M * 0.20 = 6.2M
+      expect(income.citExpense).toBe(6200000); // Mã 51
+      // Net profit after tax: 31M - 6.2M = 24.8M
+      expect(income.netProfitAfterTax).toBe(24800000); // Mã 60
+    });
+  });
+
+  // =========================================================================
+  // F5: Accounting Compliance & Tax Fraud Guardrails (R5)
+  // =========================================================================
+  describe('F5: Accounting Compliance & Tax Fraud Guardrails', () => {
+    it('T1.5.1: Prohibited accounts in TT133 detected and substitute recommendations provided', () => {
       expect(isProhibitedInCircular133('621')).toBe(true);
       expect(isProhibitedInCircular133('641')).toBe(true);
       expect(isProhibitedInCircular133('521')).toBe(true);
-      expect(isProhibitedInCircular133('111')).toBe(false);
-    });
-
-    it('T1.2.3: should search accounts accurately by code prefix and account name', () => {
-      const codeMatches = searchAccounts('112', 'CIRCULAR_200');
-      expect(codeMatches.length).toBeGreaterThan(0);
-      expect(codeMatches.some((a) => a.code === '1121')).toBe(true);
-
-      const nameMatches = searchAccounts('ngân hàng', 'CIRCULAR_200');
-      expect(nameMatches.length).toBeGreaterThan(0);
-      expect(nameMatches.some((a) => a.nameVi.toLowerCase().includes('ngân hàng'))).toBe(true);
-    });
-
-    it('T1.2.4: should filter accounts by category metadata tabs', () => {
-      const assetAccounts = searchAccounts('', 'CIRCULAR_200', 'ASSET');
-      expect(assetAccounts.length).toBeGreaterThan(20);
-      expect(assetAccounts.every((a) => a.category === 'ASSET')).toBe(true);
-
-      const liabilityAccounts = searchAccounts('', 'CIRCULAR_200', 'LIABILITY');
-      expect(liabilityAccounts.every((a) => a.category === 'LIABILITY')).toBe(true);
-    });
-
-    it('T1.2.5: should provide prohibition validation and valid substitute recommendation', () => {
-      expect(isProhibitedInCircular133('621')).toBe(true);
-      expect(isProhibitedInCircular133('641')).toBe(true);
       expect(isProhibitedInCircular133('111')).toBe(false);
 
       const val621 = validateAccountForRegime('621', 'CIRCULAR_133');
@@ -140,304 +407,54 @@ describe('Tier 1: Feature Coverage (Baseline isolated feature verifications)', (
       const val641 = validateAccountForRegime('641', 'CIRCULAR_133');
       expect(val641.substituteCode).toBe('6421');
     });
-  });
 
-  // -------------------------------------------------------------
-  // FEAT-03: Assessment Grading & Gating State Machine
-  // -------------------------------------------------------------
-  describe('FEAT-03: Assessment Grading & >=70% Gating State Machine (R2)', () => {
-    it('T1.3.1: should provide 10 questions per milestone assessment', () => {
-      const quizDay3 = MILESTONE_ASSESSMENTS[3];
-      expect(quizDay3).toBeDefined();
-      expect(quizDay3).toHaveLength(10);
-      for (const q of quizDay3) {
-        expect(q.options).toHaveLength(4);
-        expect(q.options.filter((o) => o.isCorrect)).toHaveLength(1);
-      }
+    it('T1.5.2: Sub-account inheritance of prohibition (e.g. 6411, 6272, 5211 rejected in TT133)', () => {
+      expect(isProhibitedInCircular133('6411')).toBe(true);
+      expect(isProhibitedInCircular133('6272')).toBe(true);
+      expect(isProhibitedInCircular133('5211')).toBe(true);
+      expect(isProhibitedInCircular133('6218')).toBe(true);
+
+      const val6411 = validateAccountForRegime('6411', 'CIRCULAR_133');
+      expect(val6411.isValid).toBe(false);
+      expect(val6411.isProhibited).toBe(true);
     });
 
-    it('T1.3.2: should calculate exact scores matching answer selections', () => {
-      const quizDay3 = MILESTONE_ASSESSMENTS[3];
-      // Build 100% correct answers map
-      const perfectAnswers: Record<string, string> = {};
-      for (const q of quizDay3) {
-        const correctOpt = q.options.find((o) => o.isCorrect);
-        if (correctOpt) perfectAnswers[q.id] = correctOpt.id;
-      }
+    it('T1.5.3: Non-cash invoice rule: Invoice >= 20,000,000 VND paid in cash disallows VAT and CIT deductions', () => {
+      const voucher20mCash = VOUCHER_TEST_CASES.find((v) => v.id === 'case-03-boundary-invalid-cash-20m')!;
+      expect(voucher20mCash).toBeDefined();
 
-      const result = GradingEngine.gradeAssessment(perfectAnswers, quizDay3);
-      expect(result.score).toBe(100);
-      expect(result.correctCount).toBe(10);
-      expect(GradingEngine.getProficiencyTier(result.score)).toBe('advanced');
-    });
-
-    it('T1.3.3: should enforce >=70% passing threshold to unlock next module', () => {
-      const passingAttempt = GatingEngine.recordAttempt(3, 80, [], 0);
-      expect(passingAttempt.passed).toBe(true);
-      expect(passingAttempt.unlocked).toBe(true);
-
-      const failingAttempt = GatingEngine.recordAttempt(3, 60, [], 0);
-      expect(failingAttempt.passed).toBe(false);
-      expect(failingAttempt.unlocked).toBe(false);
-    });
-
-    it('T1.3.4: should unlock Days 4, 5, 6 upon passing Milestone 1 (Day 3)', () => {
-      const initialUnlocked = [1, 2, 3];
-      const newUnlocked = GatingEngine.unlockNextModule(3, initialUnlocked);
-
-      expect(newUnlocked).toEqual([1, 2, 3, 4, 5, 6]);
-      expect(GatingEngine.canAccessDay(4, newUnlocked, { 3: 80 })).toBe(true);
-      expect(GatingEngine.canAccessDay(7, newUnlocked, { 3: 80 })).toBe(false);
-    });
-
-    it('T1.3.5: should diagnose errors under the Rule of One (exactly 1 priority focus)', () => {
-      const quizDay3 = MILESTONE_ASSESSMENTS[3];
-      // Answers with mistakes on fundamental equation and bank fee
-      const partialAnswers: Record<string, string> = {
-        'm1-q1': 'opt-a', // wrong (Fundamental equation)
-        'm1-q5': 'opt-a', // wrong (Debit credit direction)
-      };
-
-      const diagnosis = GradingEngine.diagnoseRuleOfOne(partialAnswers, quizDay3);
-      expect(diagnosis).toBeDefined();
-      expect(diagnosis?.highestPriorityErrorVi).toBeTruthy();
-      expect(diagnosis?.actionableNextStepVi).toBeTruthy();
-      expect(diagnosis?.growthMindsetFeedbackVi).toContain('nỗ lực');
-    });
-  });
-
-  // -------------------------------------------------------------
-  // FEAT-04: Live Debit=Credit Journalizer & Balance Validator
-  // -------------------------------------------------------------
-  describe('FEAT-04: Live Debit=Credit Balance Validator (R3)', () => {
-    it('T1.4.1: should confirm balanced simple 1-Debit / 1-Credit transaction', () => {
-      const rows: JournalEntryRow[] = [
-        { id: '1', accountCode: '111', accountNameVi: 'Tiền mặt', debitAmount: 50000000, creditAmount: 0 },
-        { id: '2', accountCode: '112', accountNameVi: 'Tiền gửi ngân hàng', debitAmount: 0, creditAmount: 50000000 },
-      ];
-
-      const validation = BalanceValidator.validateJournalBalance(rows);
-      expect(validation.isBalanced).toBe(true);
-      expect(validation.delta).toBe(0);
-      expect(validation.totalDebit).toBe(50000000);
-      expect(validation.totalCredit).toBe(50000000);
-      expect(validation.errorMessageVi).toBeUndefined();
-    });
-
-    it('T1.4.2: should confirm balanced compound 2-Debit / 1-Credit purchase with VAT', () => {
-      const rows: JournalEntryRow[] = [
-        { id: '1', accountCode: '156', accountNameVi: 'Hàng hóa', debitAmount: 50000000, creditAmount: 0 },
-        { id: '2', accountCode: '1331', accountNameVi: 'Thuế GTGT đầu vào', debitAmount: 5000000, creditAmount: 0 },
-        { id: '3', accountCode: '331', accountNameVi: 'Phải trả người bán', debitAmount: 0, creditAmount: 55000000 },
-      ];
-
-      const validation = BalanceValidator.validateJournalBalance(rows);
-      expect(validation.isBalanced).toBe(true);
-      expect(validation.totalDebit).toBe(55000000);
-      expect(validation.totalCredit).toBe(55000000);
-      expect(validation.delta).toBe(0);
-    });
-
-    it('T1.4.3: should reject unbalanced entries and compute exact delta', () => {
-      const rows: JournalEntryRow[] = [
-        { id: '1', accountCode: '156', accountNameVi: 'Hàng hóa', debitAmount: 50000000, creditAmount: 0 },
-        { id: '2', accountCode: '111', accountNameVi: 'Tiền mặt', debitAmount: 0, creditAmount: 48000000 },
-      ];
-
-      const validation = BalanceValidator.validateJournalBalance(rows);
-      expect(validation.isBalanced).toBe(false);
-      expect(validation.delta).toBe(2000000);
-      expect(validation.errorMessageVi).toContain('không cân bằng');
-    });
-
-    it('T1.4.4: should reject negative debit or credit amounts', () => {
-      const rows: JournalEntryRow[] = [
-        { id: '1', accountCode: '111', accountNameVi: 'Tiền mặt', debitAmount: -1000000, creditAmount: 0 },
-        { id: '2', accountCode: '112', accountNameVi: 'Tiền gửi NH', debitAmount: 0, creditAmount: -1000000 },
-      ];
-
-      const validation = BalanceValidator.validateJournalBalance(rows);
-      expect(validation.isBalanced).toBe(false);
-      expect(validation.errorMessageVi).toContain('số âm');
-    });
-
-    it('T1.4.5: should format currency accurately in Vietnamese Dong format', () => {
-      const formatted = BalanceValidator.formatVND(55000000);
-      expect(formatted).toContain('55.000.000');
-    });
-  });
-
-  // -------------------------------------------------------------
-  // FEAT-05: Voucher Inspection Room & Non-Cash Threshold
-  // -------------------------------------------------------------
-  describe('FEAT-05: Voucher Inspection Room & Non-Cash Rule (R3)', () => {
-    it('T1.5.1: should approve valid invoice below 20M paid in cash', () => {
-      const voucher = VOUCHER_TEST_CASES.find((v) => v.id === 'case-01-valid-cash')!;
-      expect(voucher).toBeDefined();
-
-      const audit = VoucherInspector.auditVoucher(voucher);
-      expect(audit.isValid).toBe(true);
-      expect(audit.vatDeductible).toBe(true);
-      expect(audit.citDeductible).toBe(true);
-      expect(audit.issues).toHaveLength(0);
-    });
-
-    it('T1.5.2: should detect and flag non-cash violation on invoice >= 20M paid in cash', () => {
-      const voucher = VOUCHER_TEST_CASES.find((v) => v.id === 'case-03-boundary-invalid-cash-20m')!;
-      expect(voucher).toBeDefined();
-
-      const audit = VoucherInspector.auditVoucher(voucher);
+      const audit = VoucherInspector.auditVoucher(voucher20mCash);
       expect(audit.isValid).toBe(false);
       expect(audit.vatDeductible).toBe(false);
       expect(audit.citDeductible).toBe(false);
       expect(audit.issues.some((i) => i.includes('20.000.000'))).toBe(true);
     });
 
-    it('T1.5.3: should flag high-risk invoice from vendor with suspended tax status (Status 03)', () => {
-      const voucher = VOUCHER_TEST_CASES.find((v) => v.id === 'case-05-vendor-status-03-suspended')!;
-      expect(voucher).toBeDefined();
+    it('T1.5.4: Non-cash invoice rule: Invoice >= 20,000,000 VND paid via bank transfer is approved with deductions intact', () => {
+      const voucher55mBank = VOUCHER_TEST_CASES.find((v) => v.id === 'case-04-valid-bank-55m')!;
+      expect(voucher55mBank).toBeDefined();
 
-      const audit = VoucherInspector.auditVoucher(voucher);
-      expect(audit.isValid).toBe(false);
-      expect(audit.vatDeductible).toBe(false);
-      expect(audit.issues.some((i) => i.includes('Status 03') || i.includes('Tạm ngừng'))).toBe(true);
+      const audit = VoucherInspector.auditVoucher(voucher55mBank);
+      expect(audit.isValid).toBe(true);
+      expect(audit.vatDeductible).toBe(true);
+      expect(audit.citDeductible).toBe(true);
+      expect(audit.issues).toHaveLength(0);
     });
 
-    it('T1.5.4: should validate Decree 123 MCCQT format (34 hex characters)', () => {
-      const validVoucher = VOUCHER_TEST_CASES.find((v) => v.id === 'case-04-valid-bank-55m')!;
-      const invalidVoucher = VOUCHER_TEST_CASES.find((v) => v.id === 'case-07-invalid-mccqt-length')!;
+    it('T1.5.5: Supplier Tax Code (MST) status 03/04 detection flags suspended / runaway sellers with legal risk alert', () => {
+      const status03Case = VOUCHER_TEST_CASES.find((v) => v.id === 'case-05-vendor-status-03-suspended')!;
+      const audit03 = VoucherInspector.auditVoucher(status03Case);
+      expect(audit03.isValid).toBe(false);
+      expect(audit03.vatDeductible).toBe(false);
+      expect(audit03.citDeductible).toBe(false);
+      expect(audit03.issues.some((i) => i.includes('Status 03') || i.includes('Tạm ngừng'))).toBe(true);
 
-      const validAudit = VoucherInspector.auditVoucher(validVoucher);
-      expect(validAudit.isValid).toBe(true);
-
-      const invalidAudit = VoucherInspector.auditVoucher(invalidVoucher);
-      expect(invalidAudit.isValid).toBe(false);
-      expect(invalidAudit.issues.some((i) => i.includes('34'))).toBe(true);
-    });
-
-    it('T1.5.5: should detect missing required voucher signers', () => {
-      const voucher = VOUCHER_TEST_CASES.find((v) => v.id === 'case-09-missing-director-signature')!;
-      expect(voucher).toBeDefined();
-
-      const audit = VoucherInspector.auditVoucher(voucher);
-      expect(audit.isValid).toBe(false);
-      expect(audit.issues.some((i) => i.includes('Giám đốc'))).toBe(true);
-    });
-  });
-
-  // -------------------------------------------------------------
-  // FEAT-06: Storage Adapter & Persistence
-  // -------------------------------------------------------------
-  describe('FEAT-06: Storage Adapter & 1-Click Backup Persistence (R4)', () => {
-    it('T1.6.1: should store, retrieve, and delete items via LocalStorageAdapter', async () => {
-      await storage.setItem('test_key', { score: 95, name: 'Học viên A' });
-      const retrieved = await storage.getItem<{ score: number; name: string }>('test_key');
-
-      expect(retrieved).toEqual({ score: 95, name: 'Học viên A' });
-
-      await storage.removeItem('test_key');
-      const afterDelete = await storage.getItem('test_key');
-      expect(afterDelete).toBeNull();
-    });
-
-    it('T1.6.2: should export backup containing valid metadata and JSON structure', async () => {
-      await storage.setItem('unlocked_days', [1, 2, 3, 4]);
-      await storage.setItem('milestone_1_score', 85);
-
-      const backupStr = await storage.exportBackup();
-      const parsed = JSON.parse(backupStr);
-
-      expect(parsed.app).toBe('vietnam-accounting-learning-web');
-      expect(parsed.version).toBe('1.0.0');
-      expect(parsed.exportedAt).toBeTruthy();
-      expect(parsed.customData['unlocked_days']).toEqual([1, 2, 3, 4]);
-    });
-
-    it('T1.6.3: should import backup and restore persisted data completely', async () => {
-      const sampleBackup = JSON.stringify({
-        version: '1.0.0',
-        exportedAt: new Date().toISOString(),
-        app: 'vietnam-accounting-learning-web',
-        customData: {
-          unlocked_days: [1, 2, 3, 4, 5, 6],
-          user_streak: 5,
-        },
-      });
-
-      const success = await storage.importBackup(sampleBackup);
-      expect(success).toBe(true);
-
-      const restoredDays = await storage.getItem<number[]>('unlocked_days');
-      const restoredStreak = await storage.getItem<number>('user_streak');
-      expect(restoredDays).toEqual([1, 2, 3, 4, 5, 6]);
-      expect(restoredStreak).toBe(5);
-    });
-
-    it('T1.6.4: should reject invalid backup payloads from wrong apps', async () => {
-      const foreignBackup = JSON.stringify({
-        app: 'another-random-app',
-        customData: {},
-      });
-
-      const success = await storage.importBackup(foreignBackup);
-      expect(success).toBe(false);
-    });
-
-    it('T1.6.5: should calculate learning streak continuity correctly', () => {
-      // First day
-      expect(StreakEngine.calculateStreak(null, '2026-09-13', 0)).toBe(1);
-      // Same day activity (streak maintained)
-      expect(StreakEngine.calculateStreak('2026-09-13', '2026-09-13', 3)).toBe(3);
-      // Consecutive day (streak incremented)
-      expect(StreakEngine.calculateStreak('2026-09-12', '2026-09-13', 3)).toBe(4);
-      // Missed 2 days (streak resets to 1)
-      expect(StreakEngine.calculateStreak('2026-09-10', '2026-09-13', 5)).toBe(1);
-    });
-  });
-
-  // -------------------------------------------------------------
-  // FEAT-07: Responsive UI Shell & Theme Toggle
-  // -------------------------------------------------------------
-  describe('FEAT-07: Responsive UI Shell & Theme Preference (R5)', () => {
-    it('T1.7.1: should persist theme mode preferences in storage', async () => {
-      await storage.setItem('theme', 'dark');
-      const savedTheme = await storage.getItem<string>('theme');
-      expect(savedTheme).toBe('dark');
-
-      await storage.setItem('theme', 'light');
-      expect(await storage.getItem<string>('theme')).toBe('light');
-    });
-
-    it('T1.7.2: should provide valid Vietnamese category metadata for all 9 classes', () => {
-      expect(CATEGORY_METADATA.ASSET.nameVi).toBe('Tài sản');
-      expect(CATEGORY_METADATA.LIABILITY.nameVi).toBe('Nợ phải trả');
-      expect(CATEGORY_METADATA.EQUITY.nameVi).toBe('Vốn chủ sở hữu');
-      expect(CATEGORY_METADATA.REVENUE.nameVi).toBe('Doanh thu');
-      expect(CATEGORY_METADATA.BUSINESS_RESULT.nameVi).toBe('Xác định kết quả kinh doanh');
-    });
-
-    it('T1.7.3: should define distinct styling classes for each category', () => {
-      for (const [, info] of Object.entries(CATEGORY_METADATA)) {
-        expect(info.colorClass).toBeTruthy();
-        expect(info.accountClasses).toBeTruthy();
-      }
-    });
-
-    it('T1.7.4: should ensure clean account code resolution without crashes', () => {
-      const acc111 = findAccountByCode('111', 'CIRCULAR_200');
-      expect(acc111).toBeDefined();
-      expect(acc111?.nameVi).toContain('Tiền mặt');
-
-      const nonexistent = findAccountByCode('999999', 'CIRCULAR_200');
-      expect(nonexistent).toBeUndefined();
-    });
-
-    it('T1.7.5: should support switching regime between CIRCULAR_200 and CIRCULAR_133', () => {
-      const acc200Count = getAccountsByRegime('CIRCULAR_200').length;
-      const acc133Count = getAccountsByRegime('CIRCULAR_133').length;
-
-      expect(acc200Count).toBeGreaterThan(acc133Count);
-      expect(acc133Count).toBeGreaterThan(40);
+      const status04Case = VOUCHER_TEST_CASES.find((v) => v.id === 'case-06-vendor-status-04-runaway')!;
+      const audit04 = VoucherInspector.auditVoucher(status04Case);
+      expect(audit04.isValid).toBe(false);
+      expect(audit04.vatDeductible).toBe(false);
+      expect(audit04.citDeductible).toBe(false);
+      expect(audit04.issues.some((i) => i.includes('Status 04') || i.includes('không hoạt động tại địa chỉ đăng ký'))).toBe(true);
     });
   });
 });

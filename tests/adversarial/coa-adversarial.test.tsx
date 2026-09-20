@@ -1,4 +1,6 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import { render, screen, fireEvent, cleanup } from '@testing-library/react';
+import { CoaExplorer } from '@/components/coa/CoaExplorer';
 import { COA_CIRCULAR_200 } from '@/data/coa-circular-200';
 import { COA_CIRCULAR_133 } from '@/data/coa-circular-133';
 import {
@@ -500,15 +502,11 @@ describe('ADVERSARIAL BATTERY 4: All 9 Classes Structural Integrity & Schema Inv
 });
 
 describe('ADVERSARIAL BATTERY 5: UI Explorer & Modal User Journey Stress Tests', () => {
-  afterEach(async () => {
-    const { cleanup } = await import('@testing-library/react');
+  afterEach(() => {
     cleanup();
   });
 
-  it('should render CoaExplorer in Circular 200 mode and display accounts', async () => {
-    const { render, screen } = await import('@testing-library/react');
-    const { CoaExplorer } = await import('@/components/coa/CoaExplorer');
-
+  it('should render CoaExplorer in Circular 200 mode and display accounts', () => {
     let currentRegime: any = 'CIRCULAR_200';
     const setRegime = (r: any) => { currentRegime = r; };
 
@@ -518,12 +516,9 @@ describe('ADVERSARIAL BATTERY 5: UI Explorer & Modal User Journey Stress Tests',
     expect(screen.getByText('TK 111')).toBeDefined();
     expect(screen.getByText('TK 131')).toBeDefined();
     expect(screen.getByText('TK 331')).toBeDefined();
-  }, 15000);
+  });
 
-  it('should display Circular 133 safeguard warning banner when in TT 133 mode', async () => {
-    const { render, screen, fireEvent } = await import('@testing-library/react');
-    const { CoaExplorer } = await import('@/components/coa/CoaExplorer');
-
+  it('should display Circular 133 safeguard warning banner when in TT 133 mode', () => {
     let currentRegime: any = 'CIRCULAR_133';
     const setRegime = (r: any) => { currentRegime = r; };
 
@@ -543,10 +538,7 @@ describe('ADVERSARIAL BATTERY 5: UI Explorer & Modal User Journey Stress Tests',
     expect(screen.getAllByText('TK 521').length).toBeGreaterThanOrEqual(1);
   });
 
-  it('should open CoaDetailModal with prohibited warning and handle replacement navigation', async () => {
-    const { render, screen, fireEvent } = await import('@testing-library/react');
-    const { CoaExplorer } = await import('@/components/coa/CoaExplorer');
-
+  it('should open CoaDetailModal with prohibited warning and handle replacement navigation', () => {
     render(<CoaExplorer currentRegime="CIRCULAR_133" onRegimeChange={() => {}} />);
 
     // Filter prohibited
@@ -572,10 +564,7 @@ describe('ADVERSARIAL BATTERY 5: UI Explorer & Modal User Journey Stress Tests',
     expect(screen.getAllByText('TK 6421').length).toBeGreaterThanOrEqual(1);
   });
 
-  it('should filter accounts by Category pills and handle reset', async () => {
-    const { render, screen, fireEvent } = await import('@testing-library/react');
-    const { CoaExplorer } = await import('@/components/coa/CoaExplorer');
-
+  it('should filter accounts by Category pills and handle reset', () => {
     render(<CoaExplorer currentRegime="CIRCULAR_200" onRegimeChange={() => {}} />);
 
     // Click KQKD (Category: BUSINESS_RESULT)
@@ -593,10 +582,7 @@ describe('ADVERSARIAL BATTERY 5: UI Explorer & Modal User Journey Stress Tests',
     expect(screen.getByText('TK 911')).toBeDefined();
   });
 
-  it('should handle search input typing and clear button', async () => {
-    const { render, screen, fireEvent } = await import('@testing-library/react');
-    const { CoaExplorer } = await import('@/components/coa/CoaExplorer');
-
+  it('should handle search input typing and clear button', () => {
     render(<CoaExplorer currentRegime="CIRCULAR_200" onRegimeChange={() => {}} />);
 
     const searchInput = screen.getByPlaceholderText(/Tìm nhanh theo số hiệu tài khoản/);

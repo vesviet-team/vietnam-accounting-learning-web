@@ -5,6 +5,41 @@ const DB_NAME = 'VietnamAccountingLearningDB';
 const DB_VERSION = 1;
 const STORE_NAME = 'app_state';
 
+export interface JournalEntry {
+  id?: string;
+  timestamp?: string;
+  descriptionVi?: string;
+  rows?: any[];
+  totalAmount?: number;
+  regime?: string;
+  accountCode?: string;
+  accountNameVi?: string;
+  debitAmount?: number;
+  creditAmount?: number;
+  noteVi?: string;
+  [key: string]: any;
+}
+
+export interface LedgerAccount {
+  accountCode?: string;
+  accountNameVi?: string;
+  debitTotal?: number;
+  creditTotal?: number;
+  closingDebit?: number;
+  closingCredit?: number;
+  entries?: any[];
+  [key: string]: any;
+}
+
+export interface WorkbenchState {
+  postedEntries: JournalEntry[];
+  ledgerTAccounts: Record<string, LedgerAccount>;
+  completedVoucherCases: string[];
+  voucherCompletedCases?: string[];
+  voucherScores?: Record<string, number>;
+  [key: string]: any;
+}
+
 export class IndexedDbAdapter implements IStorageAdapter {
   private dbPromise: Promise<IDBPDatabase> | null = null;
 
@@ -115,4 +150,67 @@ export class IndexedDbAdapter implements IStorageAdapter {
       return false;
     }
   }
+
+  async loadWorkbenchState(): Promise<WorkbenchState> {
+    try {
+      const raw = await this.getItem<WorkbenchState>('workbench_state');
+      if (!raw) {
+        return {
+          postedEntries: [],
+          ledgerTAccounts: {},
+          completedVoucherCases: [],
+          voucherCompletedCases: [],
+          voucherScores: {},
+        };
+      }
+      const completed = raw.completedVoucherCases || raw.voucherCompletedCases || [];
+      return {
+        postedEntries: Array.isArray(raw.postedEntries) ? raw.postedEntries : [],
+        ledgerTAccounts:
+          raw.ledgerTAccounts && typeof raw.ledgerTAccounts === 'object'
+            ? raw.ledgerTAccounts
+            : {},
+        completedVoucherCases: completed,
+        voucherCompletedCases: completed,
+        voucherScores:
+          raw.voucherScores && typeof raw.voucherScores === 'object'
+            ? raw.voucherScores
+            : {},
+      };
+    } catch (err) {
+      console.error('[IndexedDbAdapter] Error loading workbench state:', err);
+      return {
+        postedEntries: [],
+        ledgerTAccounts: {},
+        completedVoucherCases: [],
+        voucherCompletedCases: [],
+        voucherScores: {},
+      };
+    }
+  }
+
+  async saveWorkbenchState(state: Partial<WorkbenchState>): Promise<boolean> {
+    try {
+      const current = await this.loadWorkbenchState();
+      const completed =
+        state.completedVoucherCases ??
+        state.voucherCompletedCases ??
+        current.completedVoucherCases;
+      const merged: WorkbenchState = {
+        ...current,
+        ...state,
+        completedVoucherCases: completed,
+        voucherCompletedCases: completed,
+        postedEntries: state.postedEntries ?? current.postedEntries,
+        ledgerTAccounts: state.ledgerTAccounts ?? current.ledgerTAccounts,
+        voucherScores: state.voucherScores ?? current.voucherScores,
+      };
+      await this.setItem<WorkbenchState>('workbench_state', merged);
+      return true;
+    } catch (err) {
+      console.error('[IndexedDbAdapter] Error saving workbench state:', err);
+      return false;
+    }
+  }
 }
+

@@ -1,0 +1,22 @@
+{
+  "name": "Học Kế Toán Việt Nam 30 Ngày — Chế độ TT 200 & TT 133",
+  "short_name": "KếToánVN30",
+  "description": "Nền tảng học kế toán Việt Nam 30 ngày tương tác, tra cứu hệ thống tài khoản TT 200 và TT 133, rèn luyện định khoản và kiểm tra chứng từ.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#0284c7",
+  "background_color": "#0f172a",
+  "lang": "vi",
+  "dir": "ltr",
+  "categories": ["education", "finance", "productivity"],
+  "icons": [
+    {
+      "src": "/vite.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

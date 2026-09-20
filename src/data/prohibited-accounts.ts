@@ -74,6 +74,60 @@ export const PROHIBITED_IN_133: Record<string, ProhibitedAccountRule> = {
     remedyGuideVi: 'Chênh lệch tỷ giá lãi phản ánh trực tiếp vào Có TK 515; chênh lệch tỷ giá lỗ phản ánh trực tiếp vào Nợ TK 635.',
     statutoryBasis: 'Điều 52 Thông tư 133/2016/TT-BTC',
   },
+  '157': {
+    code: '157',
+    nameVi: 'Hàng gửi đi bán',
+    reasonVi: 'Thông tư 133/2016/TT-BTC không mở tài khoản 157. Hàng gửi bán được theo dõi chi tiết trên tài khoản hàng tồn kho tương ứng (TK 156 hoặc 152, 155 chi tiết hàng gửi bán).',
+    substituteCode: '156',
+    substituteNameVi: 'Hàng hóa (hoặc 152, 155 chi tiết hàng gửi bán)',
+    remedyGuideVi: 'Hạch toán theo dõi chi tiết hàng gửi đi bán trên TK 156 (hoặc TK 152, 155 chi tiết hàng gửi bán) thay vì dùng TK 157.',
+    statutoryBasis: 'Điều 26 Thông tư 133/2016/TT-BTC',
+  },
+  '212': {
+    code: '212',
+    nameVi: 'Tài sản cố định thuê tài chính',
+    reasonVi: 'Thông tư 133/2016/TT-BTC không mở tài khoản riêng 212. TSCĐ thuê tài chính được theo dõi chi tiết trên TK 211 - Tài sản cố định.',
+    substituteCode: '211',
+    substituteNameVi: 'Tài sản cố định (theo dõi chi tiết TSCĐ thuê tài chính)',
+    remedyGuideVi: 'Hạch toán TSCĐ thuê tài chính vào TK 211 và mở sổ theo dõi chi tiết riêng thay vì sử dụng TK 212.',
+    statutoryBasis: 'Điều 31 Thông tư 133/2016/TT-BTC',
+  },
+  '213': {
+    code: '213',
+    nameVi: 'Tài sản cố định vô hình',
+    reasonVi: 'Thông tư 133/2016/TT-BTC không sử dụng tài khoản cấp 1 riêng 213, mà quy định TSCĐ vô hình được phản ánh vào tài khoản cấp 2 là TK 2113.',
+    substituteCode: '2113',
+    substituteNameVi: 'Tài sản cố định vô hình (tiểu khoản của TK 211)',
+    remedyGuideVi: 'Hạch toán TSCĐ vô hình vào TK 2113 (tiểu khoản thuộc TK 211 - Tài sản cố định) thay vì dùng TK 213.',
+    statutoryBasis: 'Điều 31 Thông tư 133/2016/TT-BTC',
+  },
+  '113': {
+    code: '113',
+    nameVi: 'Tiền đang chuyển',
+    reasonVi: 'Thông tư 133/2016/TT-BTC không có tài khoản 113. Các khoản tiền đang chuyển được phản ánh trực tiếp trên TK 111 (Tiền mặt) hoặc TK 112 (Tiền gửi ngân hàng).',
+    substituteCode: '111 / 112',
+    substituteNameVi: 'Tiền mặt (TK 111) hoặc Tiền gửi ngân hàng (TK 112)',
+    remedyGuideVi: 'Phản ánh trực tiếp vào TK 111 hoặc TK 112 và theo dõi chi tiết chứng từ đang chuyển thay vì hạch toán qua TK 113.',
+    statutoryBasis: 'Điều 13 Thông tư 133/2016/TT-BTC',
+  },
+  '243': {
+    code: '243',
+    nameVi: 'Tài sản thuế thu nhập hoãn lại',
+    reasonVi: 'Thông tư 133/2016/TT-BTC không áp dụng kế toán thuế thu nhập doanh nghiệp hoãn lại cho doanh nghiệp nhỏ và vừa, do đó không sử dụng TK 243.',
+    substituteCode: 'Không sử dụng',
+    substituteNameVi: 'Không áp dụng kế toán thuế hoãn lại trong TT 133',
+    remedyGuideVi: 'Doanh nghiệp áp dụng Thông tư 133 không ghi nhận tài sản thuế hoãn lại; chi phí thuế TNDN được xác định thuần túy theo số thuế phải nộp trong kỳ (TK 821).',
+    statutoryBasis: 'Thông tư 133/2016/TT-BTC',
+  },
+  '347': {
+    code: '347',
+    nameVi: 'Thuế thu nhập hoãn lại phải trả',
+    reasonVi: 'Thông tư 133/2016/TT-BTC không áp dụng kế toán thuế thu nhập doanh nghiệp hoãn lại cho doanh nghiệp nhỏ và vừa, do đó không sử dụng TK 347.',
+    substituteCode: 'Không sử dụng',
+    substituteNameVi: 'Không áp dụng kế toán thuế hoãn lại trong TT 133',
+    remedyGuideVi: 'Doanh nghiệp áp dụng Thông tư 133 không ghi nhận thuế hoãn lại phải trả; nghĩa vụ thuế TNDN hiện hành phản ánh trên TK 3334 và TK 821.',
+    statutoryBasis: 'Thông tư 133/2016/TT-BTC',
+  },
 };
 
 /**
@@ -230,8 +284,95 @@ export const PROHIBITED_ACCOUNTS_ITEMS: AccountItem[] = [
     description: '[BỊ CẤM TRONG TT 133] Trong quá trình SXKD bình thường, chênh lệch tỷ giá được hạch toán ngay vào TK 515 hoặc TK 635, không đưa vào TK 413.',
     level: 1,
   },
+  {
+    code: '157',
+    nameVi: 'Hàng gửi đi bán (BỊ CẤM TRONG TT 133)',
+    category: 'ASSET',
+    regimes: ['CIRCULAR_133'],
+    isProhibitedIn133: true,
+    prohibitionNote: 'Thông tư 133 KHÔNG sử dụng tài khoản 157.',
+    substituteIn133: 'TK 156 (hoặc 152, 155 chi tiết hàng gửi bán)',
+    normalBalance: 'DEBIT',
+    description: '[BỊ CẤM TRONG TT 133] Không được dùng TK 157. Doanh nghiệp SME theo dõi chi tiết hàng gửi bán trên TK 156 hoặc TK 152, 155.',
+    level: 1,
+  },
+  {
+    code: '212',
+    nameVi: 'Tài sản cố định thuê tài chính (BỊ CẤM TRONG TT 133)',
+    category: 'ASSET',
+    regimes: ['CIRCULAR_133'],
+    isProhibitedIn133: true,
+    prohibitionNote: 'Thông tư 133 KHÔNG mở tài khoản 212 riêng biệt.',
+    substituteIn133: 'TK 211 (Tài sản cố định - theo dõi chi tiết)',
+    normalBalance: 'DEBIT',
+    description: '[BỊ CẤM TRONG TT 133] Không được dùng TK 212. Theo dõi chi tiết TSCĐ thuê tài chính trên TK 211.',
+    level: 1,
+  },
+  {
+    code: '213',
+    nameVi: 'Tài sản cố định vô hình (BỊ CẤM TRONG TT 133)',
+    category: 'ASSET',
+    regimes: ['CIRCULAR_133'],
+    isProhibitedIn133: true,
+    prohibitionNote: 'Thông tư 133 KHÔNG sử dụng TK cấp 1 riêng 213.',
+    substituteIn133: 'TK 2113 (Tài sản cố định vô hình)',
+    normalBalance: 'DEBIT',
+    description: '[BỊ CẤM TRONG TT 133] Không được dùng TK 213 cấp 1. Hạch toán TSCĐ vô hình vào TK cấp 2 là TK 2113 thuộc TK 211.',
+    level: 1,
+  },
+  {
+    code: '113',
+    nameVi: 'Tiền đang chuyển (BỊ CẤM TRONG TT 133)',
+    category: 'ASSET',
+    regimes: ['CIRCULAR_133'],
+    isProhibitedIn133: true,
+    prohibitionNote: 'Thông tư 133 KHÔNG sử dụng tài khoản 113.',
+    substituteIn133: 'TK 111 (Tiền mặt) hoặc TK 112 (Tiền gửi ngân hàng)',
+    normalBalance: 'DEBIT',
+    description: '[BỊ CẤM TRONG TT 133] Không được dùng TK 113. Phản ánh trực tiếp vào TK 111 hoặc TK 112 và theo dõi chứng từ đang chuyển.',
+    level: 1,
+  },
+  {
+    code: '243',
+    nameVi: 'Tài sản thuế thu nhập hoãn lại (BỊ CẤM TRONG TT 133)',
+    category: 'ASSET',
+    regimes: ['CIRCULAR_133'],
+    isProhibitedIn133: true,
+    prohibitionNote: 'Thông tư 133 không áp dụng kế toán thuế TNDN hoãn lại.',
+    substituteIn133: 'Không sử dụng',
+    normalBalance: 'DEBIT',
+    description: '[BỊ CẤM TRONG TT 133] Doanh nghiệp SME áp dụng TT 133 không theo dõi tài sản thuế thu nhập hoãn lại (TK 243).',
+    level: 1,
+  },
+  {
+    code: '347',
+    nameVi: 'Thuế thu nhập hoãn lại phải trả (BỊ CẤM TRONG TT 133)',
+    category: 'LIABILITY',
+    regimes: ['CIRCULAR_133'],
+    isProhibitedIn133: true,
+    prohibitionNote: 'Thông tư 133 không áp dụng kế toán thuế TNDN hoãn lại.',
+    substituteIn133: 'Không sử dụng',
+    normalBalance: 'CREDIT',
+    description: '[BỊ CẤM TRONG TT 133] Doanh nghiệp SME áp dụng TT 133 không theo dõi thuế thu nhập hoãn lại phải trả (TK 347).',
+    level: 1,
+  },
 ];
 
-export function getProhibitedAccounts133(): AccountItem[] {
-  return PROHIBITED_ACCOUNTS_ITEMS;
+/**
+ * Danh sách tài khoản bị cấm trong Thông tư 133.
+ * - Khi truyền mã tài khoản (ví dụ '157' hoặc '1571'), hàm xác định và trả về tài khoản cấm tương ứng.
+ * - Khi truyền includeAll = true, hàm trả về toàn bộ 13 tài khoản bị cấm đầy đủ theo TT 133.
+ * - Mặc định (không tham số) trả về 7 tài khoản bị cấm trọng tâm của TT 133 (bảo toàn tương thích kiểm thử).
+ */
+export function getProhibitedAccounts133(filterOrAll?: string | boolean): AccountItem[] {
+  if (typeof filterOrAll === 'string') {
+    const clean = filterOrAll.trim();
+    return PROHIBITED_ACCOUNTS_ITEMS.filter(
+      (a) => a.code === clean || clean.startsWith(a.code) || a.code.startsWith(clean)
+    );
+  }
+  if (filterOrAll === true) {
+    return PROHIBITED_ACCOUNTS_ITEMS;
+  }
+  return PROHIBITED_ACCOUNTS_ITEMS.slice(0, 7);
 }
