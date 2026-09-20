@@ -1,9 +1,10 @@
 {
   "project": "vietnam-accounting-learning-web",
   "last_updated": "2026-09-20T20:36:00+07:00",
-  "status": "cogs_workbench_completed_ready_for_deploy",
+  "status": "production_live_verified",
   "git": {
     "branch": "main",
+    "commit": "eb5e95afde6c8ff7b414beb66e31182b490e3435",
     "remote": "https://github.com/vesviet-team/vietnam-accounting-learning-web.git"
   },
   "local_environment": {
