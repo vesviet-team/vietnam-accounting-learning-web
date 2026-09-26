@@ -98,9 +98,15 @@ jobs:
     runs-on: [self-hosted, linux, x64, docker]
     needs: test
     if: github.ref == 'refs/heads/main'
+    outputs:
+      image_tag: ${{ steps.sha.outputs.short }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+
+      - name: Compute short SHA
+        id: sha
+        run: echo "short=$(echo '${{ github.sha }}' | cut -c1-7)" >> $GITHUB_OUTPUT
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -119,9 +125,10 @@ jobs:
           file: Dockerfile
           push: true
           tags: |
-            ghcr.io/vesviet-team/vietnam-accounting-learning-web:${{ github.sha }}
+            ghcr.io/vesviet-team/vietnam-accounting-learning-web:${{ steps.sha.outputs.short }}
             ghcr.io/vesviet-team/vietnam-accounting-learning-web:main
-            ghcr.io/vesviet-team/vietnam-accounting-learning-web:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Generate SBOM
         uses: anchore/sbom-action@v0
@@ -139,50 +146,63 @@ jobs:
           output-format: table
 
   # ──────────────────────────────────────────────────────────────
-  # Stage 4: Kubernetes In-Cluster Rollout
+  # Stage 4: GitOps Write-Back Deploy (Zero kubectl)
   # ──────────────────────────────────────────────────────────────
   deploy:
-    name: In-Cluster Rollout to K3s Homelab
+    name: GitOps Write-Back Deploy (ArgoCD Auto-Sync)
     runs-on: [self-hosted, linux, x64, docker]
     needs: build
     if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
     steps:
-      - name: In-Cluster Rollout Restart
+      - name: Install kustomize
         run: |
-          echo "========================================================"
-          echo "🚀 Rolling restart deployment/vietnam-accounting-web..."
-          echo "========================================================"
-          kubectl rollout restart deployment/vietnam-accounting-web -n vietnam-accounting
+          if ! command -v kustomize &> /dev/null; then
+            curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
+            sudo mv kustomize /usr/local/bin/kustomize
+          fi
+          kustomize version
 
-          echo "⏳ Waiting for rollout completion (timeout: 180s)..."
-          kubectl rollout status deployment/vietnam-accounting-web -n vietnam-accounting --timeout=180s
-          echo "✅ Rollout completed successfully."
+      - name: Checkout GitOps repo
+        uses: actions/checkout@v4
+        with:
+          repository: vesviet-team/gitops
+          token: ${{ secrets.GITOPS_PUSH_TOKEN }}
+          path: gitops-repo
 
-      - name: Automatic Rollback on Failure
-        if: failure()
+      - name: Bump image tag in GitOps
         run: |
-          echo "========================================================"
-          echo "⚠️ Rollout failed or timed out! Executing rollback..."
-          echo "========================================================"
-          kubectl rollout undo deployment/vietnam-accounting-web -n vietnam-accounting || true
-          kubectl rollout status deployment/vietnam-accounting-web -n vietnam-accounting --timeout=180s || true
+          cd gitops-repo/apps/vietnam-accounting
+          kustomize edit set image \
+            ghcr.io/vesviet-team/vietnam-accounting-learning-web=ghcr.io/vesviet-team/vietnam-accounting-learning-web:${{ needs.build.outputs.image_tag }}
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git add kustomization.yaml
+          git commit -m "chore(deploy): bump vietnam-accounting to ${{ needs.build.outputs.image_tag }} [skip ci]"
 
-      - name: Automated Health Probes
+      - name: Push with retry rebase
         run: |
-          echo "========================================================"
-          echo "🔍 Automated Health Probes"
-          echo "========================================================"
-          echo "Testing internal CoreDNS probe..."
-          for i in {1..10}; do
-            if curl --connect-timeout 3 -fsS http://vietnam-accounting-web.vietnam-accounting.svc.cluster.local:8810/healthz; then
-              echo "✅ CoreDNS probe passed."
-              break
-            fi
-            echo "CoreDNS probe retry $i/10..."
-            sleep 2
+          cd gitops-repo
+          for i in 1 2 3 4 5; do
+            echo "Push attempt $i/5..."
+            git push origin main && echo "✅ Push succeeded." && break
+            echo "⚠️ Conflict detected, rebasing..."
+            git pull --rebase origin main
           done
 
-          echo "Testing LAN IP probes..."
-          curl --connect-timeout 3 -fsS http://192.168.1.114:8810/healthz
-          curl --connect-timeout 3 -fsS http://192.168.1.116:8810/healthz
-          echo "🎉 All health probes passed!"
+      - name: Verify ArgoCD sync (wait for auto-sync)
+        run: |
+          echo "Waiting 30s for ArgoCD auto-sync..."
+          sleep 30
+          echo "Verifying health endpoint..."
+          for i in {1..15}; do
+            if curl --connect-timeout 3 -fsS http://vietnam-accounting-web.vietnam-accounting.svc.cluster.local:8810/healthz; then
+              echo "✅ Health probe passed — deployment successful!"
+              exit 0
+            fi
+            echo "Retry $i/15..."
+            sleep 5
+          done
+          echo "⚠️ Health probe timed out — check ArgoCD for sync status."
+          exit 1
