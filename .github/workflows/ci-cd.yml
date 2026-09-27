@@ -153,56 +153,49 @@ jobs:
     runs-on: [self-hosted, linux, x64, docker]
     needs: build
     if: github.ref == 'refs/heads/main'
-    permissions:
-      contents: read
     steps:
-      - name: Install kustomize
-        run: |
-          if ! command -v kustomize &> /dev/null; then
-            curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
-            sudo mv kustomize /usr/local/bin/kustomize
-          fi
-          kustomize version
-
-      - name: Checkout GitOps repo
+      - name: Checkout GitOps Repository
         uses: actions/checkout@v4
         with:
           repository: vesviet-team/gitops
           token: ${{ secrets.GITOPS_PUSH_TOKEN }}
-          path: gitops-repo
+          path: gitops
 
-      - name: Bump image tag in GitOps
+      - name: Install Kustomize
         run: |
-          cd gitops-repo/apps/vietnam-accounting
+          mkdir -p bin
+          curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash -s -- 5.4.3 bin
+          echo "$GITHUB_WORKSPACE/bin" >> $GITHUB_PATH
+
+      - name: Update Vietnam Accounting Image Tag
+        working-directory: gitops/apps/vietnam-accounting
+        run: |
           kustomize edit set image \
             ghcr.io/vesviet-team/vietnam-accounting-learning-web=ghcr.io/vesviet-team/vietnam-accounting-learning-web:${{ needs.build.outputs.image_tag }}
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git config user.name "github-actions[bot]"
-          git add kustomization.yaml
-          git commit -m "chore(deploy): bump vietnam-accounting to ${{ needs.build.outputs.image_tag }} [skip ci]"
 
-      - name: Push with retry rebase
+      - name: Commit and Push with Retry
+        working-directory: gitops
         run: |
-          cd gitops-repo
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add apps/vietnam-accounting/kustomization.yaml
+          git commit -m "chore(deploy): bump vietnam-accounting to ${{ needs.build.outputs.image_tag }} [skip ci]" || exit 0
           for i in 1 2 3 4 5; do
-            echo "Push attempt $i/5..."
-            git push origin main && echo "✅ Push succeeded." && break
-            echo "⚠️ Conflict detected, rebasing..."
-            git pull --rebase origin main
+            git pull --rebase origin main && git push origin main && break || sleep $((i * 2))
           done
 
-      - name: Verify ArgoCD sync (wait for auto-sync)
+      - name: Verify Health After Deploy
         run: |
-          echo "Waiting 30s for ArgoCD auto-sync..."
-          sleep 30
-          echo "Verifying health endpoint..."
+          echo "Waiting 45s for ArgoCD auto-sync and pod rollout..."
+          sleep 45
           for i in {1..15}; do
             if curl --connect-timeout 3 -fsS http://vietnam-accounting-web.vietnam-accounting.svc.cluster.local:8810/healthz; then
               echo "✅ Health probe passed — deployment successful!"
               exit 0
             fi
-            echo "Retry $i/15..."
+            echo "Retry $i/15 (every 5s)..."
             sleep 5
           done
           echo "⚠️ Health probe timed out — check ArgoCD for sync status."
           exit 1
+
