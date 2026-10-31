@@ -14,10 +14,12 @@ import { storageService } from '@/services/storage/storage-service';
 import {
   generateBalanceSheet,
   generateIncomeStatement,
+  generateCashFlowStatement,
   formatCurrencyVnd,
   DAY_27_CLOSING_DATASET,
   BalanceSheetReport,
   IncomeStatementReport,
+  CashFlowReport,
 } from '@/services/financial-statements';
 
 export interface FinancialStatementsViewProps {
@@ -33,10 +35,10 @@ export const FinancialStatementsView: FC<FinancialStatementsViewProps> = ({
   onNavigateToJournalizer,
   initialLedger,
 }) => {
-  const [selectedCircular, setSelectedCircular] = useState<'TT200' | 'TT133'>(
-    currentRegime === 'CIRCULAR_133' ? 'TT133' : 'TT200'
+  const [selectedCircular, setSelectedCircular] = useState<'TT200' | 'TT133' | 'TT99'>(
+    currentRegime === 'CIRCULAR_133' ? 'TT133' : currentRegime === 'CIRCULAR_99' ? 'TT99' : 'TT200'
   );
-  const [activeStatement, setActiveStatement] = useState<'B01' | 'B02'>('B01');
+  const [activeStatement, setActiveStatement] = useState<'B01' | 'B02' | 'B03'>('B01');
   const [ledgerSource, setLedgerSource] = useState<'DAY_27' | 'JOURNALIZER' | 'CUSTOM'>(
     initialLedger ? 'CUSTOM' : 'DAY_27'
   );
@@ -47,14 +49,22 @@ export const FinancialStatementsView: FC<FinancialStatementsViewProps> = ({
 
   // Synchronize when currentRegime changes from outside
   useEffect(() => {
-    setSelectedCircular(currentRegime === 'CIRCULAR_133' ? 'TT133' : 'TT200');
+    setSelectedCircular(
+      currentRegime === 'CIRCULAR_133' ? 'TT133' : currentRegime === 'CIRCULAR_99' ? 'TT99' : 'TT200'
+    );
   }, [currentRegime]);
 
   // Handle manual circular toggle
-  const handleToggleCircular = (circular: 'TT200' | 'TT133') => {
+  const handleToggleCircular = (circular: 'TT200' | 'TT133' | 'TT99') => {
     setSelectedCircular(circular);
     if (onRegimeChange) {
-      onRegimeChange(circular === 'TT133' ? 'CIRCULAR_133' : 'CIRCULAR_200');
+      onRegimeChange(
+        circular === 'TT133'
+          ? 'CIRCULAR_133'
+          : circular === 'TT99'
+          ? 'CIRCULAR_99'
+          : 'CIRCULAR_200'
+      );
     }
   };
 
@@ -86,11 +96,15 @@ export const FinancialStatementsView: FC<FinancialStatementsViewProps> = ({
 
   // Generate Reports
   const balanceSheet: BalanceSheetReport = useMemo(() => {
-    return generateBalanceSheet(ledgerAccounts, selectedCircular);
+    return generateBalanceSheet(ledgerAccounts, selectedCircular === 'TT133' ? 'TT133' : 'TT200');
   }, [ledgerAccounts, selectedCircular]);
 
   const incomeStatement: IncomeStatementReport = useMemo(() => {
     return generateIncomeStatement(ledgerAccounts);
+  }, [ledgerAccounts]);
+
+  const cashFlowStatement: CashFlowReport = useMemo(() => {
+    return generateCashFlowStatement(ledgerAccounts);
   }, [ledgerAccounts]);
 
   const formatted270 = formatCurrencyVnd(balanceSheet.assets.totalAssets);
@@ -145,6 +159,17 @@ export const FinancialStatementsView: FC<FinancialStatementsViewProps> = ({
                 }`}
               >
                 Thông tư 133
+              </button>
+              <button
+                type="button"
+                onClick={() => handleToggleCircular('TT99')}
+                className={`px-3 py-1 text-xs font-bold rounded-lg transition-all ${
+                  selectedCircular === 'TT99'
+                    ? 'bg-white dark:bg-slate-900 text-purple-700 dark:text-purple-400 shadow-2xs'
+                    : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-200'
+                }`}
+              >
+                Thông tư 99/2025
               </button>
             </div>
           </div>
@@ -313,6 +338,20 @@ export const FinancialStatementsView: FC<FinancialStatementsViewProps> = ({
           <TrendingUp className="w-4 h-4" />
           <span>B02-DN: Báo Cáo Kết Quả Kinh Doanh</span>
         </button>
+
+        <button
+          type="button"
+          data-testid="subtab-b03"
+          onClick={() => setActiveStatement('B03')}
+          className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl font-bold text-sm transition-all ${
+            activeStatement === 'B03'
+              ? 'bg-emerald-600 text-white shadow-xs'
+              : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:text-slate-900 border border-slate-200 dark:border-slate-800'
+          }`}
+        >
+          <FileSpreadsheet className="w-4 h-4" />
+          <span>B03-DN: Báo Cáo Lưu Chuyển Tiền Tệ</span>
+        </button>
       </div>
 
       {/* STATEMENT CONTENT AREA */}
@@ -321,10 +360,12 @@ export const FinancialStatementsView: FC<FinancialStatementsViewProps> = ({
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xs space-y-4">
           <div className="p-6 border-b border-slate-100 dark:border-slate-800 text-center space-y-1">
             <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-widest block">
-              Mẫu số B01 - DN (Ban hành theo TT 200 & TT 133)
+              Mẫu số B01 - DN (Ban hành theo {selectedCircular === 'TT99' ? 'TT 99/2025/TT-BTC' : 'TT 200 & TT 133'})
             </span>
             <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-slate-100">
-              BẢNG CÂN ĐỐI KẾ TOÁN
+              {selectedCircular === 'TT99'
+                ? 'BÁO CÁO TÌNH HÌNH TÀI CHÍNH (BẢNG CÂN ĐỐI KẾ TOÁN)'
+                : 'BẢNG CÂN ĐỐI KẾ TOÁN'}
             </h2>
             <p className="text-xs text-slate-500 dark:text-slate-400">
               Tại ngày: 31 tháng 12 năm 2026 &bull; Đơn vị tính: VNĐ &bull; Chế độ: {selectedCircular}
@@ -423,7 +464,7 @@ export const FinancialStatementsView: FC<FinancialStatementsViewProps> = ({
             </div>
           </div>
         </div>
-      ) : (
+      ) : activeStatement === 'B02' ? (
         /* ================= B02-DN: KẾT QUẢ KINH DOANH ================= */
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xs space-y-4">
           <div className="p-6 border-b border-slate-100 dark:border-slate-800 text-center space-y-1">
@@ -523,6 +564,116 @@ export const FinancialStatementsView: FC<FinancialStatementsViewProps> = ({
               <span className="text-[10px] text-slate-400 uppercase font-semibold">Lợi nhuận sau thuế (Mã 60)</span>
               <div className="font-mono font-extrabold text-emerald-700 dark:text-emerald-400">
                 {formatCurrencyVnd(incomeStatement.netProfitAfterTax)}
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : (
+        /* ================= B03-DN: LƯU CHUYỂN TIỀN TỆ (GIÁN TIẾP) ================= */
+        <div
+          data-testid="b03-statement-card"
+          className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xs space-y-4"
+        >
+          <div className="p-6 border-b border-slate-100 dark:border-slate-800 text-center space-y-1">
+            <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-widest block">
+              Mẫu số B03 - DN (Phương pháp gián tiếp &bull; VAS 24 / TT 200 / TT 99/2025)
+            </span>
+            <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-slate-100">
+              BÁO CÁO LƯU CHUYỂN TIỀN TỆ
+            </h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Kỳ báo cáo: {cashFlowStatement.period} &bull; Đơn vị tính: VNĐ &bull; Đối chiếu Mã 70 (B03-DN) &equiv; Mã 110 (B01-DN)
+            </p>
+            <div className="pt-1">
+              <span
+                data-testid="b03-reconciled-badge"
+                className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
+              >
+                {cashFlowStatement.isReconciledWithB01
+                  ? 'CÂN ĐỐI KHỚP MÃ 70 (B03-DN) ≡ MÃ 110 (B01-DN)'
+                  : `LỆCH MÃ 70 VS MÃ 110: ${formatCurrencyVnd(cashFlowStatement.reconciliationDiscrepancy)}`}
+              </span>
+            </div>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs font-sans">
+              <thead>
+                <tr className="bg-slate-50 dark:bg-slate-800/80 border-y border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300">
+                  <th className="py-3 px-4 text-left font-bold w-1/2">CHỈ TIÊU</th>
+                  <th className="py-3 px-3 text-center font-bold w-16">MÃ SỐ</th>
+                  <th className="py-3 px-4 text-left font-bold w-1/4">CÔNG THỨC & NGUỒN SỐ LIỆU</th>
+                  <th className="py-3 px-4 text-right font-bold w-1/4">NĂM NAY (VNĐ)</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                {cashFlowStatement.items.map((item) => {
+                  const isFinal = item.itemCode === '70';
+                  const isSubtotal = item.isSubtotal;
+                  const isNegative = item.currentPeriodAmount < 0;
+
+                  return (
+                    <tr
+                      key={item.itemCode}
+                      data-testid={`b03-row-${item.itemCode}`}
+                      className={`hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition-colors ${
+                        isFinal
+                          ? 'bg-emerald-50/70 dark:bg-emerald-950/40 font-bold text-emerald-950 dark:text-emerald-200'
+                          : isSubtotal
+                          ? 'bg-slate-50/80 dark:bg-slate-800/60 font-bold text-slate-900 dark:text-slate-100'
+                          : 'text-slate-700 dark:text-slate-300'
+                      }`}
+                    >
+                      <td className="py-2.5 px-4 font-medium">{item.itemNameVi}</td>
+                      <td className="py-2.5 px-3 text-center font-mono text-slate-500 dark:text-slate-400">
+                        {item.itemCode}
+                      </td>
+                      <td className="py-2.5 px-4 font-mono text-[11px] text-slate-500 dark:text-slate-400">
+                        {item.formulaDescriptionVi}
+                      </td>
+                      <td
+                        className={`py-2.5 px-4 text-right font-mono font-semibold ${
+                          isFinal
+                            ? 'text-sm font-extrabold text-emerald-700 dark:text-emerald-400'
+                            : isNegative
+                            ? 'text-rose-600 dark:text-rose-400'
+                            : ''
+                        }`}
+                      >
+                        {isNegative
+                          ? `(${formatCurrencyVnd(Math.abs(item.currentPeriodAmount))})`
+                          : formatCurrencyVnd(item.currentPeriodAmount)}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="p-6 bg-slate-50 dark:bg-slate-900/40 border-t border-slate-100 dark:border-slate-800 grid grid-cols-1 sm:grid-cols-4 gap-3">
+            <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-0.5">
+              <span className="text-[10px] text-slate-400 uppercase font-semibold">LCTT Kinh doanh (Mã 20)</span>
+              <div className="font-mono font-bold text-slate-900 dark:text-slate-100">
+                {formatCurrencyVnd(cashFlowStatement.operatingCashFlow)}
+              </div>
+            </div>
+            <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-0.5">
+              <span className="text-[10px] text-slate-400 uppercase font-semibold">LCTT Đầu tư (Mã 30)</span>
+              <div className="font-mono font-bold text-slate-900 dark:text-slate-100">
+                {formatCurrencyVnd(cashFlowStatement.investingCashFlow)}
+              </div>
+            </div>
+            <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-0.5">
+              <span className="text-[10px] text-slate-400 uppercase font-semibold">LCTT Tài chính (Mã 40)</span>
+              <div className="font-mono font-bold text-blue-700 dark:text-blue-400">
+                {formatCurrencyVnd(cashFlowStatement.financingCashFlow)}
+              </div>
+            </div>
+            <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-0.5">
+              <span className="text-[10px] text-slate-400 uppercase font-semibold">Tiền cuối kỳ (Mã 70)</span>
+              <div className="font-mono font-extrabold text-emerald-700 dark:text-emerald-400">
+                {formatCurrencyVnd(cashFlowStatement.closingCashAndEquivalents)}
               </div>
             </div>
           </div>

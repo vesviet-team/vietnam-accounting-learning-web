@@ -1,0 +1,55 @@
+# ──────────────────────────────────────────────
+# Content Signals (IETF draft-romm-aipref-contentsignals)
+# ──────────────────────────────────────────────
+Content-Signal: search=yes, ai-train=no, ai-input=yes
+
+# ──────────────────────────────────────────────
+# Default: allow all crawlers and AI discovery agents
+# ──────────────────────────────────────────────
+User-agent: *
+Allow: /
+Allow: /llms.txt
+Allow: /llms-full.txt
+Allow: /auth.md
+Allow: /.well-known/
+Disallow: /api/internal/
+Disallow: /debug/
+
+# ──────────────────────────────────────────────
+# Allowed AI Bots
+# ──────────────────────────────────────────────
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-SearchBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+# ──────────────────────────────────────────────
+# Blocked Scrapers (Spam / Non-compliant)
+# ──────────────────────────────────────────────
+User-agent: Bytespider
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+# ──────────────────────────────────────────────
+# Sitemaps & LLM Context
+# ──────────────────────────────────────────────
+Sitemap: https://learn.tanhdev.com/sitemap.xml
+# llms.txt: https://learn.tanhdev.com/llms.txt

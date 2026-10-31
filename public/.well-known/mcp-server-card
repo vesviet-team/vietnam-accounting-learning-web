@@ -1,0 +1,23 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/v1/server-card.schema.json",
+  "name": "vietnam-accounting-learning-mcp",
+  "description": "MCP 2026-07-28 Stateless Server for Vietnam Accounting 30-Day Curriculum, COA (Circular 99/2025, 200/2014, 133/2016), B01/B02/B03-DN Financial Statements, and Tax Guardrails",
+  "protocolVersion": "2026-07-28",
+  "mcp_version": "2026-07-28",
+  "transport": {
+    "type": "streamable-http",
+    "url": "https://learn.tanhdev.com/mcp"
+  },
+  "auth": {
+    "type": "oauth2",
+    "grant_types": [
+      "authorization_code"
+    ],
+    "authorization_endpoint": "https://learn.tanhdev.com/oauth2/auth",
+    "token_endpoint": "https://learn.tanhdev.com/oauth2/token",
+    "pkce": true
+  },
+  "capabilities": {
+    "tools": {}
+  }
+}

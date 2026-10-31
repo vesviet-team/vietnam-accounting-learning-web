@@ -10,6 +10,7 @@ import { SettingsView } from '@/components/settings/SettingsView';
 import { QuizModal } from '@/components/assessment/QuizModal';
 import { FinancialStatementsView } from '@/components/workbench/FinancialStatementsView';
 import { CogsWorkbench } from '@/components/workbench/cogs/CogsWorkbench';
+import { WebMcpProvider } from '@/components/layout/WebMcpProvider';
 import { AccountingRegime } from '@/types/coa';
 import { storageService } from '@/services/storage/storage-service';
 import { StreakEngine, CareerLevel } from '@/engine/streak-engine';
@@ -57,6 +58,9 @@ export function App() {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col transition-colors">
+      {/* WebMCP 2026 Agent Context & Tool Registration */}
+      <WebMcpProvider currentRegime={currentRegime} activeTab={activeTab} />
+
       {/* Top Header */}
       <Header
         currentRegime={currentRegime}

@@ -1,3 +1,5 @@
+import { AccountingRegime } from './coa';
+
 export interface IStorageAdapter {
   getItem<T>(key: string): Promise<T | null>;
   setItem<T>(key: string, value: T): Promise<void>;
@@ -11,7 +13,7 @@ export interface BackupData {
   exportedAt: string;
   app: string;
   theme?: 'light' | 'dark' | 'system';
-  regime?: 'CIRCULAR_133' | 'CIRCULAR_200';
+  regime?: AccountingRegime;
   progress?: Record<string, unknown>;
   assessmentResults?: Record<string, unknown>;
   customData?: Record<string, unknown>;

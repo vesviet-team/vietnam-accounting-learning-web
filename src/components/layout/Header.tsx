@@ -80,6 +80,18 @@ export const Header: FC<HeaderProps> = ({
               <ShieldCheck className="w-3.5 h-3.5" />
               <span>Thông tư 133 (DN Vừa & Nhỏ)</span>
             </button>
+            <button
+              type="button"
+              onClick={() => onRegimeChange('CIRCULAR_99')}
+              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                currentRegime === 'CIRCULAR_99'
+                  ? 'bg-white dark:bg-slate-700 text-purple-700 dark:text-purple-300 shadow-sm'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
+              }`}
+            >
+              <ShieldCheck className="w-3.5 h-3.5" />
+              <span>Thông tư 99/2025 (Mới)</span>
+            </button>
           </div>
 
           {/* Right: Actions */}

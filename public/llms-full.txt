@@ -1,0 +1,29 @@
+# Vietnam Accounting 30-Day Interactive Learning Web — Full Context Specification
+
+> Comprehensive technical and statutory reference for the Vietnam Accounting 30-Day Learning Platform. Designed for LLM and autonomous agent ingestion.
+
+## 1. Statutory & Regulatory Baseline (2026-2027)
+
+- **Law on Accounting**: Law No. 88/2015/QH13.
+- **Circular 99/2025/TT-BTC**: Issued 27/10/2025, effective 01/01/2026, replacing Circular 200/2014/TT-BTC. Renames Form B01-DN to "Báo cáo tình hình tài chính" (Statement of Financial Position), grants enterprise autonomy in opening Level 2/3 sub-accounts, standardizes functional currency translation to VND, and enforces internal control & digital voucher governance.
+- **Circular 200/2014/TT-BTC**: Full 9-class Chart of Accounts (154 accounts) for general and large enterprises.
+- **Circular 133/2016/TT-BTC**: Simplified SME Chart of Accounts (57 accounts). Explicitly prohibits 13 accounts: `621`, `622`, `623`, `627` (replaced by `154`), `641` (replaced by `6421`), `521` (direct debit to `511`), `413` (use `515`/`635` in operating phase), `157` (track on `156`/`152`/`155`), `212` (track on `211`), `213` (use `2113`), `113` (use `111`/`112`), `243`, and `347` (no deferred tax in SME regime).
+- **VAT Law No. 48/2024/QH15**: Effective 01/07/2025 (Article 14 Clause 2 Point b), lowering the mandatory non-cash payment threshold from 20,000,000 VND to 5,000,000 VND (VAT inclusive) for input VAT creditability.
+- **CIT Regulations**: Circular 78/2014/TT-BTC & Circular 96/2015/TT-BTC (20% standard CIT rate, 36-month cap on TK 242 prepaid expense amortization, Schedule B4 non-deductible adjustments) and Decree 132/2020/ND-CP (30% EBITDA cap on net interest expense for related-party transactions).
+- **Foreign Contractor Tax (FCT)**: Circular 103/2014/TT-BTC (Articles 12 & 13) for cross-border digital, cloud, software, and advertising payments (NET two-step gross-up vs GROSS withholding).
+- **E-Invoicing**: Decree 123/2020/ND-CP, Decree 70/2025/ND-CP, Circular 78/2021/TT-BTC, and Decision 1450/QD-TCT XML schema (34-hex MCCQT tax authority code).
+
+## 2. Core Mathematical & Accounting Invariants
+
+1. **Double-Entry Balance Invariant**: $\sum \text{Debits} \equiv \sum \text{Credits}$ across all posted journal entries.
+2. **Statement of Financial Position (B01-DN) Invariant**: Total Assets (`Mã 270 = Mã 100 + Mã 200`) $\equiv$ Total Resources (`Mã 440 = Mã 300 Liabilities + Mã 400 Equity`). Contra-asset accounts (`TK 214`, `TK 229`) and contra-equity (`TK 419`) are presented as negative deductions.
+3. **Income Statement (B02-DN) Cascade**: `Mã 10 = Mã 01 - Mã 02`; `Mã 20 = Mã 10 - Mã 11`; `Mã 30 = Mã 20 + Mã 21 - Mã 22 - Mã 25 - Mã 26`; `Mã 40 = Mã 31 - Mã 32`; `Mã 50 = Mã 30 + Mã 40`; `Mã 60 = Mã 50 - Mã 51 - Mã 52`.
+4. **Indirect Cash Flow Statement (B03-DN) Cross-Statement Invariant**: `Mã 50 = Mã 20 (Operating) + Mã 30 (Investing) + Mã 40 (Financing)`; Ending Cash `Mã 70 (B03-DN) = Mã 50 + Mã 60 + Mã 61` $\equiv$ `Mã 110 (B01-DN)`.
+5. **Inventory & COGS Invariant (VAS 02)**: Strictly prohibits negative physical inventory (`quantity < 0`). Abnormal material/labor/overhead waste beyond normal capacity (VAS 02 Paragraph 11) is expensed immediately to `TK 632` rather than capitalized into `TK 154`/`155`.
+
+## 3. Pedagogical Architecture
+
+- **10 Modules / 30 Days**: From Accounting Equation & Double-Entry Foundations (Module 1) to Capstone Closing & Financial Statements (Module 10).
+- **Webb's Depth of Knowledge (DOK 1-3)**: 40% DOK 1 (Recall), 40% DOK 2 (Application), 20% DOK 3 (Strategic CFO/Chief Accountant Analysis).
+- **Rule of One Diagnostic Engine**: Prioritizes learner errors across 4 cognitive tiers (Tier 1: Tax fraud/statutory violation -> Tier 2: Structural accounting imbalance -> Tier 3: Regime/account classification error -> Tier 4: Arithmetic error) and surfaces exactly one actionable next step to prevent cognitive overload.
+- **3-Tier Socratic Hint Ladder**: Progressive anti-spoil hints (Tier 1: Domain scope -> Tier 2: Statutory equation -> Tier 3: Isomorphic twin example).

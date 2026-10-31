@@ -5,6 +5,7 @@
 
 export * from './balance-sheet-engine';
 export * from './income-statement-engine';
+export * from './cash-flow-engine';
 
 /**
  * Standard Day 27 Closing Dataset (from Capstone Milestone 10 Question 10)

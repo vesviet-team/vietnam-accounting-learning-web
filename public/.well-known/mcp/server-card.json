@@ -1,0 +1,93 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/v1/server-card.schema.json",
+  "name": "vietnam-accounting-learning-mcp",
+  "description": "MCP 2026-07-28 Stateless Server for Vietnam Accounting 30-Day Curriculum, COA (Circular 99/2025, 200/2014, 133/2016), B01/B02/B03-DN Financial Statements, and Tax Guardrails",
+  "protocolVersion": "2026-07-28",
+  "mcp_version": "2026-07-28",
+  "serverInfo": {
+    "name": "vietnam-accounting-learning-mcp",
+    "version": "1.1.0",
+    "title": "Vietnam Accounting 30-Day Learning Web MCP Server",
+    "description": "Stateless streamable-HTTP MCP server exposing Vietnam Chart of Accounts lookup, B01/B02/B03-DN financial statement verification, and tax compliance guardrails."
+  },
+  "transport": {
+    "type": "streamable-http",
+    "url": "https://learn.tanhdev.com/mcp"
+  },
+  "auth": {
+    "type": "oauth2",
+    "grant_types": [
+      "authorization_code"
+    ],
+    "authorization_endpoint": "https://learn.tanhdev.com/oauth2/auth",
+    "token_endpoint": "https://learn.tanhdev.com/oauth2/token",
+    "pkce": true
+  },
+  "capabilities": {
+    "tools": {},
+    "resources": {
+      "subscribe": false
+    },
+    "prompts": {}
+  },
+  "tools": [
+    {
+      "name": "lookup_vietnam_account",
+      "description": "Search Vietnamese Chart of Accounts across Circular 99/2025/TT-BTC, Circular 200/2014/TT-BTC, and Circular 133/2016/TT-BTC.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Account code or keyword (e.g. '111', '154', '642', 'tiền mặt')"
+          },
+          "regime": {
+            "type": "string",
+            "enum": [
+              "CIRCULAR_99",
+              "CIRCULAR_200",
+              "CIRCULAR_133"
+            ]
+          }
+        },
+        "required": [
+          "code"
+        ]
+      }
+    },
+    {
+      "name": "evaluate_tax_guardrails",
+      "description": "Evaluate non-cash payment rule (20M legacy & 5M VAT Law 48/2024/QH15), vendor tax status (00/03/04), and Foreign Contractor Tax (Circular 103/2014).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "totalAmount": {
+            "type": "number"
+          },
+          "paymentMethod": {
+            "type": "string"
+          },
+          "vendorTaxStatus": {
+            "type": "string",
+            "enum": [
+              "00",
+              "03",
+              "04"
+            ]
+          }
+        },
+        "required": [
+          "totalAmount",
+          "paymentMethod"
+        ]
+      }
+    }
+  ],
+  "discovery": {
+    "llms_txt": "https://learn.tanhdev.com/llms.txt",
+    "agent_skills": "https://learn.tanhdev.com/.well-known/agent-skills/index.json",
+    "server_card": "https://learn.tanhdev.com/.well-known/mcp/server-card.json"
+  },
+  "content_language": "vi",
+  "last_updated": "2026-10-31"
+}

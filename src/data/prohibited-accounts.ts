@@ -180,7 +180,7 @@ export function validateAccountForRegime(
   substituteCode?: string;
   substituteNameVi?: string;
 } {
-  if (regime === 'CIRCULAR_200') {
+  if (regime === 'CIRCULAR_200' || regime === 'CIRCULAR_99') {
     return { isValid: true, isProhibited: false };
   }
 

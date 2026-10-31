@@ -1,0 +1,13 @@
+{
+  "resource": "https://learn.tanhdev.com",
+  "authorization_servers": [
+    "https://learn.tanhdev.com"
+  ],
+  "scopes_supported": [
+    "read",
+    "write"
+  ],
+  "bearer_methods_supported": [
+    "header"
+  ]
+}

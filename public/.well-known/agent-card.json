@@ -1,0 +1,98 @@
+{
+  "name": "vietnam-accounting-learning-agent",
+  "description": "Interactive Vietnamese Accounting 30-Day Curriculum, COA Explorer (Circular 99/2025, Circular 200/2014, Circular 133/2016), B01/B02/B03-DN Financial Statement Engine, and Tax Guardrails Agent",
+  "url": "https://learn.tanhdev.com",
+  "version": "1.1.0",
+  "protocol_version": "1.0",
+  "protocolVersion": "1.0.0",
+  "defaultInputModes": [
+    "text",
+    "data"
+  ],
+  "defaultOutputModes": [
+    "text",
+    "data"
+  ],
+  "capabilities": {
+    "streaming": true,
+    "pushNotifications": false,
+    "stateTransitionHistory": true,
+    "securityCardSigning": false,
+    "timeout_ms": 30000,
+    "retry_policy": {
+      "max_retries": 3,
+      "initial_interval_ms": 1000,
+      "backoff_factor": 2.0,
+      "max_interval_ms": 30000,
+      "jitter": "full"
+    }
+  },
+  "authentication": {
+    "schemes": [
+      "Bearer",
+      "none"
+    ]
+  },
+  "skills": [
+    {
+      "id": "coa-lookup-vietnam",
+      "name": "Vietnam Chart of Accounts Lookup (TT 99/2025, TT 200, TT 133)",
+      "description": "Search and validate Vietnamese accounting accounts, normal balances, and Circular 133 prohibited account safeguards",
+      "tags": [
+        "accounting",
+        "vietnam",
+        "circular-99",
+        "circular-200",
+        "circular-133"
+      ],
+      "inputModes": [
+        "text",
+        "data"
+      ],
+      "outputModes": [
+        "text",
+        "data"
+      ]
+    },
+    {
+      "id": "financial-statements-engine",
+      "name": "B01-DN, B02-DN & B03-DN Financial Statements Engine",
+      "description": "Generate and validate Statement of Financial Position (B01-DN), Income Statement (B02-DN), and Indirect Cash Flow Statement (B03-DN)",
+      "tags": [
+        "financial-statements",
+        "b01-dn",
+        "b02-dn",
+        "b03-dn",
+        "vas"
+      ],
+      "inputModes": [
+        "text",
+        "data"
+      ],
+      "outputModes": [
+        "text",
+        "data"
+      ]
+    },
+    {
+      "id": "vietnam-tax-guardrails",
+      "name": "Vietnam Tax Compliance & E-Invoice Guardrails",
+      "description": "Evaluate non-cash payment thresholds (20M legacy & 5M VAT Law 48/2024/QH15), vendor tax status (00/03/04), CIT Schedule B4, and FCT Circular 103/2014",
+      "tags": [
+        "tax",
+        "vat",
+        "cit",
+        "fct",
+        "e-invoice"
+      ],
+      "inputModes": [
+        "text",
+        "data"
+      ],
+      "outputModes": [
+        "text",
+        "data"
+      ]
+    }
+  ]
+}

@@ -11,7 +11,7 @@ import {
   X,
 } from 'lucide-react';
 import { AccountItem, AccountingRegime, AccountCategory, CATEGORY_METADATA } from '@/types/coa';
-import { getAccountsByRegime } from '@/data/coa-service';
+import { getAccountsByRegime, CIRCULAR_99_KEY_HIGHLIGHTS } from '@/data/coa-service';
 import { getProhibitionRule, getProhibitedAccounts133, ProhibitedAccountRule } from '@/data/prohibited-accounts';
 import { CoaDetailModal } from './CoaDetailModal';
 
@@ -54,6 +54,7 @@ function buildAccountTokens(account: AccountItem): AccountWithTokens {
 // Module-level pre-indexed accounts to eliminate redundant normalization operations
 const PREINDEXED_ACCOUNTS_200: AccountWithTokens[] = getAccountsByRegime('CIRCULAR_200').map(buildAccountTokens);
 const PREINDEXED_ACCOUNTS_133: AccountWithTokens[] = getAccountsByRegime('CIRCULAR_133').map(buildAccountTokens);
+const PREINDEXED_ACCOUNTS_99: AccountWithTokens[] = getAccountsByRegime('CIRCULAR_99').map(buildAccountTokens);
 const PREINDEXED_PROHIBITED_133: AccountWithTokens[] = getProhibitedAccounts133().map(buildAccountTokens);
 
 interface AccountCardProps {
@@ -180,6 +181,8 @@ export const CoaExplorer: FC<CoaExplorerProps> = ({
 
     const sourceList = (showOnlyProhibited && currentRegime === 'CIRCULAR_133')
       ? PREINDEXED_PROHIBITED_133
+      : currentRegime === 'CIRCULAR_99'
+      ? PREINDEXED_ACCOUNTS_99
       : (currentRegime === 'CIRCULAR_200' ? PREINDEXED_ACCOUNTS_200 : PREINDEXED_ACCOUNTS_133);
 
     return sourceList.filter((acc) => {
@@ -260,12 +263,16 @@ export const CoaExplorer: FC<CoaExplorerProps> = ({
               <span>Hệ Thống Tài Khoản Kế Toán Quốc Gia (COA)</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight pt-1">
-              {currentRegime === 'CIRCULAR_200'
+              {currentRegime === 'CIRCULAR_99'
+                ? 'Thông tư 99/2025/TT-BTC (Chế độ Kế toán Doanh nghiệp Mới — Hiệu lực 01/01/2026)'
+                : currentRegime === 'CIRCULAR_200'
                 ? 'Thông tư 200/2014/TT-BTC (Doanh nghiệp thông thường & Lớn)'
                 : 'Thông tư 133/2016/TT-BTC (Doanh nghiệp vừa và nhỏ - SME)'}
             </h1>
             <p className="text-sm text-slate-600 dark:text-slate-400 max-w-3xl pt-1">
-              {currentRegime === 'CIRCULAR_200'
+              {currentRegime === 'CIRCULAR_99'
+                ? 'Thay thế hoàn toàn Thông tư 200 từ 01/01/2026: đổi tên B01-DN thành "Báo cáo tình hình tài chính" tiệm cận IFRS, trao quyền chủ động mở tài khoản cấp 2/3, chuẩn hóa đơn vị tiền tệ và kiểm soát nội bộ số hóa.'
+                : currentRegime === 'CIRCULAR_200'
                 ? 'Danh mục tài khoản 4 chữ số chuẩn mực, bao gồm chi tiết tài khoản cấp 1 và cấp 2. Hỗ trợ tập hợp chi phí riêng lẻ qua TK 621, 622, 623, 627 và chi phí bán hàng TK 641.'
                 : 'Danh mục tài khoản 3 chữ số tinh giản cho DNNVV. Tuyệt đối không dùng các tài khoản chi phí 621, 622, 623, 627, 641 và tài khoản giảm trừ doanh thu 521.'}
             </p>
@@ -297,8 +304,48 @@ export const CoaExplorer: FC<CoaExplorerProps> = ({
               <ShieldCheck className="w-4 h-4" />
               <span>TT 133 (SME)</span>
             </button>
+            <button
+              type="button"
+              onClick={() => onRegimeChange('CIRCULAR_99')}
+              className={`flex items-center space-x-2 px-3.5 py-2 rounded-lg text-xs font-bold transition-all ${
+                currentRegime === 'CIRCULAR_99'
+                  ? 'bg-purple-600 text-white shadow-md'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
+              }`}
+            >
+              <ShieldCheck className="w-4 h-4" />
+              <span>TT 99/2025</span>
+            </button>
           </div>
         </div>
+
+        {/* Circular 99/2025 Reform Highlights Banner */}
+        {currentRegime === 'CIRCULAR_99' && (
+          <div
+            data-testid="circular-99-highlights"
+            className="p-4 rounded-xl bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-800/80 space-y-3"
+          >
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <span className="text-xs font-bold text-purple-900 dark:text-purple-200 uppercase tracking-wider">
+                Điểm Mới Trọng Tâm Thông Tư 99/2025/TT-BTC (Thay Thế TT 200 Từ 01/01/2026)
+              </span>
+              <span className="text-[11px] font-mono px-2 py-0.5 rounded-md bg-purple-100 dark:bg-purple-900/70 text-purple-800 dark:text-purple-200">
+                Ban hành: 27/10/2025 &bull; Hiệu lực: 01/01/2026
+              </span>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+              {CIRCULAR_99_KEY_HIGHLIGHTS.map((item) => (
+                <div
+                  key={item.id}
+                  className="p-3 rounded-lg bg-white/90 dark:bg-slate-900/80 border border-purple-100 dark:border-purple-900/60 text-xs space-y-1"
+                >
+                  <div className="font-bold text-purple-900 dark:text-purple-200">{item.titleVi}</div>
+                  <p className="text-slate-600 dark:text-slate-300 leading-relaxed">{item.summaryVi}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Circular 133 Safeguard Alert Notice */}
         {currentRegime === 'CIRCULAR_133' && (

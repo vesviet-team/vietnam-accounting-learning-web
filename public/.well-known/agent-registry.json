@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0",
+  "protocol_version": "1.0",
+  "updated_at": "2026-10-31T12:40:00Z",
+  "agents": [
+    {
+      "id": "vietnam-accounting-learning-agent",
+      "name": "Vietnam Accounting 30-Day Learning Agent",
+      "url": "https://learn.tanhdev.com/.well-known/agent-card.json",
+      "protocol_version": "1.0",
+      "capabilities": [
+        "coa-lookup-vietnam",
+        "financial-statements-engine",
+        "vietnam-tax-guardrails"
+      ]
+    }
+  ]
+}

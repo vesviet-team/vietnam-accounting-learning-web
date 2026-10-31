@@ -9,10 +9,17 @@
  */
 
 export const NON_CASH_PAYMENT_THRESHOLD = 20_000_000;
+export const NON_CASH_THRESHOLD_VAT_LAW_2024 = 5_000_000;
 export const STANDARD_CIT_RATE = 0.20;
 
 export const STATUTORY_BASIS_NON_CASH =
   'Khoản 1 Điều 6 Thông tư 78/2014/TT-BTC, sửa đổi bởi Điều 4 Thông tư 96/2015/TT-BTC và Khoản 2 Điều 15 Thông tư 219/2013/TT-BTC';
+
+export const STATUTORY_BASIS_VAT_LAW_2024 =
+  'Điểm b Khoản 2 Điều 14 Luật Thuế giá trị gia tăng số 48/2024/QH15 (hiệu lực từ 01/07/2025) và Nghị định hướng dẫn thi hành';
+
+export const STATUTORY_BASIS_FCT_103 =
+  'Điều 12 và Điều 13 Thông tư 103/2014/TT-BTC hướng dẫn thực hiện nghĩa vụ thuế áp dụng đối với tổ chức, cá nhân nước ngoài kinh doanh tại Việt Nam (Thuế nhà thầu - FCT)';
 
 export const STATUTORY_BASIS_VENDOR_RUNAWAY =
   'Khoản 2 Điều 4 Nghị định 123/2020/NĐ-CP';
@@ -247,4 +254,113 @@ export function calculateCitAdjustments(
   }));
 
   return calculateCitScheduleB4(accountingProfitBeforeTax, items);
+}
+
+/**
+ * Evaluates the updated non-cash payment rule under VAT Law No. 48/2024/QH15 (effective 01/07/2025)
+ * where the mandatory non-cash payment threshold is lowered to >= 5,000,000 VND.
+ */
+export function evaluateNonCashRuleVatLaw2024(
+  totalAmount: number,
+  paymentMethod: string
+): NonCashCheckResult {
+  const isCash = isCashPaymentMethod(paymentMethod);
+  const isViolated = totalAmount >= NON_CASH_THRESHOLD_VAT_LAW_2024 && isCash;
+
+  if (isViolated) {
+    return {
+      isViolated: true,
+      vatCreditable: false,
+      citDeductible: false,
+      statutoryBasis: STATUTORY_BASIS_VAT_LAW_2024,
+      explanationVi:
+        'Theo Luật Thuế GTGT số 48/2024/QH15 (hiệu lực từ 01/07/2025) và Nghị định hướng dẫn, hóa đơn mua hàng hóa, dịch vụ từ 5.000.000 VNĐ trở lên thanh toán bằng tiền mặt vi phạm điều kiện thanh toán không dùng tiền mặt. Không được khấu trừ thuế GTGT đầu vào (TK 133).',
+      totalAmount,
+      paymentMethod,
+      threshold: NON_CASH_THRESHOLD_VAT_LAW_2024,
+    };
+  }
+
+  return {
+    isViolated: false,
+    vatCreditable: true,
+    citDeductible: true,
+    statutoryBasis: STATUTORY_BASIS_VAT_LAW_2024,
+    explanationVi:
+      totalAmount >= NON_CASH_THRESHOLD_VAT_LAW_2024
+        ? 'Hóa đơn từ 5.000.000 VNĐ trở lên đã thanh toán không dùng tiền mặt theo đúng quy định của Luật Thuế GTGT số 48/2024/QH15.'
+        : 'Hóa đơn dưới 5.000.000 VNĐ đáp ứng điều kiện theo ngưỡng mới của Luật Thuế GTGT 2024.',
+    totalAmount,
+    paymentMethod,
+    threshold: NON_CASH_THRESHOLD_VAT_LAW_2024,
+  };
+}
+
+export interface FctCalculationInput {
+  contractAmount: number;
+  contractType: 'NET' | 'GROSS';
+  citRate?: number; // Default 0.05 (5% for general services/cloud) or 0.10 (10% for royalty/copyright)
+  vatRate?: number; // Default 0.05 (5% for services) or 0 (exempt software license)
+}
+
+export interface FctCalculationResult {
+  contractAmount: number;
+  contractType: 'NET' | 'GROSS';
+  citTaxableTurnover: number;
+  citRate: number;
+  citAmount: number;
+  vatTaxableTurnover: number;
+  vatRate: number;
+  vatAmount: number;
+  totalFctPayable: number;
+  statutoryBasis: string;
+}
+
+/**
+ * Calculates Foreign Contractor Tax (Thuế nhà thầu nước ngoài - FCT) under Circular 103/2014/TT-BTC.
+ * Supports both GROSS contracts (tax withheld from payment to vendor) and NET contracts (gross-up calculation).
+ */
+export function calculateForeignContractorTax(input: FctCalculationInput): FctCalculationResult {
+  const amount = Math.max(0, Number(input.contractAmount) || 0);
+  const citRate = input.citRate !== undefined ? input.citRate : 0.05;
+  const vatRate = input.vatRate !== undefined ? input.vatRate : 0.05;
+
+  if (input.contractType === 'GROSS') {
+    const vatTaxableTurnover = amount;
+    const vatAmount = Math.round(vatTaxableTurnover * vatRate);
+    const citTaxableTurnover = amount - vatAmount;
+    const citAmount = Math.round(citTaxableTurnover * citRate);
+
+    return {
+      contractAmount: amount,
+      contractType: 'GROSS',
+      citTaxableTurnover,
+      citRate,
+      citAmount,
+      vatTaxableTurnover,
+      vatRate,
+      vatAmount,
+      totalFctPayable: citAmount + vatAmount,
+      statutoryBasis: STATUTORY_BASIS_FCT_103,
+    };
+  }
+
+  // NET Contract: Gross-up CIT first, then Gross-up VAT (Điều 12 & Điều 13 Thông tư 103/2014/TT-BTC)
+  const citTaxableTurnover = Math.round(amount / (1 - citRate));
+  const citAmount = Math.round(citTaxableTurnover * citRate);
+  const vatTaxableTurnover = vatRate > 0 ? Math.round(citTaxableTurnover / (1 - vatRate)) : citTaxableTurnover;
+  const vatAmount = Math.round(vatTaxableTurnover * vatRate);
+
+  return {
+    contractAmount: amount,
+    contractType: 'NET',
+    citTaxableTurnover,
+    citRate,
+    citAmount,
+    vatTaxableTurnover,
+    vatRate,
+    vatAmount,
+    totalFctPayable: citAmount + vatAmount,
+    statutoryBasis: STATUTORY_BASIS_FCT_103,
+  };
 }

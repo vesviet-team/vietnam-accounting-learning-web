@@ -1,0 +1,63 @@
+/
+  Link: </auth.md>; rel="authorizing-agent"
+  Link: </.well-known/api-catalog>; rel="https://www.iana.org/assignments/link-relations/api-catalog"
+  Link: </.well-known/agent-card.json>; rel="agent-card"
+  Link: </.well-known/mcp/server-card.json>; rel="mcp-server-card"
+  Link: </.well-known/agent-skills/index.json>; rel="agent-skills"
+  Link: </.well-known/oauth-authorization-server>; rel="https://www.iana.org/assignments/link-relations/oauth-authorization-server"
+  Link: </.well-known/oauth-protected-resource>; rel="https://www.iana.org/assignments/link-relations/oauth-protected-resource"
+  Link: </.well-known/ai-catalog.json>; rel="service-desc"
+  Link: </llms.txt>; rel="describedby"
+
+/.well-known/api-catalog
+  Content-Type: application/linkset+json
+  Access-Control-Allow-Origin: *
+  ETag: "vnacc-api-catalog-v1"
+
+/.well-known/oauth-authorization-server
+  Content-Type: application/json
+  Access-Control-Allow-Origin: *
+
+/.well-known/oauth-protected-resource
+  Content-Type: application/json
+  Access-Control-Allow-Origin: *
+
+/auth.md
+  Content-Type: text/markdown; charset=utf-8
+  Access-Control-Allow-Origin: *
+
+/llms.txt
+  Content-Type: text/plain; charset=utf-8
+  Access-Control-Allow-Origin: *
+
+/llms-full.txt
+  Content-Type: text/plain; charset=utf-8
+  Access-Control-Allow-Origin: *
+
+/.well-known/agent-card.json
+  Content-Type: application/json
+  Access-Control-Allow-Origin: *
+
+/.well-known/agent-registry.json
+  Content-Type: application/json
+  Access-Control-Allow-Origin: *
+
+/.well-known/ai-catalog.json
+  Content-Type: application/json
+  Access-Control-Allow-Origin: *
+
+/.well-known/agent-skills/index.json
+  Content-Type: application/json
+  Access-Control-Allow-Origin: *
+
+/.well-known/mcp/server-card.json
+  Content-Type: application/json
+  Access-Control-Allow-Origin: *
+
+/.well-known/mcp-server-card
+  Content-Type: application/json
+  Access-Control-Allow-Origin: *
+
+/.well-known/security.txt
+  Content-Type: text/plain; charset=utf-8
+  Access-Control-Allow-Origin: *

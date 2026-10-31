@@ -117,6 +117,25 @@ export const MODULE_8_LESSONS: DailyLesson[] = [
         contentVi: 'Thu nhập khác (TK 711): Thu thanh lý nhượng bán TSCĐ, tiền bồi thường được bên khác trả do vi phạm hợp đồng, nợ phải trả không tìm được chủ nợ được xóa sổ. Chi phí khác (TK 811): Giá trị còn lại của TSCĐ thanh lý tháo dỡ, tiền phạt vi phạm hợp đồng kinh tế, tiền bồi thường thiệt hại, các khoản tổn thất bất khả kháng.',
         keyTakeawayVi: 'TK 711 và 811 chỉ hạch toán các nghiệp vụ bất thường, ngoài hoạt động kinh doanh cốt lõi của doanh nghiệp.',
       },
+      {
+        id: 'c24-4',
+        titleVi: 'Thuế Nhà Thầu Nước Ngoài (FCT - TT 103/2014) & Luật Thuế GTGT 48/2024/QH15 (Ngưỡng 5 Triệu)',
+        summaryVi: 'Khấu trừ tại nguồn thuế GTGT & TNDN nhà thầu nước ngoài (AWS, Google, Meta) và cập nhật ngưỡng thanh toán không tiền mặt 5 triệu đồng từ 01/07/2025.',
+        contentVi: '1. THUẾ NHÀ THẦU NƯỚC NGOÀI (FCT - Thông tư 103/2014/TT-BTC): Khi doanh nghiệp Việt Nam thanh toán phí dịch vụ phần mềm, điện toán đám mây, quảng cáo quốc tế hoặc bản quyền cho tổ chức nước ngoài không có cơ sở thường trú tại Việt Nam, kế toán phải kê khai nộp thay Thuế nhà thầu (TK 3338). Với hợp đồng NET (nhà thầu nhận đủ tiền, bên Việt Nam chịu thuế), kế toán phải quy đổi Gross-up hai bước: Doanh thu tính thuế TNDN = Giá NET / (1 - Tỷ lệ thuế TNDN); Doanh thu tính thuế GTGT = Doanh thu tính thuế TNDN / (1 - Tỷ lệ thuế GTGT). 2. CẬP NHẬT LUẬT THUẾ GTGT SỐ 48/2024/QH15 (Hiệu lực từ 01/07/2025): Điểm b Khoản 2 Điều 14 Luật Thuế GTGT 2024 và Nghị định hướng dẫn đã hạ ngưỡng bắt buộc có chứng từ thanh toán không dùng tiền mặt từ 20.000.000 VNĐ xuống còn 5.000.000 VNĐ (đã bao gồm thuế GTGT) đối với hàng hóa, dịch vụ mua vào.',
+        journalExamples: [
+          {
+            descriptionVi: 'Hạch toán thuế nhà thầu nước ngoài (FCT) nộp thay theo hợp đồng NET dịch vụ đám mây quốc tế (TNDN 5%, GTGT 5% trên giá NET 95.000.000 VNĐ)',
+            entries: [
+              { debitCredit: 'DEBIT', accountCode: '642', accountNameVi: 'Chi phí quản lý doanh nghiệp (Bao gồm thuế TNDN nhà thầu 5tr)', amount: 100000000 },
+              { debitCredit: 'DEBIT', accountCode: '1331', accountNameVi: 'Thuế GTGT được khấu trừ (Thuế GTGT nhà thầu nộp thay được khấu trừ)', amount: 5263158 },
+              { debitCredit: 'CREDIT', accountCode: '331', accountNameVi: 'Phải trả cho người bán nước ngoài (Giá NET)', amount: 95000000 },
+              { debitCredit: 'CREDIT', accountCode: '3338', accountNameVi: 'Thuế bảo vệ môi trường và các loại thuế khác (Chi tiết Thuế nhà thầu FCT)', amount: 10263158 },
+            ],
+            statutoryNoteVi: 'Theo Điều 12 & 13 Thông tư 103/2014/TT-BTC: Doanh thu tính thuế TNDN = 95tr / (1 - 5%) = 100tr (Thuế TNDN = 5tr); Doanh thu tính thuế GTGT = 100tr / (1 - 5%) = 105.263.158 đ (Thuế GTGT = 5.263.158 đ).',
+          },
+        ],
+        keyTakeawayVi: 'Nắm vững công thức Gross-up thuế nhà thầu (TT 103/2014) và mốc thanh toán không tiền mặt 5 triệu đồng từ 01/07/2025 (Luật Thuế GTGT 48/2024/QH15).',
+      },
     ],
   },
 ];
