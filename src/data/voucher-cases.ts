@@ -6,7 +6,7 @@
  * 1. Supplier tax codes: Status 00 (Active) vs Status 03 (Suspended) vs Status 04 (Runaway)
  * 2. Cash payment threshold breach >= 20M VND (Circular 219/2013 & Circular 96/2015)
  * 3. Missing mandatory signatures on internal vouchers (Law on Accounting 88/2015)
- * 4. VAT arithmetic discrepancies (Decree 123/2020)
+ * 4. VAT arithmetic discrepancies (Decree 254/2026)
  * 5. Decision 1450 MCCQT format verification
  */
 
@@ -316,13 +316,13 @@ export const VOUCHER_AUDIT_CASES: VoucherAuditCaseData[] = [
     hasArithmeticError: true,
     missingSignature: false,
     invalidMccqt: false,
-    statutoryBasis: 'Điều 10 Nghị định 123/2020/NĐ-CP về nguyên tắc số học trên hóa đơn điện tử',
+    statutoryBasis: 'Nghị định 254/2026/NĐ-CP về nguyên tắc số học trên hóa đơn điện tử',
     vatConsequenceVi:
       'Hóa đơn sai tiêu thức số tiền và tiền thuế không đủ điều kiện khấu trừ thuế GTGT hợp lệ.',
     citConsequenceVi:
       'Chi phí kế toán không khớp đúng với hóa đơn và chứng từ thanh toán thực tế.',
     remedyActionVi:
-      'Yêu cầu người bán lập Hóa đơn điện tử điều chỉnh hoặc lập Hóa đơn thay thế theo quy định tại Điều 19 Nghị định 123/2020/NĐ-CP.',
+      'Yêu cầu người bán lập Hóa đơn điện tử điều chỉnh hoặc lập Hóa đơn thay thế theo quy định tại Nghị định 254/2026/NĐ-CP.',
   },
   {
     id: 'case-06-missing-director-signature',
@@ -402,9 +402,127 @@ export const VOUCHER_AUDIT_CASES: VoucherAuditCaseData[] = [
     missingSignature: false,
     invalidMccqt: false,
     statutoryBasis:
-      'Nghị định 123/2020/NĐ-CP & Khoản 1 Điều 15 Thông tư 219/2013/TT-BTC (có UNC hợp lệ)',
+      'Nghị định 254/2026/NĐ-CP & Khoản 1 Điều 15 Thông tư 219/2013/TT-BTC (có UNC hợp lệ)',
     vatConsequenceVi: 'Được khấu trừ đầy đủ 5.000.000 VNĐ thuế GTGT đầu vào.',
     citConsequenceVi: 'Được tính 50.000.000 VNĐ vào chi phí được trừ khi tính thuế TNDN.',
     remedyActionVi: 'Hồ sơ đầy đủ điều kiện pháp lý, kẹp UNC cùng hóa đơn để lưu trữ.',
+  },
+  // =========================================================================
+  // R&D ADDITIONAL DEDUCTION CASES (Law 67/2025 + ND 320/2025)
+  // =========================================================================
+  {
+    id: 'case-08-rd-most-approved',
+    titleVi: 'Dự Án R&D Được Bộ KHCN Phê Duyệt - Khấu Trừ 200% (Luật 67/2025)',
+    categoryVi: 'Khấu trừ thêm R&D',
+    voucherType: 'VAT_INVOICE',
+    scenarioDescriptionVi:
+      'Doanh nghiệp thực hiện dự án R&D "Phát triển vật liệu sinh học mới" được Bộ KHCN phê duyệt (Quyết định 123/QD-KHCN). Tổng chi phí R&D hợp lý phát sinh năm 2026 là 5.000.000.000 VNĐ (nhân sự 3 tỷ, vật liệu 1 tỷ, khấu hao thiết bị 500 triệu, thuê ngoài 500 triệu). Theo Luật 67/2025 Điều 14 và ND 320/2025 Điều 8: Khấu trừ thêm 100% (tổng 200%).',
+    totalAmount: 5_000_000_000,
+    pretaxAmount: 5_000_000_000,
+    vatAmount: 0,
+    taxRate: 'KCT',
+    paymentMethod: 'BANK_TRANSFER',
+    sellerNameVi: 'CÔNG TY TNHH NGHIÊN CỨU VÀ PHÁT TRIỂN VIỆT',
+    sellerTaxCode: '0109999999',
+    buyerNameVi: 'CÔNG TY CỔ PHẦN DƯỢC PHẨM BẢO CHÂU',
+    buyerTaxCode: '0108888888',
+    hasTaxCodeIssue: false,
+    vendorTaxStatus: '00',
+    violates20mCashRule: false,
+    hasArithmeticError: false,
+    missingSignature: false,
+    invalidMccqt: false,
+    statutoryBasis: 'Luật Thuế TNDN 67/2025/QH15 Điều 14 & Nghị định 320/2025/NĐ-CP Điều 8',
+    vatConsequenceVi: 'Chi phí R&D 5 tỷ được khấu trừ 200% = 10 tỷ giảm thu nhập chịu thuế TNDN.',
+    citConsequenceVi: 'Khấu trừ thêm 100% (5 tỷ) được điền vào Chỉ tiêu B4 Tờ khai QTT TNDN (giảm thu nhập chịu thuế).',
+    remedyActionVi: 'Giữ hồ sơ Quyết định phê duyệt Bộ KHCN, báo cáo tài chính dự án, sổ chi tiết chi phí R&D để thanh tra.',
+  },
+  {
+    id: 'case-09-rd-other-qualifying',
+    titleVi: 'Chi Phí R&D Đủ Điều Kiện Khác - Khấu Trừ 150% (Luật 67/2025)',
+    categoryVi: 'Khấu trừ thêm R&D',
+    voucherType: 'VAT_INVOICE',
+    scenarioDescriptionVi:
+      'Doanh nghiệp chi 2.000.000.000 VNĐ cho hoạt động R&D nội bộ "Cải tiến quy trình sản xuất sạch" đủ điều kiện theo Điều 8 ND 320/2025 (có nhân sự R&D, thiết bị, vật liệu) nhưng KHÔNG được Bộ KHCN phê duyệt. Áp dụng khấu trừ 150% (thêm 50%).',
+    totalAmount: 2_000_000_000,
+    pretaxAmount: 2_000_000_000,
+    vatAmount: 0,
+    taxRate: 'KCT',
+    paymentMethod: 'BANK_TRANSFER',
+    sellerNameVi: 'CÔNG TY TNHH CÔNG NGHỆ XANH',
+    sellerTaxCode: '0107777777',
+    buyerNameVi: 'CÔNG TY CỔ PHẦN SẢN XUẤT THỰC PHẨM AN PHÁT',
+    buyerTaxCode: '0106666666',
+    hasTaxCodeIssue: false,
+    vendorTaxStatus: '00',
+    violates20mCashRule: false,
+    hasArithmeticError: false,
+    missingSignature: false,
+    invalidMccqt: false,
+    statutoryBasis: 'Luật Thuế TNDN 67/2025/QH15 Điều 14 & Nghị định 320/2025/NĐ-CP Điều 8-9',
+    vatConsequenceVi: 'Chi phí R&D 2 tỷ được khấu trừ 150% = 3 tỷ giảm thu nhập chịu thuế TNDN.',
+    citConsequenceVi: 'Khấu trừ thêm 50% (1 tỷ) được điền vào Chỉ tiêu B4 Tờ khai QTT TNDN.',
+    remedyActionVi: 'Giữ sổ chi tiết chi phí R&D, danh sách nhân sự R&D, hóa đơn mua vật liệu/thiết bị R&D để chứng minh đủ điều kiện.',
+  },
+  // =========================================================================
+  // E-COMMERCE TAX CASES (ND 117/2025 + ND 68/2026)
+  // =========================================================================
+  {
+    id: 'case-10-ecommerce-platform-withheld',
+    titleVi: 'Hóa Đơn TMĐT - Sàn Khấu Trừ Nộp Thay Thuế GTGT & TNCN (ND 117/2025)',
+    categoryVi: 'Thuế TMĐT',
+    voucherType: 'VAT_INVOICE',
+    scenarioDescriptionVi:
+      'Hộ kinh doanh Nguyễn Văn A bán hàng trên Shopee doanh thu gộp 100.000.000 VNĐ. Sàn Shopee khấu trừ phí 10% (10.000.000 VNĐ), khấu trừ thuế GTGT 8% (7.200.000 VNĐ) và thuế TNCN 0.5% (450.000 VNĐ), chuyển khoản cho hộ 82.350.000 VNĐ. Theo ND 117/2025, sàn TMĐT chịu trách nhiệm khấu trừ, kê khai, nộp thay thuế cho hộ kinh doanh.',
+    totalAmount: 100_000_000,
+    pretaxAmount: 92_592_593,
+    vatAmount: 7_200_000,
+    taxRate: '8%',
+    paymentMethod: 'BANK_TRANSFER',
+    invoiceSymbol: 'SHP',
+    invoiceNumber: 'SHP00123456',
+    mccqt: '00SHOPEE0000000000000000000000123456',
+    issueDate: '2026-09-15',
+    sellerNameVi: 'Shopee Vietnam (Sàn TMĐT)',
+    sellerTaxCode: '0106668888',
+    buyerNameVi: 'Hộ kinh doanh Nguyễn Văn A',
+    buyerTaxCode: '0123456789',
+    hasTaxCodeIssue: false,
+    vendorTaxStatus: '00',
+    violates20mCashRule: false,
+    hasArithmeticError: false,
+    missingSignature: false,
+    invalidMccqt: false,
+    statutoryBasis: 'Nghị định 117/2025/NĐ-CP (hiệu lực 01/07/2025) & Nghị định 68/2026/NĐ-CP (sửa đổi, hiệu lực 01/07/2026)',
+    vatConsequenceVi: 'Sàn Shopee khấu trừ 7.200.000 VNĐ thuế GTGT và nộp thay cho hộ kinh doanh qua Cổng thuế điện tử TMĐT.',
+    citConsequenceVi: 'Hộ kinh doanh KHÔNG tự kê khai thuế GTGT/TNCN phần doanh thu đã được sàn nộp thay. Chỉ kê khai bổ sung phần doanh thu ngoài sàn (nếu có).',
+    remedyActionVi: 'Hộ kinh doanh đối chiếu dữ liệu trên Cổng thuế điện tử TMĐT (thuedientu.gdt.gov.vn/TMDT), kê khai bổ sung doanh thu phát sinh ngoài sàn.',
+  },
+  {
+    id: 'case-11-ecommerce-reconciliation',
+    titleVi: 'Đối Chiếu Doanh Thu Hộ Kinh Doanh Với Dữ Liệu Sàn TMĐT (ND 117/2025)',
+    categoryVi: 'Thuế TMĐT',
+    voucherType: 'VAT_INVOICE',
+    scenarioDescriptionVi:
+      'Hộ kinh doanh B déclaration thuế cuối năm: Doanh thu tự khai báo 110.000.000 VNĐ. Dữ liệu sàn TMĐT (Lazada) báo cáo doanh thu đã nộp thay thuế 100.000.000 VNĐ. Chênh lệch 10.000.000 VNĐ (10%) vượt ngưỡng 5%. Theo ND 117/2025, hộ kinh doanh phải đối chiếu và kê khai bổ sung phần chênh lệch.',
+    totalAmount: 10_000_000,
+    pretaxAmount: 10_000_000,
+    vatAmount: 0,
+    taxRate: 'KCT',
+    paymentMethod: 'BANK_TRANSFER',
+    sellerNameVi: 'Hộ kinh doanh Trần Thị B',
+    sellerTaxCode: '0123456789',
+    buyerNameVi: 'Cổng Thuế Điện Tử TMĐT',
+    buyerTaxCode: '0000000000',
+    hasTaxCodeIssue: false,
+    vendorTaxStatus: '00',
+    violates20mCashRule: false,
+    hasArithmeticError: false,
+    missingSignature: false,
+    invalidMccqt: false,
+    statutoryBasis: 'Nghị định 117/2025/NĐ-CP Điều 10-12 & Nghị định 68/2026/NĐ-CP',
+    vatConsequenceVi: 'Phần chênh lệch 10 triệu VNĐ (doanh thu ngoài sàn) phải tự kê khai bổ sung thuế GTGT/TNCN.',
+    citConsequenceVi: 'Kê khai bổ sung thu nhập chịu thuế TNCN cho phần doanh thu 10 triệu VNĐ phát sinh ngoài sàn TMĐT.',
+    remedyActionVi: 'Đối chiếu số liệu sàn với sổ sách, xác định nguồn gốc chênh lệch (doanh thu ngoài sàn, sai sót sàn, hoặc quên kê khai), kê khai bổ sung trên cổng thuế điện tử.',
   },
 ];

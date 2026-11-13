@@ -48,9 +48,9 @@ describe('Interactive Digital Stock Card Simulator (StockCardSimulator.tsx)', ()
   });
 
   // =========================================================================
-  // T2.2: Supports voucher types: PNK, PXK, and XKNB Form 03 (Decree 123/2020 & 70/2025)
+  // T2.2: Supports voucher types: PNK, PXK, and XKNB Form 03 (Decree 254/2026)
   // =========================================================================
-  it('T2.2: Supports voucher types: PNK, PXK, and XKNB Form 03 (Decree 123/2020 & 70/2025)', () => {
+  it('T2.2: Supports voucher types: PNK, PXK, and XKNB Form 03 (Decree 254/2026)', () => {
     render(<StockCardSimulator />);
 
     // In the default dataset, all 3 types are rendered in the table

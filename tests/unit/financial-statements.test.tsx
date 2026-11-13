@@ -153,6 +153,75 @@ describe('R4: Dynamic Financial Statements (B01-DN & B02-DN)', () => {
   });
 
   // =========================================================================
+  // 1b. TT99 variant (Circular 99/2025/TT-BTC) — B01-DN
+  // =========================================================================
+  describe('TT99 variant (Circular 99/2025/TT-BTC)', () => {
+    it("tags report.circular as 'TT99' and preserves the invariant Mã 270 === Mã 440 (TT200-grade fixture)", () => {
+      const balances = {
+        '111': { accountCode: '111', closingDebit: 50000000, closingCredit: 0, debitTotal: 50000000, creditTotal: 0 },
+        '112': { accountCode: '112', closingDebit: 150000000, closingCredit: 0, debitTotal: 150000000, creditTotal: 0 },
+        '131': { accountCode: '131', closingDebit: 100000000, closingCredit: 0, debitTotal: 100000000, creditTotal: 0 },
+        '156': { accountCode: '156', closingDebit: 200000000, closingCredit: 0, debitTotal: 200000000, creditTotal: 0 },
+        '1331': { accountCode: '1331', closingDebit: 20000000, closingCredit: 0, debitTotal: 20000000, creditTotal: 0 },
+        '211': { accountCode: '211', closingDebit: 500000000, closingCredit: 0, debitTotal: 500000000, creditTotal: 0 },
+        '214': { accountCode: '214', closingDebit: 0, closingCredit: 50000000, debitTotal: 0, creditTotal: 50000000 },
+        '241': { accountCode: '241', closingDebit: 30000000, closingCredit: 0, debitTotal: 30000000, creditTotal: 0 },
+        '331': { accountCode: '331', closingDebit: 0, closingCredit: 200000000, debitTotal: 0, creditTotal: 200000000 },
+        '411': { accountCode: '411', closingDebit: 0, closingCredit: 800000000, debitTotal: 0, creditTotal: 800000000 },
+      };
+
+      const report = generateBalanceSheet(balances, 'TT99');
+
+      expect(report.circular).toBe('TT99');
+      // Invariant Mã 270 ≡ Mã 440 preserved under TT99 (same fixture as TT200 case above)
+      expect(report.assets.totalAssets).toBe(1000000000);
+      expect(report.resources.totalResources).toBe(1000000000);
+      expect(report.isBalanced).toBe(true);
+      expect(report.discrepancy).toBe(0);
+      expect(report.warnings.length).toBe(0);
+    });
+
+    it('does NOT fall into the TT133 branch: TT99 includes TK 113 (cash) and TK 157 (goods in transit) like TT200', () => {
+      const balances = {
+        '111': { accountCode: '111', closingDebit: 50000000, closingCredit: 0, debitTotal: 50000000, creditTotal: 0 },
+        '112': { accountCode: '112', closingDebit: 150000000, closingCredit: 0, debitTotal: 150000000, creditTotal: 0 },
+        '113': { accountCode: '113', closingDebit: 25000000, closingCredit: 0, debitTotal: 25000000, creditTotal: 0 },
+        '156': { accountCode: '156', closingDebit: 200000000, closingCredit: 0, debitTotal: 200000000, creditTotal: 0 },
+        '157': { accountCode: '157', closingDebit: 30000000, closingCredit: 0, debitTotal: 30000000, creditTotal: 0 },
+        '331': { accountCode: '331', closingDebit: 0, closingCredit: 200000000, debitTotal: 0, creditTotal: 200000000 },
+        '411': { accountCode: '411', closingDebit: 0, closingCredit: 255000000, debitTotal: 0, creditTotal: 255000000 },
+      };
+
+      const report99 = generateBalanceSheet(balances, 'TT99');
+      const report200 = generateBalanceSheet(balances, 'TT200');
+      const report133 = generateBalanceSheet(balances, 'TT133');
+
+      // TT99 == TT200: Mã 110 includes TK 113 (225M), Mã 140 includes TK 157 (230M)
+      expect(report99.assets.shortTerm.items['110']).toBe(225000000);
+      expect(report99.assets.shortTerm.items['140']).toBe(230000000);
+      expect(report99.assets.totalAssets).toBe(455000000);
+      expect(report99.assets.totalAssets).toBe(report200.assets.totalAssets);
+      expect(report99.isBalanced).toBe(true);
+      expect(report99.discrepancy).toBe(0);
+
+      // TT133 excludes TK 113 and TK 157 -> 400M total assets (55M lower) and unbalanced
+      expect(report133.assets.totalAssets).toBe(400000000);
+      expect(report133.assets.totalAssets).not.toBe(report99.assets.totalAssets);
+      expect(report133.isBalanced).toBe(false);
+    });
+
+    it('balances the Capstone Day 27 closing dataset under TT99 at 1,540,000,000 VNĐ', () => {
+      const report = generateBalanceSheet(DAY_27_CLOSING_DATASET, 'TT99');
+      expect(report.circular).toBe('TT99');
+      expect(report.assets.totalAssets).toBe(1540000000);
+      expect(report.resources.totalResources).toBe(1540000000);
+      expect(report.isBalanced).toBe(true);
+      expect(report.discrepancy).toBe(0);
+      expect(report.warnings.length).toBe(0);
+    });
+  });
+
+  // =========================================================================
   // 2. Income Statement Engine (B02-DN)
   // =========================================================================
   describe('Income Statement Engine (income-statement-engine.ts)', () => {

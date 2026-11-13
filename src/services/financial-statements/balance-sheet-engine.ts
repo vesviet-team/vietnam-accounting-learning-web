@@ -17,9 +17,20 @@ export interface BalanceSheetItem {
   openingAmount?: number;
 }
 
+/**
+ * Supported regulatory regimes for B01-DN:
+ * - 'TT200': Circular 200/2014/TT-BTC (enterprises)
+ * - 'TT133': Circular 133/2016/TT-BTC (SMEs — narrower account chart: no TK 113, 157, 212-213, 221-222, 243)
+ * - 'TT99':  Circular 99/2025/TT-BTC (amends/replaces TT200 — inherits the FULL TT200 account chart,
+ *            so all computation branches below fall through to the TT200 path by default).
+ *            TT99 adds: TK 215 (Tài sản sinh học), TK 2295 (Dự phòng TTSH), TK 2414 (Nâng cấp TSCĐ),
+ *            TK 332 (Phải trả cổ tức), TK 82112 (Thuế TNDN bổ sung thuế tối thiểu toàn cầu).
+ */
+export type BalanceSheetCircular = 'TT200' | 'TT133' | 'TT99';
+
 export interface BalanceSheetReport {
   asOfDate: string;
-  circular: 'TT200' | 'TT133';
+  circular: BalanceSheetCircular;
   assets: {
     shortTerm: { code100: number; items: Record<string, number> };
     longTerm: { code200: number; items: Record<string, number> };
@@ -249,12 +260,19 @@ export function formatCurrencyVnd(amount: number): string {
  * Generates B01-DN Balance Sheet report from ledger accounts and verifies invariant Mã 270 === Mã 440.
  *
  * @param ledgerAccounts Record of ledger accounts (TAccountData, LedgerAccountBalance, or raw balances)
- * @param circular 'TT200' | 'TT133' (default 'TT200')
+ * @param circular 'TT200' | 'TT133' | 'TT99' (default 'TT200')
  * @param asOfDate Date string (default '31/12/2026')
+ *
+ * NOTE on 'TT99' (Circular 99/2025/TT-BTC): TT 99 kế thừa hệ thống tài khoản đầy đủ của TT 200
+ * (thay thế TT 200, không thu hẹp danh mục tài khoản như TT 133). Vì vậy mọi nhánh điều kiện
+ * `circular === 'TT133' ? ... : ...` dưới đây mặc định rơi vào nhánh TT200 khi circular === 'TT99',
+ * đúng hành vi kế toán: TT99 dùng cùng cấu trúc tài khoản (TK 113, 157, 212-213, 221-222, 243...)
+ * và bất biến Mã 270 ≡ Mã 440 không đổi. Chỉ tên gọi mẫu báo cáo (B01-DN → "Báo cáo tình hình
+ * tài chính") là khác, và phần hiển thị tên đã do UI (FinancialStatementsView) xử lý theo selectedCircular.
  */
 export function generateBalanceSheet(
   ledgerAccounts: Record<string, any>,
-  circular: 'TT200' | 'TT133' = 'TT200',
+  circular: BalanceSheetCircular = 'TT200',
   asOfDate: string = '2026-12-31'
 ): BalanceSheetReport {
   const balanceMap = extractLedgerBalances(ledgerAccounts);
@@ -323,9 +341,29 @@ export function generateBalanceSheet(
   longTermItems['223'] = -depreciation;   // Negative contra-asset (code 223 statutory)
   longTermItems['220'] = netFixedAssets;
 
+  // TT99-specific: Tài sản sinh học (TK 215) and its provision (TK 2295)
+  if (circular === 'TT99') {
+    const bioAssets = sumDebitBalances(balanceMap, ['215', '2151', '2152', '2153']);
+    const bioProvision = sumCreditBalances(balanceMap, ['2295']);
+    const netBioAssets = bioAssets - bioProvision;
+    longTermItems['215'] = bioAssets;
+    if (bioProvision > 0) {
+      longTermItems['2295'] = -bioProvision;
+    }
+    longTermItems['215_net'] = netBioAssets;
+  }
+
   // Mã 240: Xây dựng cơ bản dở dang (TK 241)
   const construction = sumDebitBalances(balanceMap, ['241']);
   longTermItems['240'] = construction;
+
+  // TT99-specific: Nâng cấp cải tạo TSCĐ (TK 2414) - part of construction in progress
+  if (circular === 'TT99') {
+    const upgradeCapEx = sumDebitBalances(balanceMap, ['2414']);
+    if (upgradeCapEx > 0) {
+      longTermItems['2414'] = upgradeCapEx;
+    }
+  }
 
   // Mã 250: Đầu tư tài chính dài hạn (TK 221, 222, 228 trừ 229)
   const longTermInvestmentsPrefixes = circular === 'TT133' ? ['228'] : ['221', '222', '228'];
@@ -337,27 +375,32 @@ export function generateBalanceSheet(
   const otherLongTerm = sumDebitBalances(balanceMap, otherLongTermPrefixes);
   longTermItems['260'] = otherLongTerm;
 
-  const code200 = netFixedAssets + construction + longTermInvestments + otherLongTerm;
+  const code200 = netFixedAssets + construction + longTermInvestments + otherLongTerm + (circular === 'TT99' ? (sumDebitBalances(balanceMap, ['215', '2151', '2152', '2153']) - sumCreditBalances(balanceMap, ['2295'])) : 0);
   const totalAssets = code100 + code200; // Mã số 270
 
   // =========================================================================
   // 3. NỢ PHẢI TRẢ (MÃ SỐ 300)
   // =========================================================================
 
-  // Mã 310: Nợ ngắn hạn (TK 331, 333, 334, 335, 338, 341 ngắn hạn)
+  // Mã 310: Nợ ngắn hạn (TK 331, 332, 333, 334, 335, 338, 341 ngắn hạn)
   const payableSuppliers = sumCreditBalances(balanceMap, ['331']);
+  const dividendsPayable = circular === 'TT99' ? sumCreditBalances(balanceMap, ['332']) : 0;
   const taxPayables = sumCreditBalances(balanceMap, ['333']);
   const salaryPayables = sumCreditBalances(balanceMap, ['334']);
   const accruedExpenses = sumCreditBalances(balanceMap, ['335']);
   const otherShortTermPayables = sumCreditBalances(balanceMap, ['338', '341']);
   const code310 =
     payableSuppliers +
+    dividendsPayable +
     taxPayables +
     salaryPayables +
     accruedExpenses +
     otherShortTermPayables;
   liabilitiesItems['310'] = code310;
   liabilitiesItems['311'] = payableSuppliers;
+  if (circular === 'TT99' && dividendsPayable > 0) {
+    liabilitiesItems['312'] = dividendsPayable;
+  }
   liabilitiesItems['313'] = taxPayables;
   liabilitiesItems['314'] = salaryPayables;
   liabilitiesItems['315'] = accruedExpenses;
@@ -441,18 +484,21 @@ export function generateBalanceSheet(
     { itemCode: '130', itemNameVi: 'III. Các khoản phải thu ngắn hạn', displayLevel: 2, accountSources: ['131', '136', '138', '2293'], closingAmount: netReceivables },
     { itemCode: '140', itemNameVi: 'IV. Hàng tồn kho', displayLevel: 2, accountSources: inventoryPrefixes, closingAmount: netInventory },
     { itemCode: '150', itemNameVi: 'V. Tài sản ngắn hạn khác', displayLevel: 2, accountSources: ['133'], closingAmount: otherShortTerm },
-    { itemCode: '200', itemNameVi: 'B. TÀI SẢN DÀI HẠN', displayLevel: 1, isSubtotal: true, accountSources: ['220', '240', '250', '260'], closingAmount: code200 },
+    { itemCode: '200', itemNameVi: 'B. TÀI SẢN DÀI HẠN', displayLevel: 1, isSubtotal: true, accountSources: circular === 'TT99' ? ['220', '240', '250', '260', '215'] : ['220', '240', '250', '260'], closingAmount: code200 },
     { itemCode: '220', itemNameVi: 'I. Tài sản cố định', displayLevel: 2, isSubtotal: true, accountSources: fixedAssetsCostPrefixes.concat(['214']), closingAmount: netFixedAssets },
     { itemCode: '221', itemNameVi: '- Nguyên giá', displayLevel: 3, accountSources: fixedAssetsCostPrefixes, closingAmount: fixedAssetsCost },
     { itemCode: '222', itemNameVi: '- Giá trị hao mòn lũy kế (*)', displayLevel: 3, isNegative: true, accountSources: ['214'], closingAmount: -depreciation },
-    { itemCode: '240', itemNameVi: 'II. Xây dựng cơ bản dở dang', displayLevel: 2, accountSources: ['241'], closingAmount: construction },
-    { itemCode: '250', itemNameVi: 'III. Đầu tư tài chính dài hạn', displayLevel: 2, accountSources: longTermInvestmentsPrefixes, closingAmount: longTermInvestments },
-    { itemCode: '260', itemNameVi: 'IV. Tài sản dài hạn khác', displayLevel: 2, accountSources: otherLongTermPrefixes, closingAmount: otherLongTerm },
+    { itemCode: '215', itemNameVi: 'II. Tài sản sinh học (TT 99)', displayLevel: 2, accountSources: ['215', '2151', '2152', '2153', '2295'], closingAmount: circular === 'TT99' ? sumDebitBalances(balanceMap, ['215', '2151', '2152', '2153']) - sumCreditBalances(balanceMap, ['2295']) : 0 },
+    { itemCode: '240', itemNameVi: 'III. Xây dựng cơ bản dở dang', displayLevel: 2, accountSources: ['241'], closingAmount: construction },
+    { itemCode: '2414', itemNameVi: 'IV. Nâng cấp cải tạo TSCĐ (TT 99)', displayLevel: 2, accountSources: ['2414'], closingAmount: circular === 'TT99' ? sumDebitBalances(balanceMap, ['2414']) : 0 },
+    { itemCode: '250', itemNameVi: 'V. Đầu tư tài chính dài hạn', displayLevel: 2, accountSources: longTermInvestmentsPrefixes, closingAmount: longTermInvestments },
+    { itemCode: '260', itemNameVi: 'VI. Tài sản dài hạn khác', displayLevel: 2, accountSources: otherLongTermPrefixes, closingAmount: otherLongTerm },
     { itemCode: '270', itemNameVi: 'TỔNG CỘNG TÀI SẢN (MÃ 270 = 100 + 200)', displayLevel: 1, isSubtotal: true, accountSources: ['100', '200'], closingAmount: totalAssets },
 
     // NGUỒN VỐN
     { itemCode: '300', itemNameVi: 'C. NỢ PHẢI TRẢ', displayLevel: 1, isSubtotal: true, accountSources: ['310', '330'], closingAmount: code300 },
-    { itemCode: '310', itemNameVi: 'I. Nợ ngắn hạn', displayLevel: 2, accountSources: ['331', '333', '334', '335', '338', '341'], closingAmount: code310 },
+    { itemCode: '310', itemNameVi: 'I. Nợ ngắn hạn', displayLevel: 2, accountSources: circular === 'TT99' ? ['331', '332', '333', '334', '335', '338', '341'] : ['331', '333', '334', '335', '338', '341'], closingAmount: code310 },
+    { itemCode: '312', itemNameVi: 'Phải trả cổ tức, lợi nhuận (TT 99)', displayLevel: 3, accountSources: ['332'], closingAmount: circular === 'TT99' ? dividendsPayable : 0 },
     { itemCode: '330', itemNameVi: 'II. Nợ dài hạn', displayLevel: 2, accountSources: ['341', '347'], closingAmount: longTermLiabilities },
     { itemCode: '400', itemNameVi: 'D. VỐN CHỦ SỞ HỮU', displayLevel: 1, isSubtotal: true, accountSources: ['411', '418', '419', '421'], closingAmount: code400 },
     { itemCode: '411', itemNameVi: '1. Vốn góp của chủ sở hữu', displayLevel: 2, accountSources: ['411'], closingAmount: charterCapital },

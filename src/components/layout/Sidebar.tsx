@@ -144,6 +144,18 @@ export const Sidebar: FC<SidebarProps> = ({
                 TT 99
                 <span className="block text-[10px] font-normal opacity-85">2026 Mới</span>
               </button>
+              <button
+                type="button"
+                onClick={() => onRegimeChange('CIRCULAR_58')}
+                className={`px-2 py-2 rounded-lg text-xs font-semibold text-center transition-all ${
+                  currentRegime === 'CIRCULAR_58'
+                    ? 'bg-amber-600 text-white shadow-sm'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
+                }`}
+              >
+                TT 58
+                <span className="block text-[10px] font-normal opacity-85">DN Siêu Nhỏ</span>
+              </button>
             </div>
           </div>
 
@@ -207,7 +219,7 @@ export const Sidebar: FC<SidebarProps> = ({
           <div className="flex items-start space-x-2 text-xs text-slate-500 dark:text-slate-400">
             <Info className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
             <span>
-              Chuẩn mực VAS: Thông tư 200/2014 & Thông tư 133/2016 của Bộ Tài Chính.
+              Chuẩn mực VAS: Thông tư 200/2014, Thông tư 133/2016, Thông tư 99/2025 & Thông tư 58/2026 (DN siêu nhỏ) của Bộ Tài Chính.
             </span>
           </div>
         </div>

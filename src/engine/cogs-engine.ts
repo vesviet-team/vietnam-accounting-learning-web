@@ -1,7 +1,7 @@
 /**
  * Core Calculation Engine for COGS & Cost Accounting Workbench
  * Vietnam Accounting Standards (VAS 02 / IAS 2, Circular 200, Circular 133, Circular 99/2025)
- * & CIT Law (Decree 123/2020, Decree 70/2025, Circular 96/2015, Circular 78/2014)
+ * & CIT Law (Decree 254/2026, Circular 96/2015, Circular 78/2014)
  *
  * Zero external dependencies, pure functions, sub-millisecond execution latency (<0.1ms).
  */
@@ -522,8 +522,8 @@ export function calculateManufacturingCost(
         descriptionVi: 'Nhập kho thành phẩm hoàn thành (Tổng giá thành sản xuất Z)',
       });
     }
-  } else if (regime === 'CIRCULAR_133') {
-    // Under Circular 133: Accounts 621, 622, 627 are prohibited; directly collected on TK 154
+  } else if (regime === 'CIRCULAR_133' || regime === 'CIRCULAR_58') {
+    // Under Circular 133 & Circular 58 (DN siêu nhỏ): Accounts 621, 622, 627 are prohibited; directly collected on TK 154
     if (actualDirectMaterial > 0) {
       journalEntries.push({
         debitAccount: '154',

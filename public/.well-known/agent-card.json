@@ -1,6 +1,6 @@
 {
   "name": "vietnam-accounting-learning-agent",
-  "description": "Interactive Vietnamese Accounting 30-Day Curriculum, COA Explorer (Circular 99/2025, Circular 200/2014, Circular 133/2016), B01/B02/B03-DN Financial Statement Engine, and Tax Guardrails Agent",
+  "description": "Interactive Vietnamese Accounting 30-Day Curriculum, COA Explorer (Circular 99/2025, Circular 58/2026, Circular 200/2014, Circular 133/2016), B01/B02/B03-DN Financial Statement Engine, and Tax Guardrails Agent",
   "url": "https://learn.tanhdev.com",
   "version": "1.1.0",
   "protocol_version": "1.0",
@@ -36,12 +36,13 @@
   "skills": [
     {
       "id": "coa-lookup-vietnam",
-      "name": "Vietnam Chart of Accounts Lookup (TT 99/2025, TT 200, TT 133)",
+      "name": "Vietnam Chart of Accounts Lookup (TT 99/2025, TT 58/2026, TT 200, TT 133)",
       "description": "Search and validate Vietnamese accounting accounts, normal balances, and Circular 133 prohibited account safeguards",
       "tags": [
         "accounting",
         "vietnam",
         "circular-99",
+        "circular-58",
         "circular-200",
         "circular-133"
       ],

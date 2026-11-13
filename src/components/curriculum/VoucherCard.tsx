@@ -64,7 +64,7 @@ export const VoucherCard: FC<VoucherCardProps> = ({ voucher }) => {
           >
             Căn cứ pháp lý
           </button>
-          {voucher.type === 'E_INVOICE_ND123' && voucher.xmlPayload && (
+          {voucher.type.startsWith('E_INVOICE_ND254') && 'xmlPayload' in voucher && voucher.xmlPayload && (
             <button
               type="button"
               onClick={() => setActiveTab('RAW')}
@@ -84,7 +84,7 @@ export const VoucherCard: FC<VoucherCardProps> = ({ voucher }) => {
       {/* Tab 1: Visual Voucher Representation */}
       {activeTab === 'VISUAL' && (
         <div className="p-4 sm:p-6 bg-slate-50/50 dark:bg-slate-950/40">
-          {voucher.type === 'E_INVOICE_ND123' && <EInvoiceVisual invoice={voucher} />}
+          {voucher.type.startsWith('E_INVOICE_ND254') && (voucher as EInvoiceData).eInvoiceGroup && <EInvoiceVisual invoice={voucher as EInvoiceData} />}
           {voucher.type === 'CASH_RECEIPT_01_TT' && <CashReceiptVisual receipt={voucher} />}
           {voucher.type === 'CASH_PAYMENT_02_TT' && <CashPaymentVisual payment={voucher} />}
           {voucher.type === 'BANK_TRANSFER_UNC' && <BankTransferVisual unc={voucher} />}
@@ -131,7 +131,7 @@ export const VoucherCard: FC<VoucherCardProps> = ({ voucher }) => {
       )}
 
       {/* Tab 3: Raw XML view for Decision 1450 E-Invoices */}
-      {activeTab === 'RAW' && voucher.type === 'E_INVOICE_ND123' && (
+      {activeTab === 'RAW' && voucher.type.startsWith('E_INVOICE_ND254') && 'xmlPayload' in voucher && (
         <div className="p-4 bg-slate-900 text-slate-200 font-mono text-xs overflow-x-auto max-h-[360px]">
           <pre>{voucher.xmlPayload}</pre>
         </div>
@@ -142,13 +142,21 @@ export const VoucherCard: FC<VoucherCardProps> = ({ voucher }) => {
 
 // 1. Electronic Invoice Visual Renderer
 const EInvoiceVisual: FC<{ invoice: EInvoiceData }> = ({ invoice }) => {
+  const groupInfo = invoice.eInvoiceGroup;
+  const groupLabels = {
+    'GROUP_1_WITH_CQT': { label: 'Nhóm 1: Có mã CQT', color: 'emerald', icon: '✓' },
+    'GROUP_2_NO_CQT': { label: 'Nhóm 2: Không mã CQT', color: 'amber', icon: '⚠' },
+    'GROUP_3_POS': { label: 'Nhóm 3: POS/Máy tính tiền', color: 'blue', icon: '💳' },
+  } as const;
+  const g = groupLabels[groupInfo];
+
   return (
     <div className="max-w-3xl mx-auto bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl p-5 sm:p-6 shadow-sm space-y-4 font-sans text-xs">
       {/* Header Banner */}
       <div className="flex flex-col sm:flex-row sm:items-start justify-between pb-4 border-b-2 border-emerald-600 gap-3">
         <div>
           <div className="text-[11px] font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">
-            Nghị Định 123/2020/NĐ-CP • Quyết Định 1450/QĐ-TCT
+            Nghị Định 254/2026/NĐ-CP • Quyết Định 1450/QĐ-TCT
           </div>
           <h3 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100 tracking-tight mt-0.5">
             HÓA ĐƠN GIÁ TRỊ GIA TĂNG (ĐIỆN TỬ)
@@ -166,20 +174,34 @@ const EInvoiceVisual: FC<{ invoice: EInvoiceData }> = ({ invoice }) => {
           <div className="font-mono text-xs font-bold text-slate-800 dark:text-slate-200">
             Số: <span className="text-rose-600 dark:text-rose-400">{invoice.invoiceNumber}</span>
           </div>
-          <div className="inline-flex items-center space-x-1 px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950 text-[10px] text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-            <ShieldCheck className="w-3 h-3 text-emerald-600" />
-            <span>Có mã CQT</span>
+          <div className={`inline-flex items-center space-x-1 px-2 py-0.5 rounded text-[10px] font-semibold border ${
+            groupInfo === 'GROUP_1_WITH_CQT' ? 'bg-emerald-50 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800' :
+            groupInfo === 'GROUP_2_NO_CQT' ? 'bg-amber-50 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-800' :
+            'bg-blue-50 dark:bg-blue-950 text-blue-800 dark:text-blue-300 border-blue-200 dark:border-blue-800'
+          }`}>
+            <span>{g.icon}</span>
+            <span>{g.label}</span>
           </div>
         </div>
       </div>
 
-      {/* MCCQT Cryptographic Token */}
-      <div className="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg font-mono text-[11px] text-slate-700 dark:text-slate-300 flex items-center justify-between gap-2 overflow-hidden">
-        <span className="shrink-0 font-bold text-slate-500">Mã CQT (MCCQT 34 hex):</span>
-        <span className="truncate text-emerald-700 dark:text-emerald-400 font-semibold">
-          {invoice.mccqt}
-        </span>
-      </div>
+      {/* MCCQT Cryptographic Token (only for Group 1 & 3) */}
+      {(groupInfo === 'GROUP_1_WITH_CQT' || groupInfo === 'GROUP_3_POS') && invoice.mccqt && (
+        <div className="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg font-mono text-[11px] text-slate-700 dark:text-slate-300 flex items-center justify-between gap-2 overflow-hidden">
+          <span className="shrink-0 font-bold text-slate-500">Mã CQT (MCCQT 34 hex):</span>
+          <span className="truncate text-emerald-700 dark:text-emerald-400 font-semibold">
+            {invoice.mccqt}
+          </span>
+        </div>
+      )}
+
+      {/* Group 2 notice: No MCCQT */}
+      {groupInfo === 'GROUP_2_NO_CQT' && (
+        <div className="p-2 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-lg text-[11px] text-amber-900 dark:text-amber-200 flex items-center space-x-2">
+          <span>⚠</span>
+          <span>Hóa đơn Nhóm 2 không có mã CQT (MCCQT). Tự phát hành bằng phần mềm riêng theo Điều 5 NĐ 254/2026.</span>
+        </div>
+      )}
 
       {/* Seller & Buyer Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 py-2 border-b border-slate-200 dark:border-slate-800">
@@ -242,7 +264,7 @@ const EInvoiceVisual: FC<{ invoice: EInvoiceData }> = ({ invoice }) => {
       {/* Payment Summary */}
       <div className="pt-3 border-t border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row items-end justify-between gap-3">
         <div className="text-[11px] text-slate-500 italic max-w-sm">
-          {invoice.legalNoteVi || 'Hóa đơn khởi tạo từ hệ thống HĐĐT có mã theo Nghị định 123/2020/NĐ-CP.'}
+          {invoice.legalNoteVi || 'Hóa đơn khởi tạo từ hệ thống HĐĐT có mã theo Nghị định 254/2026/NĐ-CP.'}
         </div>
 
         <div className="w-full sm:w-64 space-y-1 font-mono text-xs">

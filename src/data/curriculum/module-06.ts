@@ -4,7 +4,7 @@ export const MODULE_6_LESSONS: DailyLesson[] = [
   {
     day: 16,
     moduleNumber: 6,
-    moduleTitleVi: 'Khối 6: Doanh Thu Bán Hàng, Hóa Đơn NĐ 123 & Các Khoản Giảm Trừ',
+    moduleTitleVi: 'Khối 6: Doanh Thu Bán Hàng, Hóa Đơn NĐ 254/2026 & Các Khoản Giảm Trừ',
     dayTitleVi: 'Ngày 16: 5 Điều Kiện Ghi Nhận Doanh Thu Theo VAS 14 & Quy Tắc Giao Hàng Thành Công',
     estimatedMinutes: 20,
     isMilestoneDay: false,
@@ -30,12 +30,19 @@ export const MODULE_6_LESSONS: DailyLesson[] = [
         contentVi: 'Khi khách hàng chuyển khoản đặt cọc hoặc trả trước 100% tiền mua hàng mà doanh nghiệp chưa bàn giao hàng hóa hoặc chưa hoàn thành dịch vụ: Ghi Nợ TK 112 / Có TK 131 (Dư Có TK 131 - Người mua trả tiền trước). Khoản tiền này bản chất là một món nợ phải trả của doanh nghiệp đối với khách hàng, tuyệt đối không được ghi vào Có TK 511.',
         keyTakeawayVi: 'Thu tiền trước mà chưa giao hàng là một khoản nợ phải trả, không được coi là doanh thu trong kỳ.',
       },
+      {
+        id: 'c16-4',
+        titleVi: 'Giảm 2% Thuế Suất Thuế GTGT (10% → 8%) Đến Hết 31/12/2026 Theo Nghị Định 174/2025/NĐ-CP',
+        summaryVi: 'NĐ 174/2025/NĐ-CP ban hành theo NQ 204/2025/QH15 giảm 2% thuế GTGT từ 10% xuống 8%, hiệu lực 01/07/2025 - 31/12/2026, trừ một số nhóm ngành loại trừ.',
+        contentVi: 'Theo Nghị định 174/2025/NĐ-CP ban hành trên cơ sở Nghị quyết 204/2025/QH15 của Quốc hội, doanh nghiệp vận chuyển, cung cấp hàng hóa, dịch vụ chịu thuế suất GTGT 10% được giảm 2% mức thuế suất xuống còn 8% đối với hoạt động sản xuất, kinh doanh, hiệu lực từ ngày 01/07/2025 đến hết ngày 31/12/2026. Trên Hóa đơn điện tử ghi rõ dòng "thuế suất 8%". NHÓM LOẠI TRỪ (vẫn giữ thuế suất 10%, không được giảm): (1) Viễn thông, hoạt động thông tin và truyền thông; (2) Hoạt động tài chính - ngân hàng, chứng khoán, bảo hiểm, kinh doanh vốn; (3) Kinh doanh bất động sản, cho thuê lại tài sản; (4) Kim loại và sản phẩm từ kim loại đúc sẵn; (5) Khoáng sản (không kể than đá); (6) Hàng hóa, dịch vụ chịu thuế tiêu thụ đặc biệt (HSDT đặc biệt: rượu, bia, thuốc lá, ô tô dưới 24 chỗ...). Khi lập tờ khai thuế GTGT, doanh nghiệp kê khai riêng theo từng mức thuế suất 8% và 10% phát sinh thực tế trong kỳ.',
+        keyTakeawayVi: 'Trong suốt kỳ 2026, thuế suất GTGT 8% (giảm 2% theo NĐ 174/2025/NĐ-CP) áp dụng đến hết 31/12/2026; các nhóm viễn thông, tài chính - ngân hàng, BĐS, kim loại, khoáng sản trừ than và HSDT đặc biệt vẫn chịu thuế suất 10%.',
+      },
     ],
   },
   {
     day: 17,
     moduleNumber: 6,
-    moduleTitleVi: 'Khối 6: Doanh Thu Bán Hàng, Hóa Đơn NĐ 123 & Các Khoản Giảm Trừ',
+    moduleTitleVi: 'Khối 6: Doanh Thu Bán Hàng, Hóa Đơn NĐ 254/2026 & Các Khoản Giảm Trừ',
     dayTitleVi: 'Ngày 17: Cặp Bút Toán Doanh Thu - Giá Vốn & Kế Toán Phải Thu Khách Hàng (TK 131)',
     estimatedMinutes: 20,
     isMilestoneDay: false,
@@ -94,8 +101,8 @@ export const MODULE_6_LESSONS: DailyLesson[] = [
   {
     day: 18,
     moduleNumber: 6,
-    moduleTitleVi: 'Khối 6: Doanh Thu Bán Hàng, Hóa Đơn NĐ 123 & Các Khoản Giảm Trừ',
-    dayTitleVi: 'Ngày 18: Giảm Trừ Doanh Thu (TT 200 dùng TK 521 vs TT 133 Nợ 511) & HĐĐT NĐ 123',
+    moduleTitleVi: 'Khối 6: Doanh Thu Bán Hàng, Hóa Đơn NĐ 254/2026 & Các Khoản Giảm Trừ',
+    dayTitleVi: 'Ngày 18: Giảm Trừ Doanh Thu (TT 200 dùng TK 521 vs TT 133 Nợ 511) & HĐĐT NĐ 254/2026',
     estimatedMinutes: 20,
     isMilestoneDay: true,
     concepts: [
@@ -115,13 +122,14 @@ export const MODULE_6_LESSONS: DailyLesson[] = [
       },
       {
         id: 'c18-3',
-        titleVi: 'Đặc Tả Hóa Đơn Điện Tử Theo Nghị Định 123/2020 & Quyết Định 1450/QĐ-TCT',
+        titleVi: 'Đặc Tả Hóa Đơn Điện Tử Theo Nghị Định 254/2026 & Quyết Định 1450/QĐ-TCT',
         summaryVi: 'Hóa đơn GTGT điện tử gồm ký hiệu 6 ký tự (KHHDon), số hóa đơn 8 chữ số, mã CQT 34 ký tự hexa (MCCQT).',
-        contentVi: 'Theo Nghị định 123/2020/NĐ-CP và Quyết định 1450/QĐ-TCT của Tổng cục Thuế, Hóa đơn điện tử có mã của cơ quan thuế phải tuân thủ chuẩn XML nghiêm ngặt: Mã ký hiệu hóa đơn 6 ký tự dạng `C26TAA` (C = có mã CQT, 26 = năm 2026, T = doanh nghiệp, AA = ký hiệu riêng); Số hóa đơn 8 chữ số từ 00000001 đến 99999999; Mã MCCQT gồm đúng 34 ký tự thập lục phân (Hexadecimal) do hệ thống CQT cấp tự động sau khi ký số thành công.',
+        contentVi: 'Theo Nghị định 254/2026/NĐ-CP và Quyết định 1450/QĐ-TCT của Tổng cục Thuế, Hóa đơn điện tử có mã của cơ quan thuế phải tuân thủ chuẩn XML nghiêm ngặt: Mã ký hiệu hóa đơn 6 ký tự dạng `C26TAA` (C = có mã CQT, 26 = năm 2026, T = doanh nghiệp, AA = ký hiệu riêng); Số hóa đơn 8 chữ số từ 00000001 đến 99999999; Mã MCCQT gồm đúng 34 ký tự thập lục phân (Hexadecimal) do hệ thống CQT cấp tự động sau khi ký số thành công.',
         vouchers: [
           {
-            type: 'E_INVOICE_ND123',
-            titleVi: 'Hóa đơn GTGT điện tử theo Nghị định 123 & Quyết định 1450',
+            type: 'E_INVOICE_ND254_GROUP1',
+            eInvoiceGroup: 'GROUP_1_WITH_CQT',
+            titleVi: 'Hóa đơn GTGT điện tử theo Nghị định 254/2026/NĐ-CP & Quyết định 1450 (Nhóm 1: Có mã CQT)',
             templateCode: '1',
             symbol: 'C26TAA',
             invoiceNumber: '00001245',

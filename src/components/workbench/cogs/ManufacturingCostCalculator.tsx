@@ -264,7 +264,7 @@ export const ManufacturingCostCalculator: FC<ManufacturingCostCalculatorProps> =
       const newPostedEntry = {
         id: `costing-${Date.now()}`,
         timestamp: now,
-        descriptionVi: `Giá thành sản xuất (${regime === 'CIRCULAR_133' ? 'TT 133' : 'TT 200/99'}): Tổng Z = ${formatVnd(
+        descriptionVi: `Giá thành sản xuất (${regime === 'CIRCULAR_133' || regime === 'CIRCULAR_58' ? 'TT 133' : 'TT 200/99'}): Tổng Z = ${formatVnd(
           calculationOutput.totalCostZ
         )}`,
         rows,

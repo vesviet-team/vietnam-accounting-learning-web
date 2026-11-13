@@ -286,7 +286,7 @@ describe('ADVERSARIAL STRESS: Tax Guardrails & Regulatory Invariants (M5)', () =
         expect(res.citDeductible).toBe(false);
         expect(res.statutoryBasis).toBe(STATUTORY_BASIS_VENDOR_RUNAWAY);
         expect(res.statusNameVi).toContain('Bỏ trốn');
-        expect(res.explanationVi).toContain('Khoản 2 Điều 4 Nghị định 123/2020/NĐ-CP');
+        expect(res.explanationVi).toContain('Nghị định 254/2026/NĐ-CP');
         expect(res.explanationVi).toContain('100% rủi ro gian lận thuế');
         expect(res.recommendationVi).toContain('Mục B4');
       }

@@ -311,7 +311,7 @@ export const CURRICULUM_30_DAYS: DailyLesson[] = [
     day: 11,
     moduleNumber: 4,
     moduleTitleVi: 'Mua hàng, Công nợ Phải trả (TK 331) & Hóa đơn Điện tử NĐ 123',
-    dayTitleVi: 'Đặc tả Hóa đơn Điện tử Nghị định 123/2020 & Quyết định 1450',
+    dayTitleVi: 'Đặc tả Hóa đơn Điện tử Nghị định 254/2026 & Quyết định 1450',
     estimatedMinutes: 20,
     isMilestoneDay: false,
     concepts: [

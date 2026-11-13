@@ -136,6 +136,26 @@ export const MODULE_8_LESSONS: DailyLesson[] = [
         ],
         keyTakeawayVi: 'Nắm vững công thức Gross-up thuế nhà thầu (TT 103/2014) và mốc thanh toán không tiền mặt 5 triệu đồng từ 01/07/2025 (Luật Thuế GTGT 48/2024/QH15).',
       },
+      {
+        id: 'c24-6',
+        titleVi: 'Khấu Trừ Thêm Chi Phí Nghiên Cứu Phát Triển (R&D) Theo Luật TNDN 67/2025 & NĐ 320/2025',
+        summaryVi: 'Từ kỳ tính thuế 2025, chi phí R&D được khấu trừ thêm: 100% (tổng 200%) cho dự án được Bộ KHCN phê duyệt, 50% (tổng 150%) cho chi phí R&D đủ điều kiện khác.',
+        contentVi: 'Theo Luật Thuế TNDN số 67/2025/QH15 (Điều 14, có hiệu lực từ 01/10/2025, áp dụng kỳ tính thuế 2025) và Nghị định 320/2025/NĐ-CP (Điều 8-10): (1) Dự án R&D được Bộ KHCN phê duyệt: khấu trừ thêm 100% (tổng mức khấu trừ 200%); (2) Chi phí R&D đủ điều kiện khác (nhân sự, vật liệu, khấu hao thiết bị R&D, thuê ngoài): khấu trừ thêm 50% (tổng mức khấu trừ 150%); (3) Chi phí không đủ điều kiện: chỉ khấu trừ bình thường 100%. Chi phí khấu trừ thêm được ghi nhận tại Chỉ tiêu B4 trên Tờ khai Quyết toán thuế TNDN (giảm thu nhập chịu thuế). Điều kiện đủ điều kiện (Điều 8 NĐ 320/2025): Có mục tiêu, nội dung, ngân sách R&D rõ ràng; Thực hiện bởi doanh nghiệp có đủ nhân sự, cơ sở vật chất R&D; Chi phí trực tiếp phục vụ R&D: lương nhân sự R&D, vật liệu, khấu hao thiết bị R&D, chi phí thuê ngoài, chi phí thử nghiệm. Không được tính: quyền sử dụng đất, chi phí tài chính, chi phí quản lý chung, marketing.',
+        journalExamples: [
+          {
+            descriptionVi: 'Khấu trừ thêm 100% chi phí R&D dự án được Bộ KHCN phê duyệt (Tổng chi phí R&D 5 tỷ, khấu trừ bình thường 5 tỷ + khấu trừ thêm 5 tỷ = 10 tỷ)',
+            entries: [
+              { debitCredit: 'DEBIT', accountCode: '642', accountNameVi: 'Chi phí quản lý doanh nghiệp (Khấu trừ thêm R&D 200%)', amount: 10000000000 },
+              { debitCredit: 'CREDIT', accountCode: '334', accountNameVi: 'Phải trả người lao động (Lương R&D)', amount: 3000000000 },
+              { debitCredit: 'CREDIT', accountCode: '152', accountNameVi: 'Nguyên liệu, vật liệu (Vật liệu R&D)', amount: 1000000000 },
+              { debitCredit: 'CREDIT', accountCode: '214', accountNameVi: 'Hao mòn TSCĐ (Khấu hao thiết bị R&D)', amount: 500000000 },
+              { debitCredit: 'CREDIT', accountCode: '331', accountNameVi: 'Phải trả người bán (Thuê ngoài R&D)', amount: 500000000 },
+            ],
+            statutoryNoteVi: 'Theo Luật 67/2025/QH15 Điều 14 & NĐ 320/2025/NĐ-CP Điều 8: Dự án R&D được Bộ KHCN phê duyệt khấu trừ 200%. Khấu trừ thêm 100% được điền vào Chỉ tiêu B4 Tờ khai QTT TNDN (giảm thu nhập chịu thuế).',
+          },
+        ],
+        keyTakeawayVi: 'Từ kỳ tính thuế 2025: R&D được phê duyệt Bộ KHCN khấu trừ 200% (thêm 100%); R&D đủ điều kiện khác khấu trừ 150% (thêm 50%). Khấu trừ thêm ghi nhận tại Chỉ tiêu B4 TNDN.',
+      },
     ],
   },
 ];

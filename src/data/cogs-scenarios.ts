@@ -4,7 +4,7 @@
  * - VAS 02 / IAS 2 (Inventories) & VFRS Roadmap Decision 345/QD-BTC
  * - Circular 200/2014/TT-BTC & Circular 99/2025/TT-BTC (replacing TT 200 from 2026)
  * - Circular 133/2016/TT-BTC (SME Accounting Regime)
- * - Decrees 123/2020/ND-CP & 70/2025/ND-CP (E-Invoices & Internal Dispatch Note Form 03/XKNB)
+ * - Decree 254/2026/ND-CP (E-Invoices & Internal Dispatch Note Form 03/XKNB)
  * - Circular 96/2015/TT-BTC & Circular 78/2014/TT-BTC (CIT Deductible Expenses & Schedule B4)
  */
 
@@ -350,11 +350,11 @@ export const COGS_SCENARIOS: CogsScenario[] = [
     code: 'SCEN-COGS-04',
     titleVi: 'Điều Chuyển Nội Bộ Mẫu 03/XKNB & Rào Chắn Xuất Âm Kho — Chuỗi Siêu Thị',
     shortDescriptionVi:
-      'Thực hành quy chuẩn Mẫu 03/XKNB theo NĐ 123 & NĐ 70 (Nợ 157 / Có 156) và kiểm thử rào chắn an toàn ngăn chặn xuất âm kho trong quản trị chuỗi bán lẻ.',
+      'Thực hành quy chuẩn Mẫu 03/XKNB theo Nghị định 254/2026/NĐ-CP (Nợ 157 / Có 156) và kiểm thử rào chắn an toàn ngăn chặn xuất âm kho trong quản trị chuỗi bán lẻ.',
     fullStoryVi:
       'Công ty Cổ phần Bán Lẻ Siêu Thị MartVina vận hành kho tổng logistics tại KCN Quang Minh và 15 siêu thị vệ tinh tại Hà Nội. ' +
       'Doanh nghiệp áp dụng quy chế điều chuyển hàng hóa nội bộ bằng Phiếu xuất kho kiêm vận chuyển nội bộ điện tử (Mẫu 03/XKNB) ' +
-      'theo Nghị định 123/2020/NĐ-CP và Nghị định 70/2025/NĐ-CP. ' +
+      'theo Nghị định 254/2026/NĐ-CP. ' +
       'Tài khoản đối ứng khi xuất điều chuyển là Nợ 157 (Hàng gửi bán / hàng chuyển đi) và Có 156 (theo Thông tư 200/TT 99) ' +
       'thay vì ghi nhận vào Giá vốn hàng bán Nợ 632 như nghiệp vụ xuất bán thương mại. ' +
       'Bên cạnh đó, hệ thống tích hợp rào chắn chống xuất âm kho nghiêm ngặt: ' +
@@ -364,7 +364,7 @@ export const COGS_SCENARIOS: CogsScenario[] = [
     dokLevelKey: 'DOK_2',
     industryVi: 'Chuỗi cung ứng & Bán lẻ đa kênh (Omnichannel Retail)',
     regulatoryBasisVi:
-      'Nghị định 123/2020/NĐ-CP Điều 8; Nghị định 70/2025/NĐ-CP; Thông tư 200/2014 Điều 26; Luật Kế toán 88/2015',
+      'Nghị định 254/2026/NĐ-CP; Thông tư 200/2014 Điều 26; Luật Kế toán 88/2015',
     learningObjectivesVi: [
       'Phân biệt bản chất pháp lý giữa Phiếu xuất kho bán hàng (PXK - Nợ 632) và Phiếu XK kiêm VCNB (Mẫu 03/XKNB - Nợ 157).',
       'Hiểu rõ sự khác biệt trong hạch toán điều chuyển kho giữa Thông tư 200/99 (dùng TK 157) và Thông tư 133 (theo dõi chi tiết TK 156 do cấm TK 157).',

@@ -61,7 +61,7 @@ export const COGS_SOCRATIC_HINTS: Record<string, CogsScenarioHints> = {
         legalBasisVi: [
           'Chuẩn mực Kế toán Việt Nam VAS 02 (Hàng tồn kho) Đoạn 13-16: Quy định các phương pháp tính giá trị hàng tồn kho (FIFO, Bình quân gia quyền, Thực tế đích danh). Phương pháp LIFO bị bãi bỏ.',
           'Thông tư 200/2014/TT-BTC & Thông tư 99/2025/TT-BTC (áp dụng từ 01/01/2026): Hướng dẫn tài khoản 156 (Hàng hóa), 157 (Hàng gửi đi bán), 632 (Giá vốn hàng bán).',
-          'Nghị định 123/2020/NĐ-CP & Nghị định 70/2025/NĐ-CP: Quy định về Phiếu xuất kho kiêm vận chuyển nội bộ điện tử (Mẫu 03/XKNB).',
+          'Nghị định 254/2026/NĐ-CP: Quy định về Phiếu xuất kho kiêm vận chuyển nội bộ điện tử (Mẫu 03/XKNB).',
         ],
         accountingPrinciplesVi: [
           'Xuất bán hàng hóa tiêu thụ ra ngoài: Nợ TK 632 / Có TK 156 (Ghi nhận giá vốn tương ứng doanh thu thực tế).',
@@ -297,13 +297,13 @@ export const COGS_SOCRATIC_HINTS: Record<string, CogsScenarioHints> = {
       },
       {
         level: 2,
-        titleVi: 'Nấc 2: Cơ Sở Pháp Lý Nghị Định 123/2020 & Luật Kế Toán 88/2015',
-        subtitleVi: 'Nghị định 123, Nghị định 70/2025, Thông tư 200 và Luật Kế toán 88/2015.',
+        titleVi: 'Nấc 2: Cơ Sở Pháp Lý Nghị Định 254/2026 & Luật Kế Toán 88/2015',
+        subtitleVi: 'Nghị định 254/2026, Thông tư 200 và Luật Kế toán 88/2015.',
         badgeVi: 'Nấc 2: Bản Chất Pháp Lý',
         contentVi:
           'Quy định pháp lý về luân chuyển nội bộ và yêu cầu tính trung thực của sổ kế toán:',
         legalBasisVi: [
-          'Nghị định 123/2020/NĐ-CP Điều 8 & Nghị định 70/2025/NĐ-CP: Bắt buộc sử dụng Phiếu xuất kho kiêm vận chuyển nội bộ điện tử (Mẫu 03/XKNB) có mã của cơ quan thuế khi lưu thông hàng hóa trên đường.',
+          'Nghị định 254/2026/NĐ-CP: Bắt buộc sử dụng Phiếu xuất kho kiêm vận chuyển nội bộ điện tử (Mẫu 03/XKNB) có mã của cơ quan thuế khi lưu thông hàng hóa trên đường.',
           'Thông tư 200/2014/TT-BTC Điều 27: Tài khoản 157 (Hàng gửi đi bán) dùng để phản ánh hàng hóa gửi đại lý hoặc chuyển giao giữa các đơn vị trực thuộc không hạch toán phụ thuộc.',
           'Thông tư 133/2016/TT-BTC: Không sử dụng TK 157. Các doanh nghiệp vừa và nhỏ theo dõi hàng gửi bán và điều chuyển chi tiết ngay trên TK 156 (hoặc sổ chi tiết địa điểm kho).',
           'Luật Kế toán 88/2015/QH13 Điều 13: Nghiêm cấm hành vi để ngoài sổ kế toán hoặc phản ánh sai lệch tình trạng tài sản (xuất âm kho tạo số dư âm bất hợp pháp).',
@@ -348,7 +348,7 @@ export const COGS_SOCRATIC_HINTS: Record<string, CogsScenarioHints> = {
           },
         ],
         taxGuidanceVi:
-          'Theo Nghị định 123, Phiếu 03/XKNB điện tử hợp lệ phải được truyền dữ liệu về cơ quan thuế. Khi quản lý thị trường kiểm tra trên đường, tài xế chỉ cần xuất trình mã tra cứu hóa đơn điện tử.',
+          'Theo Nghị định 254/2026/NĐ-CP, Phiếu 03/XKNB điện tử hợp lệ phải được truyền dữ liệu về cơ quan thuế. Khi quản lý thị trường kiểm tra trên đường, tài xế chỉ cần xuất trình mã tra cứu hóa đơn điện tử.',
       },
     ],
   },

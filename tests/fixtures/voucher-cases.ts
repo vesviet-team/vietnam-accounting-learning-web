@@ -104,7 +104,7 @@ export const VOUCHER_TEST_CASES: ExtendedVoucherCase[] = [
     hasArithmeticError: false,
     missingSignature: false,
     signers: { director: true, chiefAccountant: true, cashierOrStorekeeper: true, preparer: true },
-    statutoryBasis: 'Nghị định 123/2020/NĐ-CP & Thông tư 219/2013/TT-BTC',
+    statutoryBasis: 'Nghị định 254/2026/NĐ-CP & Thông tư 219/2013/TT-BTC',
   },
   {
     id: 'case-05-vendor-status-03-suspended',
@@ -190,7 +190,7 @@ export const VOUCHER_TEST_CASES: ExtendedVoucherCase[] = [
     hasArithmeticError: true,
     missingSignature: false,
     signers: { director: true, chiefAccountant: true, cashierOrStorekeeper: true, preparer: true },
-    statutoryBasis: 'Nghị định 123/2020/NĐ-CP Điều 10',
+    statutoryBasis: 'Nghị định 254/2026/NĐ-CP Điều 10',
   },
   {
     id: 'case-09-missing-director-signature',

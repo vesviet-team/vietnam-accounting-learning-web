@@ -12,7 +12,7 @@ export type CostingMethod =
 
 export type VoucherType = 'PNK' | 'PXK' | 'XKNB_03';
 
-export type AccountingRegime = 'CIRCULAR_200' | 'CIRCULAR_133' | 'CIRCULAR_99';
+export type AccountingRegime = 'CIRCULAR_200' | 'CIRCULAR_133' | 'CIRCULAR_99' | 'CIRCULAR_58';
 
 export type WipMethod = 'DIRECT_MATERIAL' | 'EQUIVALENT_UNITS';
 

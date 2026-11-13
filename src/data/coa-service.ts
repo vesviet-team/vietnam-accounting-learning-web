@@ -2,10 +2,12 @@ import { AccountItem, AccountingRegime, AccountCategory } from '@/types/coa';
 import { COA_CIRCULAR_200 } from './coa-circular-200';
 import { COA_CIRCULAR_133 } from './coa-circular-133';
 import { COA_CIRCULAR_99, CIRCULAR_99_KEY_HIGHLIGHTS } from './coa-circular-99';
+import { COA_CIRCULAR_58, CIRCULAR_58_KEY_HIGHLIGHTS } from './coa-circular-58';
 import { isProhibitedInCircular133, getProhibitionRule } from './prohibited-accounts';
 
 export function getAccountsByRegime(regime: AccountingRegime): AccountItem[] {
   if (regime === 'CIRCULAR_99') return COA_CIRCULAR_99;
+  if (regime === 'CIRCULAR_58') return COA_CIRCULAR_58;
   return regime === 'CIRCULAR_200' ? COA_CIRCULAR_200 : COA_CIRCULAR_133;
 }
 
@@ -40,4 +42,11 @@ export function searchAccounts(
   });
 }
 
-export { isProhibitedInCircular133, getProhibitionRule, COA_CIRCULAR_99, CIRCULAR_99_KEY_HIGHLIGHTS };
+export {
+  isProhibitedInCircular133,
+  getProhibitionRule,
+  COA_CIRCULAR_99,
+  CIRCULAR_99_KEY_HIGHLIGHTS,
+  COA_CIRCULAR_58,
+  CIRCULAR_58_KEY_HIGHLIGHTS,
+};

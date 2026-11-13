@@ -1,10 +1,10 @@
 # Vietnam Accounting 30-Day Interactive Learning Web
 
-> Interactive Vietnamese Accounting learning and simulation platform covering Circular 99/2025/TT-BTC (effective 01/01/2026), Circular 200/2014/TT-BTC, Circular 133/2016/TT-BTC (SME), Law on Accounting 88/2015/QH13, VAT Law 48/2024/QH15 (5M VND non-cash threshold from 01/07/2025), E-Invoicing Decree 123/2020/ND-CP & Decree 70/2025/ND-CP, and Foreign Contractor Tax (Circular 103/2014/TT-BTC).
+> Interactive Vietnamese Accounting learning and simulation platform covering Circular 99/2025/TT-BTC (effective 01/01/2026), Circular 58/2026/TT-BTC (micro-enterprise regime, effective 01/07/2026, replacing Circular 132/2018), Circular 200/2014/TT-BTC, Circular 133/2016/TT-BTC (SME), Law on Accounting 88/2015/QH13, VAT Law 48/2024/QH15 (5M VND non-cash threshold from 01/07/2025), E-Invoicing Decree 254/2026/ND-CP (effective 01/07/2026, replacing Decrees 123/2020 & 70/2025), PIT Law 109/2025/QH15 & Decree 253/2026/ND-CP (new deductions 15.5M/6.2M from 01/07/2026), VAT 2% reduction Decree 174/2025/ND-CP (8% rate until 31/12/2026), E-Commerce Tax Decree 117/2025/ND-CP & Decree 68/2026/ND-CP, Global Minimum Tax Decree 236/2025/ND-CP (TK 82112 top-up CIT), and Foreign Contractor Tax (Circular 103/2014/TT-BTC).
 
 ## Core Learning & Simulation Modules
 
-- [Chart of Accounts Explorer](https://learn.tanhdev.com/#coa): Interactive lookup across Circular 99/2025/TT-BTC, Circular 200/2014/TT-BTC (154 accounts), and Circular 133/2016/TT-BTC (57 SME accounts + 13 prohibited accounts safeguard)
+- [Chart of Accounts Explorer](https://learn.tanhdev.com/#coa): Interactive lookup across Circular 99/2025/TT-BTC, Circular 58/2026/TT-BTC (micro-enterprise, conversion dataset from TT 132/2018), Circular 200/2014/TT-BTC (154 accounts), and Circular 133/2016/TT-BTC (57 SME accounts + 13 prohibited accounts safeguard)
 - [30-Day Curriculum](https://learn.tanhdev.com/#curriculum): 10 structured modules, 30 daily lessons, 95 concepts, and 100 Webb's DOK 1-3 milestone test items with Rule of One diagnostic feedback
 - [Double-Entry Journalizer Workbench](https://learn.tanhdev.com/#workbench): Real-time Debit/Credit balance validation, T-account ledger posting, and 3-tier Socratic anti-spoil hint ladder
 - [Dynamic Financial Statements (B01-DN, B02-DN, B03-DN)](https://learn.tanhdev.com/#financial-statements): Automated Statement of Financial Position (B01-DN), Income Statement (B02-DN), and Indirect Cash Flow Statement (B03-DN)

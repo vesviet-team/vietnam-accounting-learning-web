@@ -123,7 +123,7 @@ export const SocraticHintLadder: FC<SocraticHintLadderProps> = ({
               </span>
               {currentRegime && (
                 <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">
-                  [{currentRegime === 'CIRCULAR_133' ? 'TT 133' : 'TT 200'}]
+                  [{currentRegime === 'CIRCULAR_200' || currentRegime === 'CIRCULAR_99' ? 'TT 200' : 'TT 133'}]
                 </span>
               )}
             </div>

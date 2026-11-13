@@ -175,7 +175,7 @@ describe('VOUCHER INSPECTION ROOM UNIT TESTS', () => {
       );
 
       expect(screen.getByText(/100\/100 ĐIỂM/i)).toBeInTheDocument();
-      expect(screen.getByText(/Điều 10 Nghị định 123\/2020\/NĐ-CP/i)).toBeInTheDocument();
+      expect(screen.getAllByText(/Nghị định 254\/2026\/NĐ-CP/i).length).toBeGreaterThan(0);
     });
 
     it('should detect missing mandatory signatures on internal payment voucher', () => {

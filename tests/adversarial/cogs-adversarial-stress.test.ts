@@ -16,7 +16,7 @@
  * - T5.12: Socratic hint anti-spoil stress: hint level segregation and anti-spoil reset invariant.
  *
  * Roles: @qa-engineer & @vietnam-accounting-specialist
- * Standards: VAS 02, IAS 2, TT 200/2014, TT 133/2016, TT 99/2025, Decree 123/2020, TT 96/2015.
+ * Standards: VAS 02, IAS 2, TT 200/2014, TT 133/2016, TT 99/2025, Decree 254/2026, TT 96/2015.
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';

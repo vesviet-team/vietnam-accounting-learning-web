@@ -42,6 +42,9 @@ export function generateCashFlowStatement(
   period: string = 'Năm 2026'
 ): CashFlowReport {
   const balances = extractLedgerBalances(ledgerOrInput);
+  // Always reconcile against the TT200 variant of B01-DN: TT99 inherits the TT200
+  // account chart (identical math incl. TK 113 in Mã 110), and TT133 is not used here.
+  // Changing this would break the Mã 70 ≡ Mã 110 reconciliation for no behavioral gain.
   const b01 = generateBalanceSheet(ledgerOrInput, 'TT200');
   const b02 = generateIncomeStatement(ledgerOrInput, period);
 

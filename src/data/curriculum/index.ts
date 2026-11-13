@@ -62,8 +62,8 @@ export const MODULE_METADATA: ModuleMetadata[] = [
   },
   {
     moduleNumber: 6,
-    titleVi: 'Doanh Thu Bán Hàng, Hóa Đơn NĐ 123 & Các Khoản Giảm Trừ',
-    subtitleVi: 'VAS 14 điều kiện doanh thu, cặp bút toán 511/632, TK 131 và HĐĐT NĐ 123',
+    titleVi: 'Doanh Thu Bán Hàng, Hóa Đơn NĐ 254/2026 & Các Khoản Giảm Trừ',
+    subtitleVi: 'VAS 14 điều kiện doanh thu, cặp bút toán 511/632, TK 131 và HĐĐT NĐ 254/2026',
     days: [16, 17, 18],
     milestoneDay: 18,
     colorClass: 'cyan',

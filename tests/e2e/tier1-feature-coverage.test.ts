@@ -385,7 +385,33 @@ describe('Tier 1: Feature Coverage (Requirement-driven verification of F1-F5)', 
       // CIT at 20%: 31M * 0.20 = 6.2M
       expect(income.citExpense).toBe(6200000); // Mã 51
       // Net profit after tax: 31M - 6.2M = 24.8M
-      expect(income.netProfitAfterTax).toBe(24800000); // Mã 60
+      expect(income.netProfitAfterTax).toBe(24800000);
+    });
+
+    it('T1.4.6: B01-DN accepts TT99 (Circular 99/2025/TT-BTC) and keeps the full TT200 account chart with invariant intact', () => {
+      const balances: Record<string, LedgerAccountBalance> = {
+        '111': { accountCode: '111', accountNameVi: 'Tiền mặt', debitTotal: 100000000, creditTotal: 0, closingDebit: 100000000, closingCredit: 0 },
+        '112': { accountCode: '112', accountNameVi: 'Tiền gửi NH', debitTotal: 200000000, creditTotal: 0, closingDebit: 200000000, closingCredit: 0 },
+        '113': { accountCode: '113', accountNameVi: 'Vàng tiền tệ', debitTotal: 50000000, creditTotal: 0, closingDebit: 50000000, closingCredit: 0 },
+        '156': { accountCode: '156', accountNameVi: 'Hàng hóa', debitTotal: 150000000, creditTotal: 0, closingDebit: 150000000, closingCredit: 0 },
+        '331': { accountCode: '331', accountNameVi: 'Phải trả người bán', debitTotal: 0, creditTotal: 200000000, closingDebit: 0, closingCredit: 200000000 },
+        '411': { accountCode: '411', accountNameVi: 'Vốn đầu tư CSH', debitTotal: 0, creditTotal: 300000000, closingDebit: 0, closingCredit: 300000000 },
+      };
+
+      const report = FinancialStatementsEngine.generateBalanceSheet(balances, 'TT99');
+      expect(report.circular).toBe('TT99');
+      // TT99 inherits the TT200 chart: Mã 110 includes TK 113 (50M) -> 100 + 200 + 50 = 350M
+      expect(report.assets.shortTerm.items['110']).toBe(350000000);
+      // Mã 270 = 350M + 150M = 500M
+      expect(report.assets.totalAssets).toBe(500000000);
+      expect(report.resources.totalResources).toBe(500000000);
+      expect(report.isBalanced).toBe(true);
+      expect(report.discrepancy).toBe(0);
+      expect(report.warnings.length).toBe(0);
+
+      // TT99 math must be identical to TT200 (not the narrowed TT133 chart)
+      const report200 = FinancialStatementsEngine.generateBalanceSheet(balances, 'TT200');
+      expect(report200.assets.totalAssets).toBe(report.assets.totalAssets);
     });
   });
 

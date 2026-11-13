@@ -46,7 +46,7 @@ export const CurriculumPreview: FC<CurriculumPreviewProps> = ({
           10 Khối Học Phần & Bài Đọc Hàng Ngày (Ngày 1 đến 30)
         </h1>
         <p className="text-sm text-emerald-100 max-w-2xl leading-relaxed">
-          Mỗi ngày dành từ 15–20 phút để làm chủ 3–5 khái niệm cốt lõi kèm Sơ đồ chữ T tương tác, mẫu chứng từ hóa đơn điện tử NĐ 123 và phiếu thu/chi/UNC thực tế.
+          Mỗi ngày dành từ 15–20 phút để làm chủ 3–5 khái niệm cốt lõi kèm Sơ đồ chữ T tương tác, mẫu chứng từ hóa đơn điện tử NĐ 254/2026 và phiếu thu/chi/UNC thực tế.
         </p>
 
         <div className="pt-2 flex flex-wrap items-center gap-3">

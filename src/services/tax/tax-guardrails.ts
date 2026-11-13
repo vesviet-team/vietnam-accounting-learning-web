@@ -4,7 +4,7 @@
  *
  * Implements:
  * 1. Non-Cash Payment Threshold Check (>= 20M VND) under Circular 219/2013/TT-BTC & Circular 96/2015/TT-BTC
- * 2. Vendor Tax Status Evaluation (Status 00 Active vs 03 Suspended vs 04 Runaway) under Decree 123/2020/ND-CP
+ * 2. Vendor Tax Status Evaluation (Status 00 Active vs 03 Suspended vs 04 Runaway) under Decree 254/2026/ND-CP
  * 3. CIT Schedule B4 (Chỉ tiêu B4 - Chi phí không được trừ) calculation & CIT Tax Adjustment Engine
  */
 
@@ -22,13 +22,13 @@ export const STATUTORY_BASIS_FCT_103 =
   'Điều 12 và Điều 13 Thông tư 103/2014/TT-BTC hướng dẫn thực hiện nghĩa vụ thuế áp dụng đối với tổ chức, cá nhân nước ngoài kinh doanh tại Việt Nam (Thuế nhà thầu - FCT)';
 
 export const STATUTORY_BASIS_VENDOR_RUNAWAY =
-  'Khoản 2 Điều 4 Nghị định 123/2020/NĐ-CP';
+  'Nghị định 254/2026/NĐ-CP hướng dẫn Luật Quản lý thuế số 108/2025/QH15 về hóa đơn điện tử, chứng từ điện tử';
 
 export const STATUTORY_BASIS_VENDOR_SUSPENDED =
-  'Khoản 2 Điều 4 Nghị định 125/2020/NĐ-CP và Điều 4 Nghị định 126/2020/NĐ-CP';
+  'Nghị định 254/2026/NĐ-CP hướng dẫn Luật Quản lý thuế số 108/2025/QH15 về hóa đơn điện tử, chứng từ điện tử';
 
 export const STATUTORY_BASIS_VENDOR_ACTIVE =
-  'Luật Quản lý thuế số 38/2019/QH14 và Nghị định 123/2020/NĐ-CP';
+  'Luật Quản lý thuế số 108/2025/QH15 và Nghị định 254/2026/NĐ-CP';
 
 export interface NonCashCheckResult {
   isViolated: boolean;
@@ -145,7 +145,7 @@ export function evaluateNonCashRule(
  *
  * Status 00: Active / Đang hoạt động -> Normal compliance.
  * Status 03: Temporarily suspended / Tạm ngừng kinh doanh có thời hạn -> High audit risk, verify invoice date vs suspension period.
- * Status 04: Inactive at registered address / Bỏ trốn -> 100% tax fraud flag, illegal invoice (Khoản 2 Điều 4 Nghị định 123/2020/NĐ-CP), VAT non-creditable, expense non-deductible for CIT (Schedule B4).
+ * Status 04: Inactive at registered address / Bỏ trốn -> 100% tax fraud flag, illegal invoice (Nghị định 254/2026/NĐ-CP), VAT non-creditable, expense non-deductible for CIT (Schedule B4).
  *
  * @param vendorTaxCode Tax code of supplier
  * @param vendorTaxStatus Status code ('00' | '03' | '04')
@@ -199,7 +199,7 @@ export function evaluateVendorTaxStatus(
         citDeductible: false,
         statutoryBasis: STATUTORY_BASIS_VENDOR_RUNAWAY,
         explanationVi:
-          'Cơ quan thuế đã ban hành thông báo người nộp thuế không hoạt động tại địa chỉ đã đăng ký (doanh nghiệp bỏ trốn). Hóa đơn bị coi là sử dụng không hợp pháp hóa đơn theo Khoản 2 Điều 4 Nghị định 123/2020/NĐ-CP, 100% rủi ro gian lận thuế.',
+          'Cơ quan thuế đã ban hành thông báo người nộp thuế không hoạt động tại địa chỉ đã đăng ký (doanh nghiệp bỏ trốn). Hóa đơn bị coi là sử dụng không hợp pháp hóa đơn theo Nghị định 254/2026/NĐ-CP, 100% rủi ro gian lận thuế.',
         recommendationVi:
           'Tuyệt đối KHÔNG khấu trừ thuế GTGT đầu vào (TK 133) và loại toàn bộ khỏi chi phí được trừ khi xác định thuế TNDN (phải đưa vào Mục B4 trên Tờ khai QTT TNDN). Lập biên bản giải trình và chuẩn bị hồ sơ chứng minh nghiệp vụ kinh tế có thật theo yêu cầu của cơ quan thuế.',
       };
@@ -362,5 +362,88 @@ export function calculateForeignContractorTax(input: FctCalculationInput): FctCa
     vatAmount,
     totalFctPayable: citAmount + vatAmount,
     statutoryBasis: STATUTORY_BASIS_FCT_103,
+  };
+}
+
+// =========================================================================
+// 6. PERSONAL INCOME TAX (PIT) DEDUCTION GUARDRAIL
+//    Luật Thuế TNCN số 109/2025/QH15 & Nghị định 253/2026/NĐ-CP
+// =========================================================================
+
+/** Mức giảm trừ gia cảnh cho bản thân theo pháp luật cũ (Luật Thuế TNCN số 04/2007/QH12, sửa đổi bởi Luật số 71/2014/QH13): 11.000.000 VNĐ/tháng */
+export const PIT_SELF_DEDUCTION_PREV_LAW = 11_000_000;
+
+/** Mức giảm trừ gia cảnh cho bản thân theo Luật Thuế TNCN số 109/2025/QH15 & Nghị định 253/2026/NĐ-CP (hiệu lực 01/07/2026): 15.500.000 VNĐ/tháng */
+export const PIT_SELF_DEDUCTION_2025_LAW = 15_500_000;
+
+/** Mức giảm trừ gia cảnh cho mỗi người phụ thuộc theo Luật Thuế TNCN số 109/2025/QH15 & Nghị định 253/2026/NĐ-CP (hiệu lực 01/07/2026): 6.200.000 VNĐ/tháng */
+export const PIT_DEPENDENT_DEDUCTION_2025_LAW = 6_200_000;
+
+export const STATUTORY_BASIS_PIT_LAW_2025 =
+  'Luật Thuế TNCN số 109/2025/QH15 và Nghị định 253/2026/NĐ-CP (hiệu lực 01/07/2026)';
+
+export type ApplicablePitLaw = 'LAW_04_2007' | 'LAW_109_2025';
+
+export interface PitDeductionCheckResult {
+  monthlyGrossSalary: number;
+  dependents: number;
+  applicableLaw: ApplicablePitLaw;
+  selfDeduction: number;
+  dependentDeduction: number;
+  totalMonthlyDeduction: number;
+  totalAnnualDeduction: number;
+  taxableMonthlyIncome: number;
+  statutoryBasis: string;
+  explanationVi: string;
+}
+
+/**
+ * Evaluates the personal-income-tax family deductions (giảm trừ gia cảnh) applicable
+ * to a monthly gross salary, depending on the effective date.
+ *
+ * - From 01/07/2026: Luật Thuế TNCN số 109/2025/QH15 + Nghị định 253/2026/NĐ-CP
+ *   → 15.500.000 VNĐ/tháng cho bản thân + 6.200.000 VNĐ/tháng cho mỗi người phụ thuộc.
+ * - Before 01/07/2026: Luật Thuế TNCN số 04/2007/QH12 (sửa đổi bởi Luật số 71/2014/QH13)
+ *   → 11.000.000 VNĐ/tháng cho bản thân + 4.400.000 VNĐ/tháng cho mỗi người phụ thuộc.
+ */
+export function evaluatePitDeduction(
+  monthlyGrossSalary: number,
+  dependents: number = 0,
+  asOfDate: string = '2026-07-01'
+): PitDeductionCheckResult {
+  const gross = Math.max(0, Number(monthlyGrossSalary) || 0);
+  const dependentCount = Math.max(0, Math.floor(Number(dependents) || 0));
+
+  const NEW_LAW_EFFECTIVE_DATE = '2026-07-01';
+  const isNewLaw = asOfDate >= NEW_LAW_EFFECTIVE_DATE;
+
+  const selfDeduction = isNewLaw ? PIT_SELF_DEDUCTION_2025_LAW : PIT_SELF_DEDUCTION_PREV_LAW;
+  const dependentDeductionPerPerson = isNewLaw ? PIT_DEPENDENT_DEDUCTION_2025_LAW : 4_400_000;
+  const dependentDeduction = dependentDeductionPerPerson * dependentCount;
+
+  const totalMonthlyDeduction = selfDeduction + dependentDeduction;
+  const totalAnnualDeduction = totalMonthlyDeduction * 12;
+  const taxableMonthlyIncome = Math.max(0, gross - totalMonthlyDeduction);
+
+  const applicableLaw: ApplicablePitLaw = isNewLaw ? 'LAW_109_2025' : 'LAW_04_2007';
+  const statutoryBasis = isNewLaw
+    ? STATUTORY_BASIS_PIT_LAW_2025
+    : 'Luật Thuế TNCN số 04/2007/QH12 (sửa đổi bởi Luật số 71/2014/QH13)';
+
+  const explanationVi = isNewLaw
+    ? `Theo Luật Thuế TNCN số 109/2025/QH15 và Nghị định 253/2026/NĐ-CP (hiệu lực từ 01/07/2026), mức giảm trừ gia cảnh cho bản thân là 15.500.000 VNĐ/tháng và 6.200.000 VNĐ/tháng cho mỗi người phụ thuộc. Áp dụng cho ngày ${asOfDate}: giảm trừ bản thân 15.500.000 VNĐ + ${dependentCount} người phụ thuộc x 6.200.000 VNĐ = tổng ${totalMonthlyDeduction.toLocaleString('vi-VN')} VNĐ/tháng. Thu nhập tính thuế tháng = max(0, ${gross.toLocaleString('vi-VN')} - ${totalMonthlyDeduction.toLocaleString('vi-VN')}) = ${taxableMonthlyIncome.toLocaleString('vi-VN')} VNĐ. Lưu ý: trước 01/07/2026 áp dụng mức cũ 11.000.000 VNĐ (bản thân) và 4.400.000 VNĐ/người phụ thuộc theo Luật Thuế TNCN số 04/2007/QH12 (sửa đổi bởi Luật số 71/2014/QH13).`
+    : `Trước ngày 01/07/2026, áp dụng mức giảm trừ gia cảnh theo Luật Thuế TNCN số 04/2007/QH12 (sửa đổi bởi Luật số 71/2014/QH13): 11.000.000 VNĐ/tháng cho bản thân và 4.400.000 VNĐ/tháng cho mỗi người phụ thuộc. Áp dụng cho ngày ${asOfDate}: giảm trừ bản thân 11.000.000 VNĐ + ${dependentCount} người phụ thuộc x 4.400.000 VNĐ = tổng ${totalMonthlyDeduction.toLocaleString('vi-VN')} VNĐ/tháng. Thu nhập tính thuế tháng = max(0, ${gross.toLocaleString('vi-VN')} - ${totalMonthlyDeduction.toLocaleString('vi-VN')}) = ${taxableMonthlyIncome.toLocaleString('vi-VN')} VNĐ. Lưu ý: từ 01/07/2026, mức mới theo Luật Thuế TNCN số 109/2025/QH15 và Nghị định 253/2026/NĐ-CP là 15.500.000 VNĐ (bản thân) và 6.200.000 VNĐ/người phụ thuộc.`;
+
+  return {
+    monthlyGrossSalary: gross,
+    dependents: dependentCount,
+    applicableLaw,
+    selfDeduction,
+    dependentDeduction,
+    totalMonthlyDeduction,
+    totalAnnualDeduction,
+    taxableMonthlyIncome,
+    statutoryBasis,
+    explanationVi,
   };
 }

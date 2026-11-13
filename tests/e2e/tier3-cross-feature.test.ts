@@ -325,7 +325,7 @@ describe('Tier 3: Pairwise Combinations & Multi-Feature Interactions', () => {
         cashierOrStorekeeper: true,
         preparer: true,
       },
-      statutoryBasis: 'Nghị định 123/2020 & TT 219/2013',
+      statutoryBasis: 'Nghị định 254/2026 & TT 219/2013',
     };
 
     const audit = VoucherInspector.auditVoucher(validHighValueVoucher);

@@ -220,7 +220,7 @@ describe('COMPREHENSIVE TAX COMPLIANCE & FRAUD GUARDRAILS (MILESTONE 5 / R5)', (
       expect(res.vatCreditable).toBe(false);
       expect(res.citDeductible).toBe(false);
       expect(res.statutoryBasis).toBe(STATUTORY_BASIS_VENDOR_RUNAWAY);
-      expect(res.explanationVi).toContain('Khoản 2 Điều 4 Nghị định 123/2020/NĐ-CP');
+      expect(res.explanationVi).toContain('Nghị định 254/2026/NĐ-CP');
       expect(res.explanationVi).toContain('100% rủi ro gian lận thuế');
       expect(res.recommendationVi).toContain('Mục B4');
     });
@@ -397,5 +397,62 @@ describe('COMPREHENSIVE TAX COMPLIANCE & FRAUD GUARDRAILS (MILESTONE 5 / R5)', (
       expect(screen.getByText(/Rào chắn Thuế GTGT đầu vào \(TK 133\):/i)).toBeInTheDocument();
       expect(screen.getByText(/Rào chắn Chi phí Thuế TNDN & Mục B4:/i)).toBeInTheDocument();
     });
+  });
+});
+
+import { evaluatePitDeduction } from '@/services/tax/tax-guardrails';
+
+describe('PIT DEDUCTION GUARDRAIL - Luật Thuế TNCN 109/2025/QH15 & NĐ 253/2026/NĐ-CP', () => {
+  it('should apply new-law deductions (15.5M self + 6.2M dependent) from 01/07/2026: gross 20M, 1 dependent -> taxable 0', () => {
+    const result = evaluatePitDeduction(20_000_000, 1, '2026-07-01');
+
+    expect(result.applicableLaw).toBe('LAW_109_2025');
+    expect(result.selfDeduction).toBe(15_500_000);
+    expect(result.dependentDeduction).toBe(6_200_000);
+    // Total monthly deduction = 15.5M + 6.2M = 21.7M
+    expect(result.totalMonthlyDeduction).toBe(21_700_000);
+    expect(result.totalAnnualDeduction).toBe(21_700_000 * 12);
+    // Taxable = max(0, 20M - 21.7M) = 0
+    expect(result.taxableMonthlyIncome).toBe(0);
+    expect(result.statutoryBasis).toBe(
+      'Luật Thuế TNCN số 109/2025/QH15 và Nghị định 253/2026/NĐ-CP (hiệu lực 01/07/2026)'
+    );
+    expect(result.explanationVi).toContain('15.500.000');
+    expect(result.explanationVi).toContain('6.200.000');
+  });
+
+  it('should compute taxable income for gross 30M with 2 dependents: 30M - (15.5M + 12.4M) = 2.1M', () => {
+    const result = evaluatePitDeduction(30_000_000, 2, '2026-08-15');
+
+    expect(result.applicableLaw).toBe('LAW_109_2025');
+    expect(result.selfDeduction).toBe(15_500_000);
+    expect(result.dependentDeduction).toBe(12_400_000);
+    expect(result.totalMonthlyDeduction).toBe(27_900_000);
+    // Taxable = 30M - 27.9M = 2.1M
+    expect(result.taxableMonthlyIncome).toBe(2_100_000);
+  });
+
+  it('should fall back to previous-law deductions (11M self + 4.4M dependent) before 01/07/2026', () => {
+    const result = evaluatePitDeduction(30_000_000, 2, '2026-06-30');
+
+    expect(result.applicableLaw).toBe('LAW_04_2007');
+    expect(result.selfDeduction).toBe(11_000_000);
+    expect(result.dependentDeduction).toBe(8_800_000);
+    expect(result.totalMonthlyDeduction).toBe(19_800_000);
+    // Taxable = 30M - 19.8M = 10.2M
+    expect(result.taxableMonthlyIncome).toBe(10_200_000);
+    expect(result.explanationVi).toContain('11.000.000');
+    expect(result.explanationVi).toContain('4.400.000');
+  });
+
+  it('should handle zero dependents with default asOfDate under the new law', () => {
+    const result = evaluatePitDeduction(25_000_000);
+
+    expect(result.dependents).toBe(0);
+    expect(result.dependentDeduction).toBe(0);
+    expect(result.applicableLaw).toBe('LAW_109_2025');
+    expect(result.totalMonthlyDeduction).toBe(15_500_000);
+    // Taxable = 25M - 15.5M = 9.5M
+    expect(result.taxableMonthlyIncome).toBe(9_500_000);
   });
 });

@@ -307,7 +307,7 @@ export const StockCardSimulator: FC<StockCardSimulatorProps> = ({
                 Thông tư 200/2014/TT-BTC & Thông tư 99/2025/TT-BTC
               </span>
               <span className="px-2.5 py-0.5 text-xs font-medium text-amber-200 bg-amber-900/40 rounded border border-amber-500/30">
-                Nghị định 123/2020 & 70/2025 (Mẫu 03/XKNB)
+                Nghị định 254/2026 (Mẫu 03/XKNB)
               </span>
             </div>
             <h2 className="text-xl md:text-2xl font-bold tracking-tight text-white flex items-center gap-2">
@@ -900,7 +900,7 @@ export const StockCardSimulator: FC<StockCardSimulatorProps> = ({
               . Giá vốn này kết chuyển vào Báo cáo KQKD (Mã 11).
             </p>
             <p>
-              • <strong>Điều chuyển / Gửi đại lý (Phiếu XK kiêm VCNB Mẫu 03/XKNB)</strong>: Tuân thủ Nghị định 123/2020 & Nghị định 70/2025, chỉ phản ánh luân chuyển hàng gửi bán hoặc điều chuyển kho, hạch toán{' '}
+              • <strong>Điều chuyển / Gửi đại lý (Phiếu XK kiêm VCNB Mẫu 03/XKNB)</strong>: Tuân thủ Nghị định 254/2026, chỉ phản ánh luân chuyển hàng gửi bán hoặc điều chuyển kho, hạch toán{' '}
               <span className="font-mono font-semibold text-purple-700 bg-purple-50 px-1 py-0.5 rounded border border-purple-200">
                 Nợ TK 157 / Có TK 156
               </span>
@@ -1013,7 +1013,7 @@ export const StockCardSimulator: FC<StockCardSimulatorProps> = ({
                   <option value="PNK">PNK - Phiếu nhập kho (Có 152/156)</option>
                   <option value="PXK">PXK - Phiếu xuất kho bán hàng (Nợ 632 / Có 156)</option>
                   <option value="XKNB_03">
-                    XKNB Mẫu 03 - Phiếu XK kiêm VCNB NĐ 123/70 (Nợ 157 / Có 156)
+                    XKNB Mẫu 03 - Phiếu XK kiêm VCNB NĐ 254/2026 (Nợ 157 / Có 156)
                   </option>
                 </select>
               </div>

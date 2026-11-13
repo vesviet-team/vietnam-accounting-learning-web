@@ -78,7 +78,7 @@ export function diagnoseRuleOfOne(
       priorityNameVi = 'Lỗi Vi Phạm Ngưỡng & Quy Định Pháp Lý Bắt Buộc (Thuế & Hóa đơn)';
       break;
     case 3:
-      priorityNameVi = 'Lỗi Nhầm Lẫn Chế Độ Kế Toán (Thông tư 200 vs Thông tư 133)';
+      priorityNameVi = 'Lỗi Nhầm Lẫn Chế Độ Kế Toán (Thông tư 200 vs Thông tư 133, gồm cả Thông tư 58/2026 cho DN siêu nhỏ)';
       break;
     case 4:
     default:

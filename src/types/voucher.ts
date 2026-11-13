@@ -1,10 +1,50 @@
 export type VoucherType =
-  | 'E_INVOICE_ND123'
+  | 'E_INVOICE_ND254_GROUP1'
+  | 'E_INVOICE_ND254_GROUP2'
+  | 'E_INVOICE_ND254_GROUP3'
   | 'CASH_RECEIPT_01_TT'
   | 'CASH_PAYMENT_02_TT'
   | 'BANK_TRANSFER_UNC'
   | 'GOODS_RECEIPT_01_VT'
   | 'GOODS_ISSUE_02_VT';
+
+export type EInvoiceGroup = 'GROUP_1_WITH_CQT' | 'GROUP_2_NO_CQT' | 'GROUP_3_POS';
+
+export interface EInvoiceGroupInfo {
+  group: EInvoiceGroup;
+  nameVi: string;
+  descriptionVi: string;
+  hasMccqt: boolean;
+  requiresCqtCode: boolean;
+  statutoryBasis: string;
+}
+
+export const E_INVOICE_GROUPS_ND254: EInvoiceGroupInfo[] = [
+  {
+    group: 'GROUP_1_WITH_CQT',
+    nameVi: 'Nhóm 1: Hóa đơn có mã của cơ quan thuế',
+    descriptionVi: 'Hóa đơn điện tử có mã CQT (MCCQT 34 ký tự hex) do Tổng cục Thuế cấp sau khi ký số. Áp dụng cho hầu hết doanh nghiệp sản xuất, kinh doanh hàng hóa, dịch vụ.',
+    hasMccqt: true,
+    requiresCqtCode: true,
+    statutoryBasis: 'Điều 4 Nghị định 254/2026/NĐ-CP',
+  },
+  {
+    group: 'GROUP_2_NO_CQT',
+    nameVi: 'Nhóm 2: Hóa đơn không có mã của cơ quan thuế',
+    descriptionVi: 'Hóa đơn điện tử tự phát hành bằng phần mềm riêng, không có MCCQT. Áp dụng cho một số đối tượng đặc thù: ngân hàng, tổ chức tín dụng, doanh nghiệp sản xuất, xuất khẩu dầu mỏ...',
+    hasMccqt: false,
+    requiresCqtCode: false,
+    statutoryBasis: 'Điều 5 Nghị định 254/2026/NĐ-CP',
+  },
+  {
+    group: 'GROUP_3_POS',
+    nameVi: 'Nhóm 3: Hóa đơn khởi tạo từ máy tính tiền (POS)',
+    descriptionVi: 'Hóa đơn điện tử được khởi tạo từ máy thanh toánPOS tích hợp với phần mềm kế toán, dùng cho bán lẻ, dịch vụ trực tiếp tại điểm bán.',
+    hasMccqt: true,
+    requiresCqtCode: true,
+    statutoryBasis: 'Điều 6 Nghị định 254/2026/NĐ-CP',
+  },
+];
 
 export interface EInvoiceItem {
   name: string;
@@ -17,12 +57,13 @@ export interface EInvoiceItem {
 }
 
 export interface EInvoiceData {
-  type: 'E_INVOICE_ND123';
+  type: 'E_INVOICE_ND254_GROUP1' | 'E_INVOICE_ND254_GROUP2' | 'E_INVOICE_ND254_GROUP3';
+  eInvoiceGroup: EInvoiceGroup;
   titleVi: string;
   templateCode: string; // '1' (Hóa đơn GTGT)
   symbol: string; // 'C26TAA' (6 characters)
   invoiceNumber: string; // '00001245' (8 digits)
-  mccqt: string; // 34 hex characters
+  mccqt?: string; // 34 hex characters (optional for Group 2)
   invoiceDate: string;
   seller: {
     name: string;

@@ -211,7 +211,7 @@ describe('Tier 2: Boundary, Extreme Precision & Corner Cases', () => {
     it('T2.3.5: should preserve complex Vietnamese Unicode characters and accents with 100% fidelity', async () => {
       const complexUnicode = {
         title: 'Nghiệp vụ: Trích quỹ khen thưởng, phúc lợi và nộp thuế GTGT vãng lai tỉnh ngoài',
-        statutoryBasis: 'Nghị định 123/2020/NĐ-CP & Thông tư 80/2021/TT-BTC',
+        statutoryBasis: 'Nghị định 254/2026/NĐ-CP & Thông tư 80/2021/TT-BTC',
         specialSymbols: '₫, €, £, ¥, ±, ≤, ≥, ≠, ≡, ‰, ★, ⚡',
       };
 
@@ -380,7 +380,7 @@ describe('Tier 2: Boundary, Extreme Precision & Corner Cases', () => {
         totalAmount: 12000000, // Error: 10M + 1M != 12M
         paymentMethod: 'BANK_TRANSFER',
         vendorTaxStatus: '00',
-        statutoryBasis: 'NĐ 123/2020/NĐ-CP',
+        statutoryBasis: 'NĐ 254/2026/NĐ-CP',
       };
 
       const audit = VoucherInspector.auditVoucher(arithmeticErrorVoucher);

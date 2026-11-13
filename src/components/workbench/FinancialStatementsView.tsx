@@ -36,7 +36,13 @@ export const FinancialStatementsView: FC<FinancialStatementsViewProps> = ({
   initialLedger,
 }) => {
   const [selectedCircular, setSelectedCircular] = useState<'TT200' | 'TT133' | 'TT99'>(
-    currentRegime === 'CIRCULAR_133' ? 'TT133' : currentRegime === 'CIRCULAR_99' ? 'TT99' : 'TT200'
+    // CIRCULAR_58 (TT 58/2026 — DN siêu nhỏ) tạm đối chiếu theo mẫu TT133;
+    // sẽ chuyển sang mẫu B01-DNSN riêng của TT 58 khi có văn bản đầy đủ.
+    currentRegime === 'CIRCULAR_133' || currentRegime === 'CIRCULAR_58'
+      ? 'TT133'
+      : currentRegime === 'CIRCULAR_99'
+      ? 'TT99'
+      : 'TT200'
   );
   const [activeStatement, setActiveStatement] = useState<'B01' | 'B02' | 'B03'>('B01');
   const [ledgerSource, setLedgerSource] = useState<'DAY_27' | 'JOURNALIZER' | 'CUSTOM'>(
@@ -50,7 +56,11 @@ export const FinancialStatementsView: FC<FinancialStatementsViewProps> = ({
   // Synchronize when currentRegime changes from outside
   useEffect(() => {
     setSelectedCircular(
-      currentRegime === 'CIRCULAR_133' ? 'TT133' : currentRegime === 'CIRCULAR_99' ? 'TT99' : 'TT200'
+      currentRegime === 'CIRCULAR_133' || currentRegime === 'CIRCULAR_58'
+        ? 'TT133'
+        : currentRegime === 'CIRCULAR_99'
+        ? 'TT99'
+        : 'TT200'
     );
   }, [currentRegime]);
 
@@ -96,7 +106,12 @@ export const FinancialStatementsView: FC<FinancialStatementsViewProps> = ({
 
   // Generate Reports
   const balanceSheet: BalanceSheetReport = useMemo(() => {
-    return generateBalanceSheet(ledgerAccounts, selectedCircular === 'TT133' ? 'TT133' : 'TT200');
+    // TT99 (Circular 99/2025) inherits the TT200 account chart, so the engine keeps
+    // TT200 math for TT99 while still tagging report.circular === 'TT99'.
+    return generateBalanceSheet(
+      ledgerAccounts,
+      selectedCircular === 'TT133' ? 'TT133' : selectedCircular === 'TT99' ? 'TT99' : 'TT200'
+    );
   }, [ledgerAccounts, selectedCircular]);
 
   const incomeStatement: IncomeStatementReport = useMemo(() => {
@@ -469,7 +484,8 @@ export const FinancialStatementsView: FC<FinancialStatementsViewProps> = ({
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xs space-y-4">
           <div className="p-6 border-b border-slate-100 dark:border-slate-800 text-center space-y-1">
             <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-widest block">
-              Mẫu số B02 - DN (Ban hành theo TT 200 & TT 133)
+              Mẫu số B02 - DN (Ban hành theo{' '}
+              {selectedCircular === 'TT99' ? 'TT 99/2025/TT-BTC' : 'TT 200 & TT 133'})
             </span>
             <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-slate-100">
               BÁO CÁO KẾT QUẢ HOẠT ĐỘNG KINH DOANH

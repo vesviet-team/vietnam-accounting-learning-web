@@ -123,7 +123,7 @@ export const SettingsView: FC<SettingsViewProps> = ({
           <ShieldCheck className="w-5 h-5 text-emerald-600" />
           <span>Chế Độ Kế Toán Doanh Nghiệp Mặc Định</span>
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div
             onClick={() => onRegimeChange('CIRCULAR_200')}
             className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
@@ -169,6 +169,22 @@ export const SettingsView: FC<SettingsViewProps> = ({
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
               Chế độ kế toán mới hiệu lực từ 01/01/2026 thay thế TT 200: Báo cáo tình hình tài chính (B01-DN), kiểm soát nội bộ & chứng từ số.
+            </p>
+          </div>
+
+          <div
+            onClick={() => onRegimeChange('CIRCULAR_58')}
+            className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
+              currentRegime === 'CIRCULAR_58'
+                ? 'border-amber-600 bg-amber-50/40 dark:bg-amber-950/20'
+                : 'border-slate-200 dark:border-slate-800 hover:border-slate-300'
+            }`}
+          >
+            <div className="font-bold text-slate-900 dark:text-slate-100 text-sm">
+              Thông tư 58/2026/TT-BTC (Mới)
+            </div>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+              TT 58/2026 — DN siêu nhỏ, hiệu lực 01/07/2026: bãi bỏ hệ thống tài khoản Nợ/Có, ghi sổ trực tiếp theo 11 mẫu sổ đơn giản; được bố trí người thân trong gia đình làm kế toán.
             </p>
           </div>
         </div>

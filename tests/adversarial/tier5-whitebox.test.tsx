@@ -879,7 +879,7 @@ describe('TIER 5 ADVERSARIAL WHITE-BOX CHALLENGE SUITE', () => {
           vatAmount: 1_000_000,
           totalAmount: 12_000_000, // Discrepancy of 1,000,000!
           paymentMethod: 'CASH' as const,
-          statutoryBasis: 'NĐ 123/2020',
+          statutoryBasis: 'NĐ 254/2026',
           vendorTaxStatus: '00' as const,
           signers: {
             director: true,

@@ -1,4 +1,4 @@
-export type AccountingRegime = 'CIRCULAR_133' | 'CIRCULAR_200' | 'CIRCULAR_99';
+export type AccountingRegime = 'CIRCULAR_133' | 'CIRCULAR_200' | 'CIRCULAR_99' | 'CIRCULAR_58';
 
 export type AccountCategory =
   | 'ASSET'

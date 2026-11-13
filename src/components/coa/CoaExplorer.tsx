@@ -55,6 +55,7 @@ function buildAccountTokens(account: AccountItem): AccountWithTokens {
 const PREINDEXED_ACCOUNTS_200: AccountWithTokens[] = getAccountsByRegime('CIRCULAR_200').map(buildAccountTokens);
 const PREINDEXED_ACCOUNTS_133: AccountWithTokens[] = getAccountsByRegime('CIRCULAR_133').map(buildAccountTokens);
 const PREINDEXED_ACCOUNTS_99: AccountWithTokens[] = getAccountsByRegime('CIRCULAR_99').map(buildAccountTokens);
+const PREINDEXED_ACCOUNTS_58: AccountWithTokens[] = getAccountsByRegime('CIRCULAR_58').map(buildAccountTokens);
 const PREINDEXED_PROHIBITED_133: AccountWithTokens[] = getProhibitedAccounts133().map(buildAccountTokens);
 
 interface AccountCardProps {
@@ -183,6 +184,8 @@ export const CoaExplorer: FC<CoaExplorerProps> = ({
       ? PREINDEXED_PROHIBITED_133
       : currentRegime === 'CIRCULAR_99'
       ? PREINDEXED_ACCOUNTS_99
+      : currentRegime === 'CIRCULAR_58'
+      ? PREINDEXED_ACCOUNTS_58
       : (currentRegime === 'CIRCULAR_200' ? PREINDEXED_ACCOUNTS_200 : PREINDEXED_ACCOUNTS_133);
 
     return sourceList.filter((acc) => {
@@ -265,6 +268,8 @@ export const CoaExplorer: FC<CoaExplorerProps> = ({
             <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight pt-1">
               {currentRegime === 'CIRCULAR_99'
                 ? 'Thông tư 99/2025/TT-BTC (Chế độ Kế toán Doanh nghiệp Mới — Hiệu lực 01/01/2026)'
+                : currentRegime === 'CIRCULAR_58'
+                ? 'Thông tư 58/2026/TT-BTC (Chế độ Kế toán Doanh nghiệp Siêu nhỏ — Hiệu lực 01/07/2026)'
                 : currentRegime === 'CIRCULAR_200'
                 ? 'Thông tư 200/2014/TT-BTC (Doanh nghiệp thông thường & Lớn)'
                 : 'Thông tư 133/2016/TT-BTC (Doanh nghiệp vừa và nhỏ - SME)'}
@@ -272,6 +277,8 @@ export const CoaExplorer: FC<CoaExplorerProps> = ({
             <p className="text-sm text-slate-600 dark:text-slate-400 max-w-3xl pt-1">
               {currentRegime === 'CIRCULAR_99'
                 ? 'Thay thế hoàn toàn Thông tư 200 từ 01/01/2026: đổi tên B01-DN thành "Báo cáo tình hình tài chính" tiệm cận IFRS, trao quyền chủ động mở tài khoản cấp 2/3, chuẩn hóa đơn vị tiền tệ và kiểm soát nội bộ số hóa.'
+                : currentRegime === 'CIRCULAR_58'
+                ? 'Chế độ kế toán DN siêu nhỏ theo TT 58/2026 (hiệu lực 01/07/2026, thay thế TT 132/2018): không dùng hệ thống tài khoản Nợ/Có, ghi sổ trực tiếp theo 11 mẫu sổ đơn giản (S1–S4d-DNSN); BCTC chỉ còn B01-DNSN & B02-DNSN; được bố trí người thân trong gia đình làm kế toán. Danh mục dưới đây là dataset đối chiếu chuyển đổi từ TT 132/2018.'
                 : currentRegime === 'CIRCULAR_200'
                 ? 'Danh mục tài khoản 4 chữ số chuẩn mực, bao gồm chi tiết tài khoản cấp 1 và cấp 2. Hỗ trợ tập hợp chi phí riêng lẻ qua TK 621, 622, 623, 627 và chi phí bán hàng TK 641.'
                 : 'Danh mục tài khoản 3 chữ số tinh giản cho DNNVV. Tuyệt đối không dùng các tài khoản chi phí 621, 622, 623, 627, 641 và tài khoản giảm trừ doanh thu 521.'}

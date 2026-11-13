@@ -30,7 +30,7 @@ export const WebMcpProvider: FC<WebMcpProviderProps> = ({ currentRegime, activeT
           mcpVersion: '2026-07-28',
           currentRegime,
           activeTab,
-          supportedCirculars: ['99/2025/TT-BTC', '200/2014/TT-BTC', '133/2016/TT-BTC'],
+          supportedCirculars: ['99/2025/TT-BTC', '58/2026/TT-BTC', '200/2014/TT-BTC', '133/2016/TT-BTC'],
           discovery: {
             authMd: '/auth.md',
             serverCard: '/.well-known/mcp/server-card.json',
@@ -44,7 +44,7 @@ export const WebMcpProvider: FC<WebMcpProviderProps> = ({ currentRegime, activeT
         const tools = [
           {
             name: 'lookup_vn_coa',
-            description: 'Lookup Vietnamese Chart of Accounts across Circular 99/2025, 200/2014, and 133/2016',
+            description: 'Lookup Vietnamese Chart of Accounts across Circular 99/2025, 58/2026, 200/2014, and 133/2016',
             inputSchema: { type: 'object', properties: { code: { type: 'string' } }, required: ['code'] },
           },
           {

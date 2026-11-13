@@ -297,7 +297,7 @@ describe('Tier 4: Real-World End-to-End Application Scenarios', () => {
       paymentMethod: 'BANK_TRANSFER', // Compliant
       vendorTaxStatus: '00', // Active
       signers: { director: true, chiefAccountant: true, cashierOrStorekeeper: true, preparer: true },
-      statutoryBasis: 'NĐ 123/2020',
+      statutoryBasis: 'NĐ 254/2026',
     };
 
     // Audit invoices

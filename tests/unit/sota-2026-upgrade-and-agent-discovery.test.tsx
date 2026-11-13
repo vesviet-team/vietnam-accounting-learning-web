@@ -35,6 +35,15 @@ describe('2026 SOTA Vietnam Accounting Standards Upgrade', () => {
       const tk112 = findAccountByCode('112', 'CIRCULAR_99');
       expect(tk112).toBeDefined();
       expect(tk112?.regimes).toContain('CIRCULAR_99');
+
+      // TT 99/2025: bỏ TK 142, 144, 223; bổ sung TK 215 (Tài sản sinh học) và 82112
+      // (chi phí thuế TNDN bổ sung theo thuế tối thiểu toàn cầu)
+      const codes = new Set(COA_CIRCULAR_99.map((a) => a.code));
+      expect(codes.has('142')).toBe(false);
+      expect(codes.has('144')).toBe(false);
+      expect(codes.has('223')).toBe(false);
+      expect(codes.has('215')).toBe(true);
+      expect(codes.has('82112')).toBe(true);
     });
 
     it('renders Circular 99/2025 highlights banner and switcher in CoaExplorer', () => {

@@ -157,9 +157,10 @@ describe('CURRICULUM UNIT TEST SUITE', () => {
   });
 
   describe('3. Statutory Voucher Illustrations & Invariants', () => {
-    it('should validate Decree 123 E-Invoice Decision 1450 schema attributes', () => {
+    it('should validate Decree 254/2026 E-Invoice Decision 1450 schema attributes (Group 1)', () => {
       const sampleEInvoice: EInvoiceData = {
-        type: 'E_INVOICE_ND123',
+        type: 'E_INVOICE_ND254_GROUP1',
+        eInvoiceGroup: 'GROUP_1_WITH_CQT',
         titleVi: 'Hóa đơn GTGT điện tử',
         templateCode: '1',
         symbol: 'C26TAA',
@@ -195,8 +196,8 @@ describe('CURRICULUM UNIT TEST SUITE', () => {
       expect(/^\d{8}$/.test(sampleEInvoice.invoiceNumber)).toBe(true);
 
       // 34-hex MCCQT verification
-      expect(sampleEInvoice.mccqt).toHaveLength(34);
-      expect(/^[0-9A-Fa-f]{34}$/.test(sampleEInvoice.mccqt)).toBe(true);
+      expect(sampleEInvoice.mccqt!).toHaveLength(34);
+      expect(/^[0-9A-Fa-f]{34}$/.test(sampleEInvoice.mccqt!)).toBe(true);
 
       // Pretax + VAT == Total Payment Invariant
       expect(sampleEInvoice.subtotalPretax + sampleEInvoice.totalVat).toBe(sampleEInvoice.totalPayment);
@@ -306,13 +307,14 @@ describe('CURRICULUM UNIT TEST SUITE', () => {
       expect(container.textContent).toContain('65.000.000');
     });
 
-    it('VoucherCard should render authentic Decree 123 E-Invoice details and switch tabs', async () => {
+    it('VoucherCard should render authentic Decree 254/2026 E-Invoice details and switch tabs', async () => {
       const { render, screen, fireEvent } = await import('@testing-library/react');
       const { VoucherCard } = await import('@/components/curriculum/VoucherCard');
 
       const testInvoice: EInvoiceData = {
-        type: 'E_INVOICE_ND123',
-        titleVi: 'Hóa đơn GTGT điện tử NĐ 123',
+        type: 'E_INVOICE_ND254_GROUP1',
+        eInvoiceGroup: 'GROUP_1_WITH_CQT',
+        titleVi: 'Hóa đơn GTGT điện tử NĐ 254/2026',
         templateCode: '1',
         symbol: 'C26TAA',
         invoiceNumber: '00001245',
@@ -341,7 +343,7 @@ describe('CURRICULUM UNIT TEST SUITE', () => {
 
       const { container } = render(<VoucherCard voucher={testInvoice} />);
 
-      expect(screen.getByText('Hóa đơn GTGT điện tử NĐ 123')).toBeDefined();
+      expect(screen.getByText('Hóa đơn GTGT điện tử NĐ 254/2026')).toBeDefined();
       expect(screen.getByText('C26TAA')).toBeDefined();
       expect(screen.getByText('00001245')).toBeDefined();
       expect(container.textContent).toContain('0037A2F8B1E9C40526D80A12BC34EF5678');

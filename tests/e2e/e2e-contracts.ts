@@ -99,9 +99,14 @@ export class SocraticEngine {
 // 2. Financial Statements (B01-DN & B02-DN) Interfaces & Reference Engine (F4)
 // ============================================================================
 
+// Mirrors src/services/financial-statements/balance-sheet-engine.ts.
+// 'TT99' (Circular 99/2025/TT-BTC) inherits the FULL TT200 account chart, so the
+// contract math keeps TT200 behavior for TT99 (all TT133-only branches are skipped).
+export type E2EBalanceSheetCircular = 'TT200' | 'TT133' | 'TT99';
+
 export interface BalanceSheetReport {
   asOfDate: string;
-  circular: 'TT200' | 'TT133';
+  circular: E2EBalanceSheetCircular;
   assets: {
     shortTerm: { code100: number; items: Record<string, number> };
     longTerm: { code200: number; items: Record<string, number> };
@@ -153,7 +158,7 @@ export class FinancialStatementsEngine {
    */
   static generateBalanceSheet(
     balances: Record<string, LedgerAccountBalance>,
-    circular: 'TT200' | 'TT133' = 'TT200',
+    circular: E2EBalanceSheetCircular = 'TT200',
     asOfDate: string = '2026-12-31'
   ): BalanceSheetReport {
     const shortTermItems: Record<string, number> = {};

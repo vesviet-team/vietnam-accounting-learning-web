@@ -15,7 +15,7 @@ export const VoucherPreview: FC<VoucherPreviewProps> = ({ currentRegime }) => {
           <span>Phòng Kiểm Tra Chứng Từ Kế Toán Thực Tế — Chế độ {currentRegime === 'CIRCULAR_200' ? 'Thông tư 200' : 'Thông tư 133'}</span>
         </div>
         <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
-          Mô Phỏng Hóa Đơn Điện Tử NĐ 123 & Kiểm Tra Điều Kiện Khấu Trừ Thuế
+          Mô Phỏng Hóa Đơn Điện Tử NĐ 254/2026 & Kiểm Tra Điều Kiện Khấu Trừ Thuế
         </h1>
         <p className="text-sm text-slate-500 dark:text-slate-400">
           Rèn luyện kỹ năng phát hiện sai phạm thực tế: Ngưỡng thanh toán không dùng tiền mặt &ge; 20 triệu đồng (TT 219/2013), kiểm tra MST doanh nghiệp ngừng hoạt động, tính hợp lệ của mã CQT (MCCQT).
