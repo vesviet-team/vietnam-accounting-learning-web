@@ -41,3 +41,11 @@ Thumbs.db
 .agents/
 ORIGINAL_REQUEST.md
 .zcode
+
+# ── Go backend (server/) — merged from vietnam-accounting-api ──
+server/bin/
+server/server
+server/*.exe
+server/vendor/
+server/coverage.*
+*.out

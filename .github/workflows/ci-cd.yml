@@ -24,11 +24,71 @@ env:
 
 jobs:
   # ──────────────────────────────────────────────────────────────
-  # Stage 1: Lint & Code Quality
+  # Stage 0: Path Filter (monorepo: web SPA vs Go server/)
+  # ──────────────────────────────────────────────────────────────
+  changes:
+    name: Detect Changed Paths
+    runs-on: [self-hosted, linux, x64, docker]
+    outputs:
+      web: ${{ steps.diff.outputs.web }}
+      server: ${{ steps.diff.outputs.server }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Compute changed paths
+        id: diff
+        run: |
+          set -euo pipefail
+          EVENT='${{ github.event_name }}'
+          WEB=false
+          SERVER=false
+          CHANGED=""
+
+          if [ "$EVENT" = "workflow_dispatch" ]; then
+            # Manual run → build & deploy everything.
+            WEB=true
+            SERVER=true
+          elif [ "$EVENT" = "pull_request" ]; then
+            CHANGED=$(git diff --name-only "origin/${{ github.base_ref }}...HEAD")
+          else
+            BEFORE='${{ github.event.before }}'
+            if [ -z "$BEFORE" ] || printf '%s' "$BEFORE" | grep -q '^0\+$' || ! git cat-file -e "$BEFORE" 2>/dev/null; then
+              # New branch / unknown base → treat as full run.
+              WEB=true
+              SERVER=true
+            else
+              CHANGED=$(git diff --name-only "$BEFORE" "$GITHUB_SHA")
+            fi
+          fi
+
+          if [ -n "$CHANGED" ]; then
+            while IFS= read -r f; do
+              case "$f" in
+                server/*)            SERVER=true ;;
+                .github/workflows/*) WEB=true; SERVER=true ;;
+                *.md|LICENSE|STATE.json|reports/*|dist/*|.agents/*|.zcode*|docs/*) ;;
+                *)                   WEB=true ;;
+              esac
+            done <<< "$CHANGED"
+          fi
+
+          echo "web=$WEB" >> "$GITHUB_OUTPUT"
+          echo "server=$SERVER" >> "$GITHUB_OUTPUT"
+          echo "Changed files:"
+          if [ -n "$CHANGED" ]; then printf '  %s\n' $CHANGED; else echo "  (none — full run)"; fi
+          echo "web=$WEB server=$SERVER"
+
+  # ──────────────────────────────────────────────────────────────
+  # Stage 1: Lint & Code Quality (web SPA + Go server in parallel)
   # ──────────────────────────────────────────────────────────────
   lint:
-    name: Code Quality & Secret Scan
+    name: Code Quality & Secret Scan (web)
     runs-on: [self-hosted, linux, x64, docker]
+    needs: [changes]
+    if: needs.changes.outputs.web == 'true'
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -48,7 +108,7 @@ jobs:
         run: |
           echo "=== Secret Scanner ==="
           echo "Rule: No API tokens, private keys, or credentials committed."
-          
+
           # Check for committed .env file
           if git ls-files | grep -q "^\.env$"; then
             echo "❌ VIOLATION: .env file is tracked by git."
@@ -69,12 +129,13 @@ jobs:
           echo "✅ Secret scan passed: No secrets detected in tracked files."
 
   # ──────────────────────────────────────────────────────────────
-  # Stage 2: Automated Testing
+  # Stage 2: Automated Testing (web SPA)
   # ──────────────────────────────────────────────────────────────
   test:
-    name: Unit & Adversarial Tests
+    name: Unit & Adversarial Tests (web)
     runs-on: [self-hosted, linux, x64, docker]
-    needs: lint
+    needs: [changes, lint]
+    if: needs.changes.outputs.web == 'true'
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -91,13 +152,13 @@ jobs:
         run: npm run test
 
   # ──────────────────────────────────────────────────────────────
-  # Stage 3: Container Image Build & Security Scan
+  # Stage 3: Container Image Build & Security Scan (web SPA)
   # ──────────────────────────────────────────────────────────────
   build:
-    name: Build and Push Container Image
+    name: Build and Push Container Image (web)
     runs-on: [self-hosted, linux, x64, docker]
-    needs: test
-    if: github.ref == 'refs/heads/main'
+    needs: [changes, test]
+    if: needs.changes.outputs.web == 'true' && github.ref == 'refs/heads/main'
     outputs:
       image_tag: ${{ steps.sha.outputs.short }}
     steps:
@@ -146,13 +207,13 @@ jobs:
           output-format: table
 
   # ──────────────────────────────────────────────────────────────
-  # Stage 4: GitOps Write-Back Deploy (Zero kubectl)
+  # Stage 4: GitOps Write-Back Deploy (web SPA, Zero kubectl)
   # ──────────────────────────────────────────────────────────────
   deploy:
-    name: GitOps Write-Back Deploy (ArgoCD Auto-Sync)
+    name: GitOps Write-Back Deploy (ArgoCD Auto-Sync, web)
     runs-on: [self-hosted, linux, x64, docker]
-    needs: build
-    if: github.ref == 'refs/heads/main'
+    needs: [changes, build]
+    if: needs.changes.outputs.web == 'true' && github.ref == 'refs/heads/main'
     steps:
       - name: Checkout GitOps Repository
         uses: actions/checkout@v4
@@ -199,3 +260,154 @@ jobs:
           echo "⚠️ Health probe timed out — check ArgoCD for sync status."
           exit 1
 
+  # ──────────────────────────────────────────────────────────────
+  # Stage 5: Go server (server/) — lint, test, build, write-back.
+  # Ported from vesviet-team/vietnam-accounting-api CI on consolidation.
+  # ──────────────────────────────────────────────────────────────
+  server-lint:
+    name: Go Lint & Secret Scan (server)
+    runs-on: [self-hosted, linux, x64, docker]
+    needs: [changes]
+    if: needs.changes.outputs.server == 'true'
+    defaults:
+      run:
+        working-directory: server
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+
+      - name: Check gofmt (fail on unformatted files)
+        run: |
+          UNFORMATTED=$(gofmt -l .)
+          if [ -n "$UNFORMATTED" ]; then
+            echo "❌ Files not gofmt-formatted:"
+            echo "$UNFORMATTED"
+            exit 1
+          fi
+          echo "✅ gofmt clean"
+
+      - name: Run go vet
+        run: go vet ./...
+
+      - name: 'Secret Scanner: Detect Committed Secrets (server)'
+        run: |
+          echo "=== Secret Scanner (server/) ==="
+          echo "Rule: No tokens, private keys, or credentials committed."
+
+          if git ls-files | grep -qE "^(\.env|server/\.env)$"; then
+            echo "❌ VIOLATION: .env file is tracked by git."
+            exit 1
+          fi
+
+          HARDCODED_SECRETS=$(git ls-files 'server/*.go' 'server/*.yml' 'server/*.yaml' 'server/*.sql' \
+            | xargs grep -lnE "ghp_[A-Za-z0-9_]{36}|github_pat_[A-Za-z0-9_]{82}|BEGIN (RSA|EC|OPENSSH|DSA) PRIVATE KEY" 2>/dev/null \
+            || true)
+
+          if [ -n "$HARDCODED_SECRETS" ]; then
+            echo "❌ VIOLATION: Detected possible secrets in tracked files:"
+            echo "$HARDCODED_SECRETS"
+            exit 1
+          fi
+
+          echo "✅ Secret scan passed: No secrets detected in tracked server files."
+
+  server-test:
+    name: Go Unit Tests (server)
+    runs-on: [self-hosted, linux, x64, docker]
+    needs: [changes, server-lint]
+    if: needs.changes.outputs.server == 'true'
+    defaults:
+      run:
+        working-directory: server
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Go (with module cache)
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+          cache: true
+          cache-dependency-path: server/go.sum
+
+      - name: Run Tests
+        run: go test ./... -count=1 -v
+
+  server-build-push:
+    name: Build and Push API Image (server)
+    runs-on: [self-hosted, linux, x64, docker]
+    needs: [changes, server-test]
+    if: needs.changes.outputs.server == 'true' && github.ref == 'refs/heads/main'
+    outputs:
+      image_tag: ${{ steps.sha.outputs.short }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Compute short SHA
+        id: sha
+        run: echo "short=$(echo '${{ github.sha }}' | cut -c1-7)" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and Push Docker Image (context ./server)
+        uses: docker/build-push-action@v6
+        with:
+          context: ./server
+          file: ./server/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/vesviet-team/vietnam-accounting-api:${{ steps.sha.outputs.short }}
+            ghcr.io/vesviet-team/vietnam-accounting-api:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  server-gitops-writeback:
+    name: GitOps Write-Back API Tag (ArgoCD Auto-Sync)
+    runs-on: [self-hosted, linux, x64, docker]
+    needs: [server-build-push]
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout GitOps Repository
+        uses: actions/checkout@v4
+        with:
+          repository: vesviet-team/gitops
+          token: ${{ secrets.GITOPS_PUSH_TOKEN }}
+          path: gitops
+
+      - name: Update API Image Tag in GitOps
+        working-directory: gitops/apps/vietnam-accounting
+        run: |
+          # api.yaml contains: image: ghcr.io/vesviet-team/vietnam-accounting-api:<tag>
+          OLD_TAG=$(sed -n 's|.*ghcr.io/vesviet-team/vietnam-accounting-api:\([^[:space:]]*\).*|\1|p' api.yaml | head -1)
+          NEW_TAG=${{ needs.server-build-push.outputs.image_tag }}
+          if [ "$OLD_TAG" = "$NEW_TAG" ]; then
+            echo "Image tag already $NEW_TAG — nothing to do."
+            exit 0
+          fi
+          sed -i "s|ghcr.io/vesviet-team/vietnam-accounting-api:${OLD_TAG}|ghcr.io/vesviet-team/vietnam-accounting-api:${NEW_TAG}|g" api.yaml
+          echo "Updated image tag: $OLD_TAG -> $NEW_TAG"
+
+      - name: Commit and Push with Retry
+        working-directory: gitops
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add apps/vietnam-accounting/api.yaml
+          git commit -m "chore(deploy): bump vietnam-accounting-api to ${{ needs.server-build-push.outputs.image_tag }} [skip ci]" || exit 0
+          for i in 1 2 3 4 5; do
+            git pull --rebase origin main && git push origin main && break || sleep $((i * 2))
+          done
