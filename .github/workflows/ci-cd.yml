@@ -280,6 +280,8 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: '1.23'
+          cache: true
+          cache-dependency-path: server/go.sum
 
       - name: Check gofmt (fail on unformatted files)
         run: |
@@ -304,7 +306,7 @@ jobs:
             exit 1
           fi
 
-          HARDCODED_SECRETS=$(git ls-files 'server/*.go' 'server/*.yml' 'server/*.yaml' 'server/*.sql' \
+          HARDCODED_SECRETS=$(git ls-files '*.go' '*.yml' '*.yaml' '*.sql' \
             | xargs grep -lnE "ghp_[A-Za-z0-9_]{36}|github_pat_[A-Za-z0-9_]{82}|BEGIN (RSA|EC|OPENSSH|DSA) PRIVATE KEY" 2>/dev/null \
             || true)
 
