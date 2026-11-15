@@ -360,8 +360,19 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          # NOTE: the ghcr.io package vesviet-team/vietnam-accounting-api predates
+          # the monorepo consolidation and is linked to the archived repo — the
+          # new repo's GITHUB_TOKEN has no write access to it (GitHub only allows
+          # granting Actions access to existing org packages via the UI). The
+          # GITOPS_PUSH_TOKEN PAT carries write:packages, so we push with it.
+          username: vesviet
+          password: ${{ secrets.GITOPS_PUSH_TOKEN }}
+
+      - name: Diagnose token scopes (scopes only, never the token value)
+        run: |
+          echo "Scopes of the token used for ghcr push:"
+          curl -sI -H "Authorization: token ${{ secrets.GITOPS_PUSH_TOKEN }}" https://api.github.com/user \
+            | grep -i "^x-oauth-scopes" || echo "(no scope header returned)"
 
       - name: Build and Push Docker Image (context ./server)
         uses: docker/build-push-action@v6
