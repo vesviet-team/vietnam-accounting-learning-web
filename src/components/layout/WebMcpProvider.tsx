@@ -54,7 +54,7 @@ export const WebMcpProvider: FC<WebMcpProviderProps> = ({ currentRegime, activeT
           },
           {
             name: 'calculate_fct_103',
-            description: 'Calculate Foreign Contractor Tax (FCT) GROSS/NET under Circular 103/2014/TT-BTC',
+            description: 'Calculate Foreign Contractor Tax (FCT) GROSS/NET under Circular 89/2026/TT-BTC (effective 01/07/2026, replacing Circular 103/2014/TT-BTC)',
             inputSchema: { type: 'object', properties: { contractAmount: { type: 'number' }, contractType: { type: 'string' } } },
           },
           {

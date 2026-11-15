@@ -78,7 +78,7 @@
     {
       "id": "vietnam-tax-guardrails",
       "name": "Vietnam Tax Compliance & E-Invoice Guardrails",
-      "description": "Evaluate non-cash payment thresholds (20M legacy & 5M VAT Law 48/2024/QH15), vendor tax status (00/03/04), CIT Schedule B4, and FCT Circular 103/2014",
+      "description": "Evaluate non-cash payment thresholds (20M legacy & 5M VAT Law 48/2024/QH15), vendor tax status (00/03/04), CIT Schedule B4, and FCT Circular 89/2026 (replacing Circular 103/2014)",
       "tags": [
         "tax",
         "vat",

@@ -57,7 +57,7 @@
     },
     {
       "name": "evaluate_tax_guardrails",
-      "description": "Evaluate non-cash payment rule (20M legacy & 5M VAT Law 48/2024/QH15), vendor tax status (00/03/04), and Foreign Contractor Tax (Circular 103/2014).",
+      "description": "Evaluate non-cash payment rule (20M legacy & 5M VAT Law 48/2024/QH15), vendor tax status (00/03/04), and Foreign Contractor Tax (Circular 89/2026/TT-BTC, replacing Circular 103/2014).",
       "inputSchema": {
         "type": "object",
         "properties": {

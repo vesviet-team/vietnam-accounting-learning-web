@@ -93,6 +93,20 @@ export const MODULE_10_LESSONS: DailyLesson[] = [
         keyTakeawayVi: 'Rà soát trạng thái mã số thuế của toàn bộ nhà cung cấp là khâu kiểm soát sống còn trước khi nộp BCTC.',
       },
       {
+        id: 'c30-3',
+        titleVi: 'Giảm 30% Thuế TNCN/TNDN Kỳ 2026-2027 Theo NĐ 398/2026/NĐ-CP (Điều Kiện Doanh Thu ≤ 10 Tỷ)',
+        summaryVi: 'Doanh nghiệp, hộ kinh doanh và cá nhân kinh doanh có doanh thu năm không vượt 10 tỷ đồng được giảm 30% số thuế phải nộp cho kỳ tính thuế 2026 và 2027.',
+        contentVi: 'Theo Nghị định 398/2026/NĐ-CP (hiệu lực 2026-10-29, chi tiết Nghị quyết 43/2026/QH16): (1) ĐIỀU KIỆN: doanh thu năm không vượt quá 10.000.000.000 VNĐ; áp dụng cho kỳ tính thuế 2026 và 2027; đối tượng gồm doanh nghiệp, hộ kinh doanh và cá nhân kinh doanh. (2) CÁCH TÍNH: giảm 30% số thuế TNCN/TNDN PHẢI NỘP; riêng TNDN được tính trên số thuế SAU ưu đãi. Ví dụ: doanh thu 8 tỷ, thuế TNDN xác định 200 triệu → thực nộp 200 triệu x 70% = 140 triệu. (3) KÊ KHAI: dùng Mẫu 01/Mẫu 02 ban hành kèm NĐ 398/2026. (4) VƯỢT NGƯỠNG: nếu doanh thu năm vượt 10 tỷ, doanh nghiệp MẤT quyền giảm và phải NỘP BỔ SUNG toàn bộ số thuế đã giảm theo Mẫu 03 NĐ 398/2026/NĐ-CP. Kế toán phải theo dõi chặt doanh thu lũy kế 12 tháng để nhận diện rủi ro vượt ngưỡng trước khi khóa sổ quyết toán.',
+        keyTakeawayVi: 'Doanh thu ≤ 10 tỷ + kỳ tính thuế 2026/2027 → giảm 30% số thuế phải nộp (kê khai Mẫu 01/02); vượt ngưỡng → mất quyền giảm, nộp bổ sung theo Mẫu 03 NĐ 398/2026/NĐ-CP.',
+      },
+      {
+        id: 'c30-5',
+        titleVi: 'Bẫy Kỳ 2027: Hết Giảm 2% GTGT (8% → 10%), Hết Gia Hạn Thuế NĐ 245/2026 & Chứng Chỉ Kế Toán Trưởng TT 101/2026',
+        summaryVi: 'Ba mốc hết hiệu lực luận vào 2027-01-01 mà kế toán phải chủ động upskill và cảnh báo doanh nghiệp ngay trong kỳ 2026.',
+        contentVi: 'Kế toán phải cảnh báo 3 "cái bẫy" chuyển giai đoạn sang năm 2027: (1) HẾT GIẢM 2% GTGT: NĐ 174/2025/NĐ-CP chỉ áp dụng đến 2026-12-31; từ 2027-01-01 thuế suất GTGT quay về 10% (hộ kinh doanh phân phối/handmade hàng hóa từ 0,8% về 1%) - hóa đơn xuất từ 01/01/2027 KHÔNG được ghi thuế suất 8%. (2) HẾT GIA HẠN THUẾ: NĐ 245/2026/NĐ-CP (hiệu lực 2026-06-27 đến 2026-12-30) cho gia hạn nộp GTGT/TNCN hộ KD tối đa 5 tháng (quý II → 02/11/2026, quý III → 30/12/2026), TNDN tạm nộp quý II → 02/11 và quý III → 30/12, 50% tiền thuê đất → 02/11/2026; doanh nghiệp phải nộp VĂN BẢN ĐỀ NGHỊ GIA HẠN trước 02/11/2026 và mọi hiệu lực gia hạn chấm dứt 30/12/2026 - không kéo dài sang 2027. (3) CHỨNG CHỈ KẾ TOÁN TRƯỞNG: TT 101/2026/TT-BTC (thay TT 199/2011) có hiệu lực 2027-01-01 với chứng chỉ kế toán trưởng có giá trị 5 năm - kế toán trưởng phải hoàn thành bồi dưỡng trước 31/12/2026.',
+        keyTakeawayVi: 'Kế hoạch chủ động cho 2027: chuẩn bị chuyển thuế suất GTGT 8% → 10% từ 01/01/2027; hoàn tất gia hạn thuế NĐ 245/2026 trước 30/12/2026 (đơn đề nghị trước 02/11/2026); đảm bảo kế toán trưởng có chứng chỉ TT 101/2026 trước 01/01/2027.',
+      },
+      {
         id: 'c30-4',
         titleVi: 'Chứng Chỉ Kế Toán Trưởng Theo Thông Tư 101/2026/TT-BTC (Hiệu Lực 01/01/2027)',
         summaryVi: 'Thông tư 101/2026 quy định chương trình bồi dưỡng 152-180 giờ, thay thế TT 12/2016 & TT 15/2017. Kế toán trưởng bắt buộc phải có chứng chỉ mới từ 01/01/2027.',

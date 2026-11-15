@@ -6,6 +6,9 @@ import {
   reconcileSellerWithPlatform,
   EcommerceTransaction,
   STATUTORY_BASIS_ECOMMERCE_TAX,
+  STATUTORY_BASIS_HOUSEHOLD_BUSINESS_THRESHOLD,
+  HOUSEHOLD_BUSINESS_TAX_CODE_THRESHOLD,
+  RECONCILIATION_VARIANCE_THRESHOLD_PERCENT,
 } from '@/services/tax/ecommerce-tax';
 
 describe('E-Commerce Tax Compliance Engine (ND 117/2025 + ND 68/2026)', () => {
@@ -51,7 +54,7 @@ describe('E-Commerce Tax Compliance Engine (ND 117/2025 + ND 68/2026)', () => {
       expect(result.discrepancies).toHaveLength(0);
     });
 
-    it('should flag discrepancy for household business > 1B VND without tax code', () => {
+    it('should flag discrepancy for household business > 1B VND without tax code citing ND 141/2026', () => {
       const transactions = [createSampleTransaction({ grossRevenue: 1_200_000_000, netRevenue: 1_080_000_000 })];
       const result = calculateEcommerceSellerTaxObligation(transactions, '09/2026', {
         name: 'Hộ kinh doanh lớn',
@@ -60,6 +63,9 @@ describe('E-Commerce Tax Compliance Engine (ND 117/2025 + ND 68/2026)', () => {
 
       expect(result.isPlatformCompliant).toBe(false);
       expect(result.discrepancies.some((d) => d.includes('> 1 tỷ VNĐ') && d.includes('mã số thuế'))).toBe(true);
+      // Căn cứ pháp lý phải là NĐ 141/2026 sửa NĐ 68/2026 (không phải NĐ 117/2025)
+      expect(result.discrepancies.some((d) => d.includes('141/2026/NĐ-CP') && d.includes('68/2026/NĐ-CP'))).toBe(true);
+      expect(result.discrepancies.some((d) => d.includes('117/2025'))).toBe(false);
     });
 
     it('should flag discrepancy for missing invoice numbers', () => {
@@ -74,7 +80,7 @@ describe('E-Commerce Tax Compliance Engine (ND 117/2025 + ND 68/2026)', () => {
       expect(result.discrepancies.some((d) => d.includes('thiếu số hóa đơn'))).toBe(true);
     });
 
-    it('should calculate CIT for enterprise sellers', () => {
+    it('should NOT compute CIT from revenue: enterprise without taxable income yields CIT = 0', () => {
       const transactions = [createSampleTransaction({ sellerType: 'ENTERPRISE', netRevenue: 100_000_000, vatAmount: 8_000_000 })];
       const result = calculateEcommerceSellerTaxObligation(transactions, '09/2026', {
         taxCode: '0101234567',
@@ -82,9 +88,39 @@ describe('E-Commerce Tax Compliance Engine (ND 117/2025 + ND 68/2026)', () => {
         type: 'ENTERPRISE',
       });
 
-      // CIT = 20% of netRevenue (simplified)
-      expect(result.citSelfDeclared).toBe(20_000_000);
+      // CIT must never be revenue x 20%; without declared taxable income the engine returns 0
+      expect(result.citSelfDeclared).toBe(0);
       expect(result.sellerType).toBe('ENTERPRISE');
+    });
+
+    it('should compute CIT = taxableIncome x 20% when enterprise taxable income is provided', () => {
+      const transactions = [createSampleTransaction({ sellerType: 'ENTERPRISE', netRevenue: 100_000_000, vatAmount: 8_000_000 })];
+      // Thu nhập chịu thuế 50 triệu (sau điều chỉnh Chỉ tiêu B4) -> CIT = 50M x 20% = 10M
+      const result = calculateEcommerceSellerTaxObligation(
+        transactions,
+        '09/2026',
+        {
+          taxCode: '0101234567',
+          name: 'Công ty TNHH Test',
+          type: 'ENTERPRISE',
+        },
+        { enterpriseTaxableIncome: 50_000_000 }
+      );
+
+      expect(result.citSelfDeclared).toBe(10_000_000);
+    });
+
+    it('should never treat revenue as the CIT base even for huge revenue', () => {
+      const transactions = [createSampleTransaction({ sellerType: 'ENTERPRISE', netRevenue: 1_000_000_000, vatAmount: 80_000_000 })];
+      const result = calculateEcommerceSellerTaxObligation(transactions, '09/2026', {
+        taxCode: '0101234567',
+        name: 'Công ty TNHH Test',
+        type: 'ENTERPRISE',
+      });
+
+      // If CIT were revenue x 20% this would be 200M; correct behavior is 0 without taxable income
+      expect(result.citSelfDeclared).not.toBe(200_000_000);
+      expect(result.citSelfDeclared).toBe(0);
     });
 
     it('should aggregate multiple transactions correctly', () => {
@@ -231,6 +267,17 @@ describe('E-Commerce Tax Compliance Engine (ND 117/2025 + ND 68/2026)', () => {
       expect(STATUTORY_BASIS_ECOMMERCE_TAX).toContain('68/2026/NĐ-CP');
       expect(STATUTORY_BASIS_ECOMMERCE_TAX).toContain('01/07/2025');
       expect(STATUTORY_BASIS_ECOMMERCE_TAX).toContain('01/07/2026');
+    });
+
+    it('should base the 1B household threshold on ND 141/2026 amending ND 68/2026 (tax year 2026)', () => {
+      expect(HOUSEHOLD_BUSINESS_TAX_CODE_THRESHOLD).toBe(1_000_000_000);
+      expect(STATUTORY_BASIS_HOUSEHOLD_BUSINESS_THRESHOLD).toContain('141/2026/NĐ-CP');
+      expect(STATUTORY_BASIS_HOUSEHOLD_BUSINESS_THRESHOLD).toContain('68/2026/NĐ-CP');
+      expect(STATUTORY_BASIS_HOUSEHOLD_BUSINESS_THRESHOLD).toContain('2026');
+    });
+
+    it('should expose the reconciliation variance threshold as an unverified constant', () => {
+      expect(RECONCILIATION_VARIANCE_THRESHOLD_PERCENT).toBe(5);
     });
   });
 });

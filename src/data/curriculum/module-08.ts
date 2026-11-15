@@ -119,9 +119,9 @@ export const MODULE_8_LESSONS: DailyLesson[] = [
       },
       {
         id: 'c24-4',
-        titleVi: 'Thuế Nhà Thầu Nước Ngoài (FCT - TT 103/2014) & Luật Thuế GTGT 48/2024/QH15 (Ngưỡng 5 Triệu)',
-        summaryVi: 'Khấu trừ tại nguồn thuế GTGT & TNDN nhà thầu nước ngoài (AWS, Google, Meta) và cập nhật ngưỡng thanh toán không tiền mặt 5 triệu đồng từ 01/07/2025.',
-        contentVi: '1. THUẾ NHÀ THẦU NƯỚC NGOÀI (FCT - Thông tư 103/2014/TT-BTC): Khi doanh nghiệp Việt Nam thanh toán phí dịch vụ phần mềm, điện toán đám mây, quảng cáo quốc tế hoặc bản quyền cho tổ chức nước ngoài không có cơ sở thường trú tại Việt Nam, kế toán phải kê khai nộp thay Thuế nhà thầu (TK 3338). Với hợp đồng NET (nhà thầu nhận đủ tiền, bên Việt Nam chịu thuế), kế toán phải quy đổi Gross-up hai bước: Doanh thu tính thuế TNDN = Giá NET / (1 - Tỷ lệ thuế TNDN); Doanh thu tính thuế GTGT = Doanh thu tính thuế TNDN / (1 - Tỷ lệ thuế GTGT). 2. CẬP NHẬT LUẬT THUẾ GTGT SỐ 48/2024/QH15 (Hiệu lực từ 01/07/2025): Điểm b Khoản 2 Điều 14 Luật Thuế GTGT 2024 và Nghị định hướng dẫn đã hạ ngưỡng bắt buộc có chứng từ thanh toán không dùng tiền mặt từ 20.000.000 VNĐ xuống còn 5.000.000 VNĐ (đã bao gồm thuế GTGT) đối với hàng hóa, dịch vụ mua vào.',
+        titleVi: 'Thuế Nhà Thầu Nước Ngoài (FCT - TT 89/2026, thay TT 103/2014) & Luật Thuế GTGT 48/2024/QH15 (Ngưỡng 5 Triệu)',
+        summaryVi: 'Khấu trừ tại nguồn thuế GTGT & TNDN nhà thầu nước ngoài (AWS, Google, Meta) theo TT 89/2026/TT-BTC và cập nhật ngưỡng thanh toán không tiền mặt 5 triệu đồng từ 01/07/2025.',
+        contentVi: '1. THUẾ NHÀ THẦU NƯỚC NGOÀI (FCT - Thông tư 89/2026/TT-BTC, hiệu lực 01/07/2026, thay thế Thông tư 103/2014/TT-BTC): Khi doanh nghiệp Việt Nam thanh toán phí dịch vụ phần mềm, điện toán đám mây, quảng cáo quốc tế hoặc bản quyền cho tổ chức nước ngoài không có cơ sở thường trú tại Việt Nam, kế toán phải kê khai nộp thay Thuế nhà thầu (TK 3338). Với hợp đồng NET (nhà thầu nhận đủ tiền, bên Việt Nam chịu thuế), kế toán phải quy đổi Gross-up hai bước: Doanh thu tính thuế TNDN = Giá NET / (1 - Tỷ lệ thuế TNDN); Doanh thu tính thuế GTGT = Doanh thu tính thuế TNDN / (1 - Tỷ lệ thuế GTGT). Bảng tỷ lệ % tính trên doanh thu giữ nguyên như TT 103/2014 (dịch vụ 5%/5%, phân phối 1%/1%, sản xuất-vận tải 3%/2%); tờ khai mới 01/NTNN và tờ quyết toán 02/NTNN. 2. CẬP NHẬT LUẬT THUẾ GTGT SỐ 48/2024/QH15 (Hiệu lực từ 01/07/2025): Điểm b Khoản 2 Điều 14 Luật Thuế GTGT 2024 và Nghị định hướng dẫn đã hạ ngưỡng bắt buộc có chứng từ thanh toán không dùng tiền mặt từ 20.000.000 VNĐ xuống còn 5.000.000 VNĐ (đã bao gồm thuế GTGT) đối với hàng hóa, dịch vụ mua vào.',
         journalExamples: [
           {
             descriptionVi: 'Hạch toán thuế nhà thầu nước ngoài (FCT) nộp thay theo hợp đồng NET dịch vụ đám mây quốc tế (TNDN 5%, GTGT 5% trên giá NET 95.000.000 VNĐ)',
@@ -131,10 +131,10 @@ export const MODULE_8_LESSONS: DailyLesson[] = [
               { debitCredit: 'CREDIT', accountCode: '331', accountNameVi: 'Phải trả cho người bán nước ngoài (Giá NET)', amount: 95000000 },
               { debitCredit: 'CREDIT', accountCode: '3338', accountNameVi: 'Thuế bảo vệ môi trường và các loại thuế khác (Chi tiết Thuế nhà thầu FCT)', amount: 10263158 },
             ],
-            statutoryNoteVi: 'Theo Điều 12 & 13 Thông tư 103/2014/TT-BTC: Doanh thu tính thuế TNDN = 95tr / (1 - 5%) = 100tr (Thuế TNDN = 5tr); Doanh thu tính thuế GTGT = 100tr / (1 - 5%) = 105.263.158 đ (Thuế GTGT = 5.263.158 đ).',
+            statutoryNoteVi: 'Theo Điều 12 & 13 Thông tư 89/2026/TT-BTC (thay TT 103/2014 từ 01/07/2026): Doanh thu tính thuế TNDN = 95tr / (1 - 5%) = 100tr (Thuế TNDN = 5tr); Doanh thu tính thuế GTGT = 100tr / (1 - 5%) = 105.263.158 đ (Thuế GTGT = 5.263.158 đ).',
           },
         ],
-        keyTakeawayVi: 'Nắm vững công thức Gross-up thuế nhà thầu (TT 103/2014) và mốc thanh toán không tiền mặt 5 triệu đồng từ 01/07/2025 (Luật Thuế GTGT 48/2024/QH15).',
+        keyTakeawayVi: 'Nắm vững công thức Gross-up thuế nhà thầu (TT 89/2026, thay TT 103/2014 từ 01/07/2026) và mốc thanh toán không tiền mặt 5 triệu đồng từ 01/07/2025 (Luật Thuế GTGT 48/2024/QH15).',
       },
       {
         id: 'c24-6',

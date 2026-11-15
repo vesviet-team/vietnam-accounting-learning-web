@@ -9,6 +9,8 @@
  * 4. Cross-border e-commerce tax implications
  */
 
+import { STANDARD_CIT_RATE } from './tax-guardrails';
+
 export type EcommercePlatformType = 'SHOPEE' | 'LAZADA' | 'TIKTOK_SHOP' | 'GRAB' | 'GOOGLE_PLAY' | 'APP_STORE' | 'OTHER';
 export type SellerType = 'HOUSEHOLD_BUSINESS' | 'INDIVIDUAL_BUSINESS' | 'ENTERPRISE';
 export type TaxWithholdingStatus = 'PLATFORM_WITHHELD' | 'SELF_DECLARED' | 'MIXED';
@@ -49,7 +51,7 @@ export interface EcommerceTaxObligation {
   // Self-declared tax obligations (for revenue outside platform withholding)
   vatSelfDeclared: number;
   pitSelfDeclared: number;
-  citSelfDeclared: number; // Only for enterprises
+  citSelfDeclared: number; // Only for enterprises: thu nhập chịu thuế x 20% (KHÔNG tính trên doanh thu)
 
   // Compliance status
   isPlatformCompliant: boolean;
@@ -60,6 +62,14 @@ export interface EcommerceTaxObligation {
 export const STATUTORY_BASIS_ECOMMERCE_TAX =
   'Nghị định 117/2025/NĐ-CP (hiệu lực 01/07/2025) & Nghị định 68/2026/NĐ-CP (sửa đổi, hiệu lực 01/07/2026) - Quản lý thuế hoạt động TMĐT';
 
+// Ngưỡng hộ kinh doanh doanh thu > 1 tỷ đồng/năm (trước đây là 500 triệu) bắt buộc đăng ký MST
+// và không chịu GTGT/TNCN theo tỷ lệ % trên doanh thu: theo NĐ 141/2026/NĐ-CP sửa đổi NĐ 68/2026/NĐ-CP,
+// áp dụng từ kỳ tính thuế 2026. (KHÔNG phải căn cứ của NĐ 117/2025/NĐ-CP.)
+export const HOUSEHOLD_BUSINESS_TAX_CODE_THRESHOLD = 1_000_000_000;
+
+export const STATUTORY_BASIS_HOUSEHOLD_BUSINESS_THRESHOLD =
+  'NĐ 141/2026/NĐ-CP sửa đổi NĐ 68/2026/NĐ-CP, áp dụng từ kỳ tính thuế 2026: ngưỡng doanh thu hộ kinh doanh nâng từ 500 triệu lên 1 tỷ đồng/năm';
+
 /**
  * Calculates tax obligations for a household/individual seller on an e-commerce platform.
  *
@@ -69,11 +79,15 @@ export const STATUTORY_BASIS_ECOMMERCE_TAX =
  * 3. Platform remits via "Cổng thuế điện tử TMĐT" (GDT e-commerce tax portal)
  * 4. Sellers must still register tax, reconcile platform data, and declare OUTSIDE-platform revenue
  * 5. NĐ 68/2026 amends NĐ 117/2025 - updated foreign platform list, data exchange requirements
+ * 6. NĐ 141/2026/NĐ-CP (amending NĐ 68/2026/NĐ-CP, effective tax year 2026): household business
+ *    revenue threshold raised from 500M to 1B VND/year (mandatory tax code registration; exempt
+ *    from percentage-based VAT/PIT on revenue below the threshold)
  */
 export function calculateEcommerceSellerTaxObligation(
   transactions: EcommerceTransaction[],
   period: string,
-  sellerInfo: { taxCode?: string; name: string; type: SellerType; registeredVatRate?: number }
+  sellerInfo: { taxCode?: string; name: string; type: SellerType; registeredVatRate?: number },
+  options?: { enterpriseTaxableIncome?: number }
 ): EcommerceTaxObligation {
   const platformTransactions = transactions.filter((t) => t.sellerType === 'HOUSEHOLD_BUSINESS' || t.sellerType === 'INDIVIDUAL_BUSINESS');
   const enterpriseTransactions = transactions.filter((t) => t.sellerType === 'ENTERPRISE');
@@ -89,8 +103,8 @@ export function calculateEcommerceSellerTaxObligation(
 
   // Check compliance
   const discrepancies: string[] = [];
-  if (totalGrossRevenue > 1_000_000_000 && !sellerInfo.taxCode) {
-    discrepancies.push('Hộ kinh doanh doanh thu > 1 tỷ VNĐ/năm bắt buộc đăng ký mã số thuế (NĐ 117/2025)');
+  if (totalGrossRevenue > HOUSEHOLD_BUSINESS_TAX_CODE_THRESHOLD && !sellerInfo.taxCode) {
+    discrepancies.push(`Hộ kinh doanh doanh thu > 1 tỷ VNĐ/năm bắt buộc đăng ký mã số thuế (NĐ 141/2026/NĐ-CP sửa đổi NĐ 68/2026/NĐ-CP, áp dụng từ kỳ tính thuế 2026)`);
   }
   if (totalGrossRevenue > 100_000_000 && sellerInfo.type === 'HOUSEHOLD_BUSINESS' && !sellerInfo.taxCode) {
     discrepancies.push('Hộ kinh doanh doanh thu > 100 triệu VNĐ/năm khuyến khích đăng ký MST');
@@ -103,7 +117,15 @@ export function calculateEcommerceSellerTaxObligation(
   }
 
   // Enterprise transactions: self-declare CIT
-  const citSelfDeclared = enterpriseTransactions.reduce((sum, t) => sum + t.netRevenue * 0.2, 0); // Simplified 20% CIT
+  // CORRECTED: CIT KHÔNG BAO GIỜ được tính theo % doanh thu. CIT = thu nhập chịu thuế (lợi nhuận
+  // sau điều chỉnh Chỉ tiêu B4) x 20% theo Luật Thuế TNDN 67/2025 & TT 78/2014/TT-BTC (sửa đổi TT 96/2015).
+  // Doanh thu TMĐT chỉ là dữ liệu đối chiếu; nếu không cung cấp thu nhập chịu thuế (hoặc không có
+  // giao dịch doanh nghiệp trên sàn) thì CIT = 0 (không suy diễn từ doanh thu).
+  const hasEnterpriseActivity = enterpriseTransactions.length > 0;
+  const citSelfDeclared =
+    hasEnterpriseActivity
+      ? Math.max(0, Math.round((options?.enterpriseTaxableIncome ?? 0) * STANDARD_CIT_RATE))
+      : 0;
 
   return {
     period,
@@ -140,6 +162,7 @@ export interface PlatformTaxRemittance {
   totalTaxRemitted: number;
   filingDeadline: string; // Last day of following month
   portalUrl: string; // 'https://thuedientu.gdt.gov.vn/TMDT' (Cổng thuế điện tử TMĐT)
+                    // TODO: verify — cần đối chiếu URL chính thức hiện hành của Cổng thuế điện tử TMĐT trước khi dùng trong sản phẩm
   statutoryBasis: string;
 }
 
@@ -175,7 +198,7 @@ export function calculatePlatformTaxRemittance(
     totalPitRemitted,
     totalTaxRemitted,
     filingDeadline,
-    portalUrl: 'https://thuedientu.gdt.gov.vn/TMDT', // Cổng thuế điện tử TMĐT
+    portalUrl: 'https://thuedientu.gdt.gov.vn/TMDT', // Cổng thuế điện tử TMĐT — TODO: verify URL chính thức hiện hành
     statutoryBasis: STATUTORY_BASIS_ECOMMERCE_TAX,
   };
 }
@@ -206,6 +229,13 @@ export function validateEcommerceInvoiceCompliance(
 
   return { compliant, issues, riskLevel };
 }
+
+/**
+ * Ngưỡng chênh lệch % cho phép khi đối chiếu doanh thu tự khai với dữ liệu sàn.
+ * // TODO: verify — chưa có statutoryBasis (không tìm được số hiệu văn bản quy định
+ * ngưỡng 5% này; hiện chỉ là tham số nghiệp vụ đối chiếu nội bộ của engine).
+ */
+export const RECONCILIATION_VARIANCE_THRESHOLD_PERCENT = 5;
 
 /**
  * Reconciles seller's declared revenue with platform's reported data.
@@ -239,10 +269,10 @@ export function reconcileSellerWithPlatform(
   let adjustmentNeeded: 'NONE' | 'ADDITIONAL_DECLARATION' | 'REFUND_CLAIM' = 'NONE';
   let explanationVi = '';
 
-  if (variance > 0 && variancePercent > 5) {
+  if (variance > 0 && variancePercent > RECONCILIATION_VARIANCE_THRESHOLD_PERCENT) {
     adjustmentNeeded = 'ADDITIONAL_DECLARATION';
     explanationVi = `Doanh thu tự khai báo (${new Intl.NumberFormat('vi-VN').format(sellerDeclaredRevenue)}) cao hơn dữ liệu sàn (${new Intl.NumberFormat('vi-VN').format(platformReportedRevenue)}) ${variancePercent.toFixed(1)}%. Cần kê khai bổ sung phần chênh lệch ra khỏi sàn TMĐT.`;
-  } else if (variance < 0 && variancePercent > 5) {
+  } else if (variance < 0 && variancePercent > RECONCILIATION_VARIANCE_THRESHOLD_PERCENT) {
     adjustmentNeeded = 'REFUND_CLAIM';
     explanationVi = `Doanh thu tự khai báo thấp hơn dữ liệu sàn ${variancePercent.toFixed(1)}%. Cần đối chiếu lại: có thể sàn báo cáo sai hoặc người bán quên kê khai phần doanh thu.`;
   } else {
@@ -250,7 +280,7 @@ export function reconcileSellerWithPlatform(
   }
 
   return {
-    reconciled: variancePercent <= 5,
+    reconciled: variancePercent <= RECONCILIATION_VARIANCE_THRESHOLD_PERCENT,
     variance,
     variancePercent,
     adjustmentNeeded,

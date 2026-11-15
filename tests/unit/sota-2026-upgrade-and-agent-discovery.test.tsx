@@ -152,7 +152,7 @@ describe('2026 SOTA Vietnam Accounting Standards Upgrade', () => {
       expect(day24).toBeDefined();
       const c24_4 = day24?.concepts.find((c) => c.id === 'c24-4');
       expect(c24_4).toBeDefined();
-      expect(c24_4?.titleVi).toContain('Thuế Nhà Thầu Nước Ngoài (FCT - TT 103/2014)');
+      expect(c24_4?.titleVi).toContain('Thuế Nhà Thầu Nước Ngoài (FCT - TT 89/2026');
       expect(c24_4?.titleVi).toContain('Luật Thuế GTGT 48/2024/QH15');
     });
   });

@@ -400,11 +400,20 @@ describe('COMPREHENSIVE TAX COMPLIANCE & FRAUD GUARDRAILS (MILESTONE 5 / R5)', (
   });
 });
 
-import { evaluatePitDeduction } from '@/services/tax/tax-guardrails';
+import {
+  evaluatePitDeduction,
+  evaluateSmeTaxReduction,
+  evaluateVatReductionWindow,
+  STATUTORY_BASIS_PIT_LAW_2025,
+  SME_TAX_REDUCTION_REVENUE_THRESHOLD,
+  SME_TAX_REDUCTION_RATE,
+  VAT_REDUCED_RATE,
+  VAT_REDUCED_RATE_VALID_UNTIL,
+} from '@/services/tax/tax-guardrails';
 
-describe('PIT DEDUCTION GUARDRAIL - Luật Thuế TNCN 109/2025/QH15 & NĐ 253/2026/NĐ-CP', () => {
-  it('should apply new-law deductions (15.5M self + 6.2M dependent) from 01/07/2026: gross 20M, 1 dependent -> taxable 0', () => {
-    const result = evaluatePitDeduction(20_000_000, 1, '2026-07-01');
+describe('PIT DEDUCTION GUARDRAIL - Nghị quyết 110/2025/UBTVQH15 (áp dụng từ kỳ tính thuế 2026)', () => {
+  it('should apply new-law deductions (15.5M self + 6.2M dependent) ngay từ 01/01/2026 (kỳ tính thuế 2026): gross 20M, 1 dependent -> taxable 0', () => {
+    const result = evaluatePitDeduction(20_000_000, 1, '2026-01-01');
 
     expect(result.applicableLaw).toBe('LAW_109_2025');
     expect(result.selfDeduction).toBe(15_500_000);
@@ -414,9 +423,9 @@ describe('PIT DEDUCTION GUARDRAIL - Luật Thuế TNCN 109/2025/QH15 & NĐ 253/2
     expect(result.totalAnnualDeduction).toBe(21_700_000 * 12);
     // Taxable = max(0, 20M - 21.7M) = 0
     expect(result.taxableMonthlyIncome).toBe(0);
-    expect(result.statutoryBasis).toBe(
-      'Luật Thuế TNCN số 109/2025/QH15 và Nghị định 253/2026/NĐ-CP (hiệu lực 01/07/2026)'
-    );
+    expect(result.statutoryBasis).toBe(STATUTORY_BASIS_PIT_LAW_2025);
+    expect(result.statutoryBasis).toContain('110/2025/UBTVQH15');
+    expect(result.statutoryBasis).toContain('2026-01-01');
     expect(result.explanationVi).toContain('15.500.000');
     expect(result.explanationVi).toContain('6.200.000');
   });
@@ -432,8 +441,8 @@ describe('PIT DEDUCTION GUARDRAIL - Luật Thuế TNCN 109/2025/QH15 & NĐ 253/2
     expect(result.taxableMonthlyIncome).toBe(2_100_000);
   });
 
-  it('should fall back to previous-law deductions (11M self + 4.4M dependent) before 01/07/2026', () => {
-    const result = evaluatePitDeduction(30_000_000, 2, '2026-06-30');
+  it('should fall back to previous-law deductions (11M self + 4.4M dependent) for tax year 2025 (before 2026-01-01)', () => {
+    const result = evaluatePitDeduction(30_000_000, 2, '2025-12-31');
 
     expect(result.applicableLaw).toBe('LAW_04_2007');
     expect(result.selfDeduction).toBe(11_000_000);
@@ -445,6 +454,13 @@ describe('PIT DEDUCTION GUARDRAIL - Luật Thuế TNCN 109/2025/QH15 & NĐ 253/2
     expect(result.explanationVi).toContain('4.400.000');
   });
 
+  it('should apply the new deductions to the WHOLE of 2026, not just from 01/07/2026', () => {
+    // Kỳ tính thuế 2026 áp dụng 15.5M/6.2M ngay từ kỳ đầu tiên của năm (NQ 110/2025/UBTVQH15)
+    const earlyYear = evaluatePitDeduction(30_000_000, 2, '2026-01-31');
+    expect(earlyYear.selfDeduction).toBe(15_500_000);
+    expect(earlyYear.totalMonthlyDeduction).toBe(27_900_000);
+  });
+
   it('should handle zero dependents with default asOfDate under the new law', () => {
     const result = evaluatePitDeduction(25_000_000);
 
@@ -454,5 +470,94 @@ describe('PIT DEDUCTION GUARDRAIL - Luật Thuế TNCN 109/2025/QH15 & NĐ 253/2
     expect(result.totalMonthlyDeduction).toBe(15_500_000);
     // Taxable = 25M - 15.5M = 9.5M
     expect(result.taxableMonthlyIncome).toBe(9_500_000);
+  });
+});
+
+describe('SME 30% CIT/PIT REDUCTION GUARDRAIL - NĐ 398/2026/NĐ-CP (kỳ tính thuế 2026-2027)', () => {
+  it('should grant the 30% reduction at the exact 10B revenue boundary (doanh thu đúng 10 tỷ vẫn được giảm)', () => {
+    const result = evaluateSmeTaxReduction(10_000_000_000, 2026);
+
+    expect(result.status).toBe('ELIGIBLE');
+    expect(result.isEligible).toBe(true);
+    expect(result.revenueThreshold).toBe(SME_TAX_REDUCTION_REVENUE_THRESHOLD);
+    expect(result.reductionRate).toBe(SME_TAX_REDUCTION_RATE);
+    expect(result.statutoryBasis).toContain('398/2026/NĐ-CP');
+    expect(result.statutoryBasis).toContain('NQ 43/2026/QH16');
+    expect(result.explanationVi).toContain('GIẢM 30%');
+    expect(result.declarationFormVi).toContain('Mẫu 01');
+  });
+
+  it('should withdraw the reduction at 10B + 1 VND with Mẫu 03 additional-payment warning', () => {
+    const result = evaluateSmeTaxReduction(10_000_000_001, 2026);
+
+    expect(result.status).toBe('REVENUE_EXCEEDED');
+    expect(result.isEligible).toBe(false);
+    expect(result.explanationVi).toContain('NỘP BỔ SUNG');
+    expect(result.declarationFormVi).toContain('Mẫu 03');
+    expect(result.statutoryBasis).toContain('398/2026/NĐ-CP');
+  });
+
+  it('should apply the reduction for tax year 2027', () => {
+    const result = evaluateSmeTaxReduction(8_000_000_000, 2027);
+    expect(result.status).toBe('ELIGIBLE');
+    expect(result.isEligible).toBe(true);
+    expect(result.taxYear).toBe(2027);
+  });
+
+  it('should NOT apply for tax year 2025 (before the 2026-2027 window)', () => {
+    const result = evaluateSmeTaxReduction(5_000_000_000, 2025);
+
+    expect(result.status).toBe('YEAR_NOT_APPLICABLE');
+    expect(result.isEligible).toBe(false);
+    expect(result.explanationVi).toContain('2026 và 2027');
+  });
+
+  it('should NOT apply for tax year 2028 (after the 2026-2027 window)', () => {
+    const result = evaluateSmeTaxReduction(5_000_000_000, 2028);
+
+    expect(result.status).toBe('YEAR_NOT_APPLICABLE');
+    expect(result.isEligible).toBe(false);
+  });
+
+  it('should encode the accounting invariant: CIT payable after reduction = 0.7 x CIT payable', () => {
+    // Invariant kế toán thật: DN doanh thu 8 tỷ, thuế TNDN xác định 200tr
+    // → sau giảm 30% còn 200tr x 0.7 = 140tr (TNDN tính trên số thuế sau ưu đãi)
+    const result = evaluateSmeTaxReduction(8_000_000_000, 2026);
+    const citBefore = 200_000_000;
+    const citAfter = Math.round(citBefore * (1 - result.reductionRate));
+    expect(result.isEligible).toBe(true);
+    expect(citAfter).toBe(140_000_000);
+  });
+});
+
+describe('VAT 2% REDUCTION WINDOW GUARDRAIL - NĐ 174/2025/NĐ-CP (8% chỉ đến 31/12/2026)', () => {
+  it('should keep the 8% rate active within the reduction window (2026)', () => {
+    const result = evaluateVatReductionWindow('2026-12-31');
+
+    expect(result.isWithinReductionWindow).toBe(true);
+    expect(result.applicableRate).toBe(VAT_REDUCED_RATE);
+    expect(result.householdBusinessGoodsRate).toBe(0.008);
+    expect(result.warningVi).toBeNull();
+    expect(VAT_REDUCED_RATE).toBe(0.08);
+    expect(VAT_REDUCED_RATE_VALID_UNTIL).toBe('2026-12-31');
+  });
+
+  it('should warn that the rate returns to 10% from 2027-01-01', () => {
+    const result = evaluateVatReductionWindow('2027-01-01');
+
+    expect(result.isWithinReductionWindow).toBe(false);
+    expect(result.applicableRate).toBe(0.10);
+    expect(result.householdBusinessGoodsRate).toBe(0.01);
+    expect(result.warningVi).toContain('2027-01-01');
+    expect(result.warningVi).toContain('10%');
+    expect(result.warningVi).toContain('174/2025');
+  });
+
+  it('should report the pre-window period (before 2025-07-01) at the standard 10% rate', () => {
+    const result = evaluateVatReductionWindow('2025-06-30');
+
+    expect(result.isWithinReductionWindow).toBe(false);
+    expect(result.applicableRate).toBe(0.10);
+    expect(result.warningVi).toContain('2025-07-01');
   });
 });

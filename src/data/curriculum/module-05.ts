@@ -102,7 +102,7 @@ export const MODULE_5_LESSONS: DailyLesson[] = [
         id: 'c15-1',
         titleVi: 'Công Thức Tính Lương Gross Sang Net & Các Khoản Giảm Trừ',
         summaryVi: 'Lương Net = Lương Gross - Bảo hiểm bắt buộc (10.5%) - Thuế TNCN (nếu có).',
-        contentVi: 'Thu nhập chịu thuế = Tổng thu nhập trừ các khoản phụ cấp miễn thuế (ăn trưa trong định mức, đồng phục, phụ cấp điện thoại theo quy chế). Thu nhập tính thuế = Thu nhập chịu thuế trừ các khoản giảm trừ (Bảo hiểm 10.5%, Giảm trừ bản thân 15,5 triệu/tháng, Giảm trừ người phụ thuộc 6,2 triệu/người/tháng, đóng góp từ thiện) — theo Luật Thuế TNCN 109/2025/QH15, hiệu lực 01/07/2026 (trước đó: 11 triệu/tháng và 4,4 triệu/người/tháng). Áp dụng Biểu thuế lũy tiến từng phần (từ 5% đến 35%) để tính thuế TNCN.',
+        contentVi: 'Thu nhập chịu thuế = Tổng thu nhập trừ các khoản phụ cấp miễn thuế (ăn trưa trong định mức, đồng phục, phụ cấp điện thoại theo quy chế). Thu nhập tính thuế = Thu nhập chịu thuế trừ các khoản giảm trừ (Bảo hiểm 10.5%, Giảm trừ bản thân 15,5 triệu/tháng, Giảm trừ người phụ thuộc 6,2 triệu/người/tháng, đóng góp từ thiện) — theo Nghị quyết 110/2025/UBTVQH15, hiệu lực 2026-01-01, áp dụng từ kỳ tính thuế 2026 (trước kỳ 2026: 11 triệu/tháng và 4,4 triệu/người/tháng theo Luật 04/2007/QH12 sửa đổi bởi Luật 71/2014/QH13; thủ tục kê khai theo Luật Thuế TNCN 109/2025/QH15 và NĐ 253/2026/NĐ-CP). Áp dụng Biểu thuế lũy tiến từng phần (từ 5% đến 35%) để tính thuế TNCN.',
         keyTakeawayVi: 'Lương Net là số tiền thực tế đổ vào tài khoản ATM của người lao động sau khi trừ bảo hiểm và thuế TNCN.',
       },
       {
