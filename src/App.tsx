@@ -7,6 +7,7 @@ import { Journalizer } from '@/components/workbench/Journalizer';
 import { VoucherInspector } from '@/components/workbench/VoucherInspector';
 import { TaxComplianceTools } from '@/components/voucher/TaxComplianceTools';
 import { SettingsView } from '@/components/settings/SettingsView';
+import { MergeAnonymousDialog } from '@/components/settings/MergeAnonymousDialog';
 
 // Code-split P2: các view nặng (Lộ trình curriculum ~184 kB, bộ đề milestone
 // ~204 kB, engine BCTC & COGS) được tách khỏi main chunk bằng dynamic import —
@@ -30,6 +31,7 @@ const CogsWorkbench = lazy(() =>
 import { WebMcpProvider } from '@/components/layout/WebMcpProvider';
 import { AccountingRegime } from '@/types/coa';
 import { storageService } from '@/services/storage/storage-service';
+import { syncService } from '@/services/sync/sync-service';
 import { StreakEngine, CareerLevel } from '@/engine/streak-engine';
 
 export type AppNavTab = NavTab | 'financial-statements' | 'bctc' | 'cogs';
@@ -65,6 +67,14 @@ export function App() {
     });
     return () => {
       isMounted = false;
+    };
+  }, []);
+
+  // P1 multi-device sync: wire storage/focus/auth listeners once.
+  useEffect(() => {
+    syncService.init();
+    return () => {
+      /* keep the sync singleton alive for the whole app lifetime */
     };
   }, []);
 
@@ -236,6 +246,9 @@ export function App() {
         isOpen={isBackupModalOpen}
         onClose={() => setIsBackupModalOpen(false)}
       />
+
+      {/* P1: anonymous → account progress-merge prompt (first login only) */}
+      <MergeAnonymousDialog />
 
       {/* Global Milestone Assessment Modal */}
       {activeMilestoneQuizDay !== null && (

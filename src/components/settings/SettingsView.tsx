@@ -11,6 +11,7 @@ import {
 import { AccountingRegime } from '@/types/coa';
 import { storageService } from '@/services/storage/storage-service';
 import { useTheme } from '@/hooks/useTheme';
+import { AccountSection } from './AccountSection';
 
 interface SettingsViewProps {
   currentRegime: AccountingRegime;
@@ -91,6 +92,9 @@ export const SettingsView: FC<SettingsViewProps> = ({
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-fade-in pb-12">
+      {/* P1: Account & multi-device sync section */}
+      <AccountSection />
+
       <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-xs border border-slate-200 dark:border-slate-800 space-y-1">
         <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
           Cài Đặt & Lưu Trữ Dữ Liệu

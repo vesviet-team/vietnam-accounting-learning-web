@@ -2,7 +2,13 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
+import { authService } from '@/services/auth/auth-service';
 import './styles/globals.css';
+
+// P1 OAuth: complete the authorization-code flow when the browser lands
+// back with ?code&state. Fire-and-forget: the offline-first app renders
+// regardless; auth state is published via onAuthChange listeners.
+void authService.handleRedirectIfPresent();
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

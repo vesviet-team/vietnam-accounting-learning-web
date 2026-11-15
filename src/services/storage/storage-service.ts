@@ -10,36 +10,114 @@ import {
   LedgerAccount,
 } from './indexeddb-adapter';
 import { CogsState } from '@/types/cogs';
+import { getDeviceId, getEntityUuid } from '@/services/auth/device';
 
 export type { WorkbenchState, JournalEntry, LedgerAccount, CogsState };
+
+/**
+ * Storage keys whose payloads participate in cloud sync (P1). Writes to
+ * these keys are annotated with sync metadata (device_id, entity_uuid,
+ * updated_at — backward compatible: readers ignore unknown fields) and
+ * published to sync listeners.
+ */
+export const SYNCED_KEYS = new Set<string>([
+  'learner_progress',
+  'milestone_scores',
+  'user_streak_state',
+  'workbench_state',
+  'cogs_state',
+]);
+
+export type StorageChangeListener = (key: string) => void;
+
+/**
+ * Sync metadata fields added to stored payloads of synced keys on write.
+ * They are stripped again on read through this facade so application data
+ * round-trips byte-identically (FEAT-06 100% fidelity invariant) while the
+ * stored record still carries device/entity forensics for the sync layer.
+ */
+export const SYNC_META_FIELDS = ['device_id', 'entity_uuid', 'updated_at'] as const;
+
+function stripSyncMeta<T>(value: T): T {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) return value;
+  const clone = { ...(value as Record<string, unknown>) };
+  for (const f of SYNC_META_FIELDS) delete clone[f];
+  return clone as T;
+}
 
 export class StorageService implements IStorageAdapter {
   private localAdapter: LocalStorageAdapter;
   private idbAdapter: IndexedDbAdapter;
+  private syncListeners = new Set<StorageChangeListener>();
 
   constructor() {
     this.localAdapter = new LocalStorageAdapter('vnacc_');
     this.idbAdapter = new IndexedDbAdapter();
   }
 
+  /**
+   * Subscribe to writes of synced keys (used by the sync service to
+   * schedule pushes). Returns an unsubscribe function.
+   */
+  subscribeChanges(listener: StorageChangeListener): () => void {
+    this.syncListeners.add(listener);
+    return () => this.syncListeners.delete(listener);
+  }
+
+  private notify(key: string): void {
+    if (!SYNCED_KEYS.has(key)) return;
+    for (const listener of this.syncListeners) {
+      try {
+        listener(key);
+      } catch {
+        /* listener errors never break storage writes */
+      }
+    }
+  }
+
+  /**
+   * Adds sync metadata to object payloads of synced keys without mutating
+   * the caller's object. Extra fields are backward compatible: every
+   * reader of these keys only looks at the fields it knows, so the
+   * FEAT-06 backup round-trip fidelity is preserved.
+   */
+  private annotate<T>(key: string, value: T): T {
+    if (!SYNCED_KEYS.has(key) || value === null || typeof value !== 'object' || Array.isArray(value)) {
+      return value;
+    }
+    return {
+      ...(value as Record<string, unknown>),
+      device_id: getDeviceId(),
+      entity_uuid: getEntityUuid(key),
+      updated_at: new Date().toISOString(),
+    } as T;
+  }
+
   // Delegate default IStorageAdapter methods to IndexedDB (with LocalStorage fallback)
   async getItem<T>(key: string): Promise<T | null> {
     try {
       const idbVal = await this.idbAdapter.getItem<T>(key);
-      if (idbVal !== null) return idbVal;
-      return await this.localAdapter.getItem<T>(key);
+      if (idbVal !== null) return this.stripIfSynced(key, idbVal);
+      return this.stripIfSynced(key, await this.localAdapter.getItem<T>(key));
     } catch {
-      return await this.localAdapter.getItem<T>(key);
+      return this.stripIfSynced(key, await this.localAdapter.getItem<T>(key));
     }
   }
 
-  async setItem<T>(key: string, value: T): Promise<void> {
+  private stripIfSynced<T>(key: string, value: T): T {
+    if (SYNCED_KEYS.has(key)) return stripSyncMeta(value);
+    return value;
+  }
+
+  async setItem<T>(key: string, value: T, opts: { silent?: boolean } = {}): Promise<void> {
+    const annotated = this.annotate(key, value);
     try {
-      await this.idbAdapter.setItem<T>(key, value);
+      await this.idbAdapter.setItem<T>(key, annotated);
     } catch {
       // If IndexedDB fails or unavailable, write to LocalStorage
-      await this.localAdapter.setItem<T>(key, value);
+      await this.localAdapter.setItem<T>(key, annotated);
     }
+    if (!opts.silent) this.notify(key);
   }
 
   async removeItem(key: string): Promise<void> {
@@ -54,8 +132,12 @@ export class StorageService implements IStorageAdapter {
     return await this.getItem<LearnerProgress>('learner_progress');
   }
 
-  async saveLearnerProgress(progress: LearnerProgress): Promise<void> {
-    await this.setItem<LearnerProgress>('learner_progress', progress);
+  /**
+   * silent=true writes the synced payload WITHOUT notifying sync listeners
+   * (used when applying canonical server state, to avoid push loops).
+   */
+  async saveLearnerProgress(progress: LearnerProgress, opts: { silent?: boolean } = {}): Promise<void> {
+    await this.setItem<LearnerProgress>('learner_progress', progress, opts);
   }
 
   // --- Streak & Continuity Persistence ---
@@ -125,7 +207,7 @@ export class StorageService implements IStorageAdapter {
     }
   }
 
-  async saveWorkbenchState(state: Partial<WorkbenchState>): Promise<boolean> {
+  async saveWorkbenchState(state: Partial<WorkbenchState>, opts: { silent?: boolean } = {}): Promise<boolean> {
     try {
       const current = await this.loadWorkbenchState();
       const completed =
@@ -141,7 +223,7 @@ export class StorageService implements IStorageAdapter {
         ledgerTAccounts: state.ledgerTAccounts ?? current.ledgerTAccounts,
         voucherScores: state.voucherScores ?? current.voucherScores,
       };
-      await this.setItem<WorkbenchState>('workbench_state', merged);
+      await this.setItem<WorkbenchState>('workbench_state', merged, opts);
       return true;
     } catch (err) {
       console.error('[StorageService] Error saving workbench state:', err);
@@ -159,9 +241,9 @@ export class StorageService implements IStorageAdapter {
     }
   }
 
-  async saveCogsState(state: CogsState): Promise<boolean> {
+  async saveCogsState(state: CogsState, opts: { silent?: boolean } = {}): Promise<boolean> {
     try {
-      await this.setItem<CogsState>('cogs_state', state);
+      await this.setItem<CogsState>('cogs_state', state, opts);
       return true;
     } catch (err) {
       console.error('[StorageService] Error saving cogs state:', err);
@@ -176,12 +258,18 @@ export class StorageService implements IStorageAdapter {
 
     const localData: Record<string, unknown> = {};
     for (const key of localKeys) {
-      localData[key] = await this.localAdapter.getItem(key);
+      // Sync metadata is stripped: application data round-trips 100%
+      // (FEAT-06) and is re-annotated on the next write.
+      localData[key] = SYNCED_KEYS.has(key)
+        ? stripSyncMeta(await this.localAdapter.getItem(key))
+        : await this.localAdapter.getItem(key);
     }
 
     const idbData: Record<string, unknown> = {};
     for (const key of idbKeys) {
-      idbData[key] = await this.idbAdapter.getItem(key);
+      idbData[key] = SYNCED_KEYS.has(key)
+        ? stripSyncMeta(await this.idbAdapter.getItem(key))
+        : await this.idbAdapter.getItem(key);
     }
 
     const theme = (await this.getTheme()) as 'light' | 'dark' | 'system';
