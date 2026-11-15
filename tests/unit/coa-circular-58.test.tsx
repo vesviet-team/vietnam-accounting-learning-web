@@ -1,7 +1,16 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { COA_CIRCULAR_58, CIRCULAR_58_KEY_HIGHLIGHTS } from '@/data/coa-circular-58';
-import { getAccountsByRegime, findAccountByCode } from '@/data/coa-service';
+import { getAccountsByRegime, findAccountByCode, ensureAccountsLoaded } from '@/data/coa-service';
+import { beforeAll } from 'vitest';
+
+// P2 code-split: dataset TT 58/TT 133 dynamic-import theo regime — preload trước khi API đồng bộ chạy.
+beforeAll(async () => {
+  await Promise.all([
+    ensureAccountsLoaded('CIRCULAR_58'),
+    ensureAccountsLoaded('CIRCULAR_133'),
+  ]);
+});
 import { SettingsView } from '@/components/settings/SettingsView';
 
 describe('Circular 58/2026/TT-BTC — Micro-enterprise (DN siêu nhỏ) accounting regime', () => {

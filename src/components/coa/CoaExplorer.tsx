@@ -11,7 +11,7 @@ import {
   X,
 } from 'lucide-react';
 import { AccountItem, AccountingRegime, AccountCategory, CATEGORY_METADATA } from '@/types/coa';
-import { getAccountsByRegime, CIRCULAR_99_KEY_HIGHLIGHTS } from '@/data/coa-service';
+import { getAccountsByRegime, ensureAccountsLoaded, getCircular99Highlights } from '@/data/coa-service';
 import { getProhibitionRule, getProhibitedAccounts133, ProhibitedAccountRule } from '@/data/prohibited-accounts';
 import { CoaDetailModal } from './CoaDetailModal';
 
@@ -51,11 +51,9 @@ function buildAccountTokens(account: AccountItem): AccountWithTokens {
   };
 }
 
-// Module-level pre-indexed accounts to eliminate redundant normalization operations
-const PREINDEXED_ACCOUNTS_200: AccountWithTokens[] = getAccountsByRegime('CIRCULAR_200').map(buildAccountTokens);
-const PREINDEXED_ACCOUNTS_133: AccountWithTokens[] = getAccountsByRegime('CIRCULAR_133').map(buildAccountTokens);
-const PREINDEXED_ACCOUNTS_99: AccountWithTokens[] = getAccountsByRegime('CIRCULAR_99').map(buildAccountTokens);
-const PREINDEXED_ACCOUNTS_58: AccountWithTokens[] = getAccountsByRegime('CIRCULAR_58').map(buildAccountTokens);
+// Code-split P2: dataset COA được dynamic-import theo regime (xem coa-service).
+// Danh sách tài khoản build token một lần khi dataset của regime được nạp xong,
+// thay vì pre-index cả 4 dataset ở mức module (trước đây đẩy toàn bộ vào main chunk).
 const PREINDEXED_PROHIBITED_133: AccountWithTokens[] = getProhibitedAccounts133().map(buildAccountTokens);
 
 interface AccountCardProps {
@@ -170,6 +168,35 @@ export const CoaExplorer: FC<CoaExplorerProps> = ({
   const [selectedAccount, setSelectedAccount] = useState<AccountItem | null>(null);
   const [visibleCount, setVisibleCount] = useState<number>(PAGE_SIZE);
 
+  // Dataset theo regime: khởi tạo đồng bộ từ cache (TT 200 load tĩnh như cũ; các
+  // regime khác đã có cache thì dùng ngay), rồi dynamic-import nếu chưa có.
+  const [regimeAccounts, setRegimeAccounts] = useState<AccountWithTokens[]>(() =>
+    getAccountsByRegime(currentRegime).map(buildAccountTokens)
+  );
+  const [circular99Highlights, setCircular99Highlights] = useState(() => getCircular99Highlights());
+
+  useEffect(() => {
+    let alive = true;
+    // Cache hit (TT 200 mặc định hoặc regime đã tải trước đó): cập nhật đồng bộ.
+    const cached = getAccountsByRegime(currentRegime);
+    if (cached.length > 0) {
+      setRegimeAccounts(cached.map(buildAccountTokens));
+      if (currentRegime === 'CIRCULAR_99') setCircular99Highlights(getCircular99Highlights());
+      return () => { alive = false; };
+    }
+    setRegimeAccounts([]);
+    ensureAccountsLoaded(currentRegime)
+      .then((accounts) => {
+        if (!alive) return;
+        setRegimeAccounts(accounts.map(buildAccountTokens));
+        if (currentRegime === 'CIRCULAR_99') setCircular99Highlights(getCircular99Highlights());
+      })
+      .catch((err) => {
+        console.error('[CoaExplorer] Failed to load COA dataset for', currentRegime, err);
+      });
+    return () => { alive = false; };
+  }, [currentRegime]);
+
   // Reset pagination window when filter criteria change
   useEffect(() => {
     setVisibleCount(PAGE_SIZE);
@@ -182,11 +209,7 @@ export const CoaExplorer: FC<CoaExplorerProps> = ({
 
     const sourceList = (showOnlyProhibited && currentRegime === 'CIRCULAR_133')
       ? PREINDEXED_PROHIBITED_133
-      : currentRegime === 'CIRCULAR_99'
-      ? PREINDEXED_ACCOUNTS_99
-      : currentRegime === 'CIRCULAR_58'
-      ? PREINDEXED_ACCOUNTS_58
-      : (currentRegime === 'CIRCULAR_200' ? PREINDEXED_ACCOUNTS_200 : PREINDEXED_ACCOUNTS_133);
+      : regimeAccounts;
 
     return sourceList.filter((acc) => {
       if (selectedCategory !== 'ALL' && acc.category !== selectedCategory) {
@@ -195,7 +218,7 @@ export const CoaExplorer: FC<CoaExplorerProps> = ({
       if (!q) return true;
       return acc._normalizedSearch.includes(q) || (qNoAccents ? acc._normalizedSearch.includes(qNoAccents) : false);
     });
-  }, [searchQuery, currentRegime, selectedCategory, showOnlyProhibited]);
+  }, [searchQuery, currentRegime, selectedCategory, showOnlyProhibited, regimeAccounts]);
 
   // In JSDOM or active search, render immediately for instant testing & accessibility
   const isSearchOrFilter = searchQuery.trim().length > 0 || showOnlyProhibited || selectedCategory !== 'ALL';
@@ -341,7 +364,7 @@ export const CoaExplorer: FC<CoaExplorerProps> = ({
               </span>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
-              {CIRCULAR_99_KEY_HIGHLIGHTS.map((item) => (
+              {circular99Highlights.map((item) => (
                 <div
                   key={item.id}
                   className="p-3 rounded-lg bg-white/90 dark:bg-slate-900/80 border border-purple-100 dark:border-purple-900/60 text-xs space-y-1"

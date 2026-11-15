@@ -1,5 +1,15 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { getAccountsByRegime, searchAccounts } from '@/data/coa-service';
+import { getAccountsByRegime, searchAccounts, ensureAccountsLoaded } from '@/data/coa-service';
+import { beforeAll } from 'vitest';
+
+// P2 code-split: dataset TT 133/99/58 dynamic-import theo regime — preload trước khi API đồng bộ chạy.
+beforeAll(async () => {
+  await Promise.all([
+    ensureAccountsLoaded('CIRCULAR_133'),
+    ensureAccountsLoaded('CIRCULAR_99'),
+    ensureAccountsLoaded('CIRCULAR_58'),
+  ]);
+});
 import { isProhibitedInCircular133, validateAccountForRegime } from '@/data/prohibited-accounts';
 import { StorageService } from '@/services/storage/storage-service';
 import { VoucherInspector } from '../helpers/domain-engines';

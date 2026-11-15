@@ -1,4 +1,4 @@
-import { describe, it, expect, afterEach } from 'vitest';
+import { describe, it, expect, afterEach, beforeAll } from 'vitest';
 import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import { CoaExplorer } from '@/components/coa/CoaExplorer';
 import { COA_CIRCULAR_200 } from '@/data/coa-circular-200';
@@ -15,6 +15,12 @@ import {
   searchAccounts,
 } from '@/data/coa-service';
 import { AccountCategory, CATEGORY_METADATA } from '@/types/coa';
+import { ensureAccountsLoaded } from '@/data/coa-service';
+
+// P2 code-split: dataset TT 133 dynamic-import theo regime — preload cho API đồng bộ.
+beforeAll(async () => {
+  await ensureAccountsLoaded('CIRCULAR_133');
+});
 
 /**
  * ============================================================================

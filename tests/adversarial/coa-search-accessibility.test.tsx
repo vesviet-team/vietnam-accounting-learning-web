@@ -1,11 +1,19 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeAll } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { CoaExplorer, removeVietnameseAccents } from '@/components/coa/CoaExplorer';
-import { getAccountsByRegime } from '@/data/coa-service';
+import { getAccountsByRegime, ensureAccountsLoaded } from '@/data/coa-service';
+import type { AccountItem } from '@/types/coa';
 
 describe('CHALLENGER BATTERY: Diacritic Search & Account Accessibility in CoaExplorer', () => {
-  const allAccounts200 = getAccountsByRegime('CIRCULAR_200');
-  const allAccounts133 = getAccountsByRegime('CIRCULAR_133');
+  // P2 code-split: dataset TT 133 được dynamic-import theo regime — phải đảm bảo
+  // cache đã nạp trước khi các assertion đồng bộ chạy.
+  let allAccounts200: AccountItem[];
+  let allAccounts133: AccountItem[];
+  beforeAll(async () => {
+    await ensureAccountsLoaded('CIRCULAR_133');
+    allAccounts200 = getAccountsByRegime('CIRCULAR_200');
+    allAccounts133 = getAccountsByRegime('CIRCULAR_133');
+  });
 
   // Helper to find account card badge: <span ...>TK {code}</span>
   const hasAccountBadge = (code: string): boolean => {

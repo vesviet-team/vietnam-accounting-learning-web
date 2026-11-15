@@ -14,7 +14,14 @@ import {
   getAccountsByRegime,
   findAccountByCode,
   searchAccounts,
+  ensureAccountsLoaded,
 } from '@/data/coa-service';
+import { beforeAll } from 'vitest';
+
+// P2 code-split: dataset TT 133 dynamic-import theo regime — preload trước khi API đồng bộ chạy.
+beforeAll(async () => {
+  await ensureAccountsLoaded('CIRCULAR_133');
+});
 
 describe('Chart of Accounts Data Integrity', () => {
   it('Circular 200 dataset should cover all 9 account classes', () => {

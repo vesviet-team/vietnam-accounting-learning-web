@@ -1,16 +1,32 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { Header } from '@/components/layout/Header';
 import { Sidebar, NavTab } from '@/components/layout/Sidebar';
 import { BackupModal } from '@/components/layout/BackupModal';
 import { CoaExplorer } from '@/components/coa/CoaExplorer';
-import { CurriculumPreview } from '@/components/curriculum/CurriculumPreview';
 import { Journalizer } from '@/components/workbench/Journalizer';
 import { VoucherInspector } from '@/components/workbench/VoucherInspector';
 import { TaxComplianceTools } from '@/components/voucher/TaxComplianceTools';
 import { SettingsView } from '@/components/settings/SettingsView';
-import { QuizModal } from '@/components/assessment/QuizModal';
-import { FinancialStatementsView } from '@/components/workbench/FinancialStatementsView';
-import { CogsWorkbench } from '@/components/workbench/cogs/CogsWorkbench';
+
+// Code-split P2: các view nặng (Lộ trình curriculum ~184 kB, bộ đề milestone
+// ~204 kB, engine BCTC & COGS) được tách khỏi main chunk bằng dynamic import —
+// chỉ tải khi người dùng mở tab tương ứng. Các component vẫn giữ nguyên xuất
+// khẩu tĩnh cho unit test (test import trực tiếp từ module, không qua lazy
+// wrapper; App-integration test dùng waitFor nên tương thích với lazy load).
+const CurriculumPreview = lazy(() =>
+  import('@/components/curriculum/CurriculumPreview').then((m) => ({ default: m.CurriculumPreview }))
+);
+const QuizModal = lazy(() =>
+  import('@/components/assessment/QuizModal').then((m) => ({ default: m.QuizModal }))
+);
+const FinancialStatementsView = lazy(() =>
+  import('@/components/workbench/FinancialStatementsView').then((m) => ({
+    default: m.FinancialStatementsView,
+  }))
+);
+const CogsWorkbench = lazy(() =>
+  import('@/components/workbench/cogs/CogsWorkbench').then((m) => ({ default: m.default }))
+);
 import { WebMcpProvider } from '@/components/layout/WebMcpProvider';
 import { AccountingRegime } from '@/types/coa';
 import { storageService } from '@/services/storage/storage-service';
@@ -163,10 +179,12 @@ export function App() {
           )}
 
           {activeTab === 'curriculum' && (
-            <CurriculumPreview
-              currentRegime={currentRegime}
-              onNavigateToCoa={() => setActiveTab('coa')}
-            />
+            <Suspense fallback={<div className="p-8 text-sm text-slate-500 dark:text-slate-400">Đang tải Lộ Trình 30 Ngày…</div>}>
+              <CurriculumPreview
+                currentRegime={currentRegime}
+                onNavigateToCoa={() => setActiveTab('coa')}
+              />
+            </Suspense>
           )}
 
           {activeTab === 'workbench' && (
@@ -184,20 +202,24 @@ export function App() {
           {activeTab === 'tax' && <TaxComplianceTools />}
 
           {(activeTab === 'financial-statements' || activeTab === 'bctc') && (
-            <FinancialStatementsView
-              currentRegime={currentRegime}
-              onRegimeChange={handleRegimeChange}
-              onNavigateToJournalizer={() => setActiveTab('workbench')}
-            />
+            <Suspense fallback={<div className="p-8 text-sm text-slate-500 dark:text-slate-400">Đang tải Báo Cáo Tài Chính…</div>}>
+              <FinancialStatementsView
+                currentRegime={currentRegime}
+                onRegimeChange={handleRegimeChange}
+                onNavigateToJournalizer={() => setActiveTab('workbench')}
+              />
+            </Suspense>
           )}
 
           {activeTab === 'cogs' && (
-            <CogsWorkbench
-              currentRegime={currentRegime}
-              onRegimeChange={handleRegimeChange}
-              onNavigateToJournalizer={() => setActiveTab('workbench')}
-              onNavigateToFinancialStatements={() => setActiveTab('financial-statements')}
-            />
+            <Suspense fallback={<div className="p-8 text-sm text-slate-500 dark:text-slate-400">Đang tải COGS Workbench…</div>}>
+              <CogsWorkbench
+                currentRegime={currentRegime}
+                onRegimeChange={handleRegimeChange}
+                onNavigateToJournalizer={() => setActiveTab('workbench')}
+                onNavigateToFinancialStatements={() => setActiveTab('financial-statements')}
+              />
+            </Suspense>
           )}
 
           {activeTab === 'settings' && (
@@ -217,11 +239,13 @@ export function App() {
 
       {/* Global Milestone Assessment Modal */}
       {activeMilestoneQuizDay !== null && (
-        <QuizModal
-          isOpen={true}
-          milestoneDay={activeMilestoneQuizDay}
-          onClose={() => setActiveMilestoneQuizDay(null)}
-        />
+        <Suspense fallback={<div className="fixed inset-0 z-50" />}>
+          <QuizModal
+            isOpen={true}
+            milestoneDay={activeMilestoneQuizDay}
+            onClose={() => setActiveMilestoneQuizDay(null)}
+          />
+        </Suspense>
       )}
     </div>
   );

@@ -15,7 +15,7 @@ import {
 import { AccountingRegime } from '@/types/coa';
 import { JournalEntryRow, JournalBalanceValidation } from '@/types/workbench';
 import { TAccountData } from '@/types/curriculum';
-import { searchAccounts, findAccountByCode } from '@/data/coa-service';
+import { searchAccounts, findAccountByCode, ensureAccountsLoaded } from '@/data/coa-service';
 import { isProhibitedInCircular133, getProhibitedAccountInfo } from '@/data/prohibited-accounts';
 import { TAccountView, formatVnd, determineAccountNature } from '@/components/curriculum/TAccountView';
 import { storageService } from '@/services/storage/storage-service';
@@ -247,6 +247,20 @@ export const Journalizer: FC<JournalizerProps> = ({
   const [postSuccessMessage, setPostSuccessMessage] = useState<string | null>(null);
   const [postedEntries, setPostedEntries] = useState<PostedJournalEntry[]>([]);
   const [ledgerTAccounts, setLedgerTAccounts] = useState<Record<string, TAccountData>>({});
+
+  // Code-split P2: dataset COA của regime không mặc định (TT 133/99/58) được
+  // dynamic-import theo yêu cầu (xem coa-service). Chế độ mặc định TT 200 được
+  // import tĩnh nên có sẵn ngay; các regime khác tải xong sẽ re-render qua tick.
+  const [, bumpCoaLoadTick] = useState(0);
+  useEffect(() => {
+    let alive = true;
+    ensureAccountsLoaded(currentRegime).then(() => {
+      if (alive) bumpCoaLoadTick((t) => t + 1);
+    });
+    return () => {
+      alive = false;
+    };
+  }, [currentRegime]);
 
   // Restore persisted workbench state (postedEntries & ledgerTAccounts) on mount
   useEffect(() => {

@@ -3,7 +3,13 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import fs from 'node:fs';
 import path from 'node:path';
 import { COA_CIRCULAR_99, CIRCULAR_99_KEY_HIGHLIGHTS } from '@/data/coa-circular-99';
-import { getAccountsByRegime, findAccountByCode } from '@/data/coa-service';
+import { getAccountsByRegime, findAccountByCode, ensureAccountsLoaded } from '@/data/coa-service';
+import { beforeAll } from 'vitest';
+
+// P2 code-split: dataset TT 99 dynamic-import theo regime — preload trước khi API đồng bộ chạy.
+beforeAll(async () => {
+  await ensureAccountsLoaded('CIRCULAR_99');
+});
 import { CoaExplorer } from '@/components/coa/CoaExplorer';
 import {
   generateCashFlowStatement,

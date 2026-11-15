@@ -1,9 +1,14 @@
-import { describe, it, expect, afterEach } from 'vitest';
+import { describe, it, expect, afterEach, beforeAll } from 'vitest';
 import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import { useState } from 'react';
 import { CoaExplorer, removeVietnameseAccents } from '@/components/coa/CoaExplorer';
 import { AccountingRegime } from '@/types/coa';
-import { getAccountsByRegime } from '@/data/coa-service';
+import { getAccountsByRegime, ensureAccountsLoaded } from '@/data/coa-service';
+
+// P2 code-split: harness chuyển regime sang TT 133 — preload dataset vào cache.
+beforeAll(async () => {
+  await ensureAccountsLoaded('CIRCULAR_133');
+});
 
 describe('CHALLENGER M1: Empirical Latency & Performance Stress Harness', () => {
   afterEach(() => {
