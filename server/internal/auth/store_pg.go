@@ -131,6 +131,38 @@ func (s *PGStore) RevokeAllForUser(ctx context.Context, userID uuid.UUID) error 
 	return err
 }
 
+// ListSessionsForUser returns active (non-revoked, unexpired) sessions of
+// the user, newest first. One row = one device grant.
+func (s *PGStore) ListSessionsForUser(ctx context.Context, userID uuid.UUID) ([]Session, error) {
+	rows, err := s.pool.Query(ctx,
+		"SELECT "+sessionCols+" FROM oauth_sessions WHERE user_id = $1 AND revoked_at IS NULL AND expires_at > now() ORDER BY created_at DESC",
+		userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	out := []Session{}
+	for rows.Next() {
+		var sess Session
+		if err := rows.Scan(&sess.ID, &sess.UserID, &sess.DeviceID, &sess.RefreshHash,
+			&sess.RotatedFrom, &sess.Scope, &sess.RevokedAt, &sess.CreatedAt,
+			&sess.LastUsedAt, &sess.ExpiresAt); err != nil {
+			return nil, err
+		}
+		out = append(out, sess)
+	}
+	return out, rows.Err()
+}
+
+func (s *PGStore) GetSessionByID(ctx context.Context, id uuid.UUID) (Session, error) {
+	sess, err := scanSession(s.pool.QueryRow(ctx,
+		"SELECT "+sessionCols+" FROM oauth_sessions WHERE id = $1", id))
+	if errors.Is(err, pgx.ErrNoRows) {
+		return Session{}, ErrNotFound
+	}
+	return sess, err
+}
+
 func (s *PGStore) TouchSession(ctx context.Context, id uuid.UUID) error {
 	_, err := s.pool.Exec(ctx,
 		"UPDATE oauth_sessions SET last_used_at = now() WHERE id = $1", id)

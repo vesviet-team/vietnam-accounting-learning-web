@@ -12,6 +12,38 @@ import (
 	"github.com/vesviet-team/vietnam-accounting-api/internal/httpx"
 )
 
+// RefreshCookieName is the httpOnly refresh-token cookie set by the token
+// endpoint so a SPA keeps its session across reloads without ever storing
+// the refresh token in web storage. The JSON body also carries the refresh
+// token for non-cookie clients (backwards compatible with P0).
+const RefreshCookieName = "vnacc_rt"
+
+// setRefreshCookie writes the httpOnly refresh cookie (Secure + SameSite
+// Strict; the service is always reached through HTTPS in production).
+func setRefreshCookie(w http.ResponseWriter, value string) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     RefreshCookieName,
+		Value:    value,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteStrictMode,
+		MaxAge:   int(RefreshTokenTTL.Seconds()),
+	})
+}
+
+func clearRefreshCookie(w http.ResponseWriter) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     RefreshCookieName,
+		Value:    "",
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteStrictMode,
+		MaxAge:   -1,
+	})
+}
+
 // TokenHandler serves POST /oauth2/token with grant_type =
 // authorization_code (PKCE S256 required) and refresh_token (rotation with
 // reuse detection).
@@ -110,9 +142,15 @@ func (h *TokenHandler) authorizationCodeGrant(w http.ResponseWriter, r *http.Req
 // refreshGrant performs rotation: the old session row (holding the old
 // refresh hash) is revoked and a new session links back via rotated_from.
 // Presenting a refresh token whose session is already revoked means reuse:
-// the entire family is revoked.
+// the entire family is revoked. The refresh token may come from the form
+// field or the httpOnly cookie.
 func (h *TokenHandler) refreshGrant(w http.ResponseWriter, r *http.Request) {
 	raw := r.PostForm.Get("refresh_token")
+	if raw == "" {
+		if c, cerr := r.Cookie(RefreshCookieName); cerr == nil {
+			raw = c.Value
+		}
+	}
 	if raw == "" {
 		httpx.OAuthError(w, http.StatusBadRequest, "invalid_request", "refresh_token is required")
 		return
@@ -169,6 +207,7 @@ func (h *TokenHandler) issue(w http.ResponseWriter, userID, sessionID uuid.UUID,
 		httpx.OAuthError(w, http.StatusInternalServerError, "server_error", "")
 		return
 	}
+	setRefreshCookie(w, refresh)
 	writeJSON(w, http.StatusOK, map[string]any{
 		"access_token":  access,
 		"token_type":    "Bearer",

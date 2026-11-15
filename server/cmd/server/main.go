@@ -15,11 +15,13 @@ import (
 
 	"github.com/google/uuid"
 
+	"github.com/vesviet-team/vietnam-accounting-api/internal/account"
 	"github.com/vesviet-team/vietnam-accounting-api/internal/auth"
 	"github.com/vesviet-team/vietnam-accounting-api/internal/backup"
 	"github.com/vesviet-team/vietnam-accounting-api/internal/config"
 	"github.com/vesviet-team/vietnam-accounting-api/internal/db"
 	"github.com/vesviet-team/vietnam-accounting-api/internal/middleware"
+	"github.com/vesviet-team/vietnam-accounting-api/internal/sync"
 	"github.com/vesviet-team/vietnam-accounting-api/internal/user"
 	"github.com/vesviet-team/vietnam-accounting-api/migrations"
 )
@@ -85,6 +87,13 @@ func run() error {
 		cfg.OAuthClientID, cfg.OAuthClientRedirectURI, cfg.OAuthIssuer, users, authStore)
 	userHandler := &user.Handler{Service: users, Keys: keys}
 	backupHandler := &backup.Handler{Store: backup.NewPGStore(pool), Keys: keys}
+	syncStore := sync.NewPGStore(pool)
+	syncHandler := &sync.Handler{Store: syncStore, Keys: keys}
+	accountHandler := &account.Handler{
+		Store: account.NewPGStore(pool, authStore, syncStore),
+		Keys:  keys,
+		Users: users,
+	}
 
 	// Router (Go 1.22 method patterns).
 	mux := http.NewServeMux()
@@ -105,6 +114,17 @@ func run() error {
 
 	mux.HandleFunc("PUT /sync/backup", backupHandler.Put)
 	mux.HandleFunc("GET /sync/backup", backupHandler.Get)
+
+	// P1 per-entity sync + account management (bearer-authenticated,
+	// rate-limited; payloads are never logged).
+	mux.Handle("GET /sync/pull", middleware.RateLimit(120, time.Minute)(http.HandlerFunc(syncHandler.Pull)))
+	mux.Handle("POST /sync/push", middleware.RateLimit(120, time.Minute)(http.HandlerFunc(syncHandler.Push)))
+	mux.Handle("POST /sync/merge-anonymous", middleware.RateLimit(30, time.Minute)(http.HandlerFunc(syncHandler.MergeAnonymous)))
+
+	mux.Handle("GET /me/sessions", middleware.RateLimit(120, time.Minute)(http.HandlerFunc(accountHandler.Sessions)))
+	mux.Handle("POST /me/sessions/revoke", middleware.RateLimit(30, time.Minute)(http.HandlerFunc(accountHandler.RevokeSession)))
+	mux.Handle("GET /me/export", middleware.RateLimit(10, time.Minute)(http.HandlerFunc(accountHandler.Export)))
+	mux.Handle("POST /me/delete", middleware.RateLimit(10, time.Minute)(http.HandlerFunc(accountHandler.Delete)))
 
 	// Middleware chain: recover -> logging -> request-id -> CORS -> mux.
 	handler := middleware.Recover(logger)(

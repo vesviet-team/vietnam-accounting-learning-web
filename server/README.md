@@ -39,6 +39,13 @@ Mỗi package tách lớp: handler HTTP → service → interface `Store` (impl 
 | `/auth/register` | POST | none (rate-limited) | Đăng ký email/password |
 | `/sync/backup` | PUT | Bearer | Body `{payload, revision, device_id}`. `payload` là JSON opaque (client có thể tự mã hóa). `revision` bigint monotonic: ≤ revision hiện có → **409** kèm revision hiện tại; lớn hơn → ghi, trả `{revision, updated_at}` |
 | `/sync/backup` | GET | Bearer | Trả latest: `{payload, revision, device_id, updated_at}`; 404 nếu chưa có |
+| `/sync/pull` | GET | Bearer | P1 per-entity pull: `?cursor=<seq>&kinds=progress,attempts,active_days,workbench`. Trả entities có `seq > cursor` + cursor mới (server-assigned, monotonic) |
+| `/sync/push` | POST | Bearer | P1 batch merge: `progress` = max/union (completed_days union, milestone_scores max-per-day, current_day max, revision = max); `attempts` = union theo uuid (append-only); `active_days` = union; `workbench` = LWW revision. Trả canonical state + cursor |
+| `/sync/merge-anonymous` | POST | Bearer | Merge snapshot anonymous (sau login lần đầu) bằng cùng merge policy ở trên; trả canonical |
+| `/me/sessions` | GET | Bearer | Danh sách oauth_sessions sống: `{id, device_id, created_at, last_used_at, expires_at, current}` |
+| `/me/sessions/revoke` | POST | Bearer | Body `{session_id}` — chỉ revoke session của chính user (404 nếu không thuộc user) |
+| `/me/export` | GET | Bearer | Toàn bộ dữ liệu user dạng JSON download (attachment) |
+| `/me/delete` | POST | Bearer | Soft-delete (`users.disabled_at`) + xoá sạch dữ liệu con trong 1 transaction (GDPR/NĐ 13/2023) |
 
 OAuth scopes: `read`, `write` (subset check). Issuer: `https://hoa.tanhdev.com`. Client first-party duy nhất cấu hình qua env (`OAUTH_CLIENT_ID` / `OAUTH_CLIENT_REDIRECT_URI`) — khớp discovery metadata `public/.well-known/oauth-authorization-server` của frontend.
 

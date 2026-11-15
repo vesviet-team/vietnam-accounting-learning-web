@@ -94,3 +94,9 @@ func (s *Service) GetActiveByID(ctx context.Context, id uuid.UUID) (*User, error
 	}
 	return u, nil
 }
+
+// Disable soft-deletes the user (right to erasure / account closure).
+// Idempotent: disabling an already-disabled user succeeds.
+func (s *Service) Disable(ctx context.Context, id uuid.UUID) error {
+	return s.store.Disable(ctx, id)
+}

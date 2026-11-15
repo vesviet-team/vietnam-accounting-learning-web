@@ -55,6 +55,18 @@ func (m *memUserStore) GetByID(_ context.Context, id uuid.UUID) (*User, error) {
 	return &cp, nil
 }
 
+func (m *memUserStore) Disable(_ context.Context, id uuid.UUID) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	u, ok := m.byID[id.String()]
+	if !ok {
+		return ErrNotFound
+	}
+	now := time.Now()
+	u.DisabledAt = &now
+	return nil
+}
+
 func TestRegisterAndAuthenticate(t *testing.T) {
 	ctx := context.Background()
 	s := NewService(newMemUserStore())

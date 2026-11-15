@@ -76,6 +76,13 @@ func (s *PGStore) GetByID(ctx context.Context, id uuid.UUID) (*User, error) {
 	return u, err
 }
 
+// Disable soft-deletes the user (idempotent).
+func (s *PGStore) Disable(ctx context.Context, id uuid.UUID) error {
+	_, err := s.pool.Exec(ctx,
+		"UPDATE users SET disabled_at = now() WHERE id = $1 AND disabled_at IS NULL", id)
+	return err
+}
+
 func isUniqueViolation(err error) bool {
 	var pgErr *pgconn.PgError
 	if errors.As(err, &pgErr) {

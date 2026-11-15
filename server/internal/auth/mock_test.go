@@ -132,6 +132,36 @@ func (m *memStore) RevokeAllForUser(_ context.Context, userID uuid.UUID) error {
 	return nil
 }
 
+func (m *memStore) ListSessionsForUser(_ context.Context, userID uuid.UUID) ([]Session, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	out := []Session{}
+	for _, s := range m.sessions {
+		if s.UserID == userID && s.RevokedAt == nil && time.Now().Before(s.ExpiresAt) {
+			out = append(out, *s)
+		}
+	}
+	// Newest first.
+	for i := 0; i < len(out); i++ {
+		for j := i + 1; j < len(out); j++ {
+			if out[j].CreatedAt.After(out[i].CreatedAt) {
+				out[i], out[j] = out[j], out[i]
+			}
+		}
+	}
+	return out, nil
+}
+
+func (m *memStore) GetSessionByID(_ context.Context, id uuid.UUID) (Session, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	s, ok := m.sessions[id]
+	if !ok {
+		return Session{}, ErrNotFound
+	}
+	return *s, nil
+}
+
 func (m *memStore) TouchSession(_ context.Context, id uuid.UUID) error { return nil }
 
 func (m *memStore) isRevoked(id uuid.UUID) bool {

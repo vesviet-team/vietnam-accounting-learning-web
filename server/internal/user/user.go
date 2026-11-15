@@ -36,4 +36,7 @@ type Store interface {
 	CreateUser(ctx context.Context, u *User) error
 	GetByEmail(ctx context.Context, email string) (*User, error)
 	GetByID(ctx context.Context, id uuid.UUID) (*User, error)
+
+	// Disable soft-deletes the user (disabled_at = now). Idempotent.
+	Disable(ctx context.Context, id uuid.UUID) error
 }

@@ -79,5 +79,12 @@ type Store interface {
 	// RevokeAllForUser revokes every active session of the user.
 	RevokeAllForUser(ctx context.Context, userID uuid.UUID) error
 
+	// ListSessionsForUser returns the active (non-revoked, unexpired)
+	// sessions of the user — one per device — newest first.
+	ListSessionsForUser(ctx context.Context, userID uuid.UUID) ([]Session, error)
+
+	// GetSessionByID returns one session row (any state).
+	GetSessionByID(ctx context.Context, id uuid.UUID) (Session, error)
+
 	TouchSession(ctx context.Context, id uuid.UUID) error
 }
