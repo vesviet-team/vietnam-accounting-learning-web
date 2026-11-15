@@ -1,8 +1,8 @@
 {
-  "issuer": "https://learn.tanhdev.com",
-  "authorization_endpoint": "https://learn.tanhdev.com/oauth2/auth",
-  "token_endpoint": "https://learn.tanhdev.com/oauth2/token",
-  "jwks_uri": "https://learn.tanhdev.com/oauth2/jwks",
+  "issuer": "https://hoa.tanhdev.com",
+  "authorization_endpoint": "https://hoa.tanhdev.com/oauth2/auth",
+  "token_endpoint": "https://hoa.tanhdev.com/oauth2/token",
+  "jwks_uri": "https://hoa.tanhdev.com/oauth2/jwks",
   "response_types_supported": [
     "code"
   ],
@@ -14,9 +14,9 @@
   ],
   "client_id_metadata_document_supported": true,
   "agent_auth": {
-    "skill": "https://learn.tanhdev.com/auth.md",
-    "register_uri": "https://learn.tanhdev.com/oauth2/register",
-    "claim_uri": "https://learn.tanhdev.com/oauth2/claim",
+    "skill": "https://hoa.tanhdev.com/auth.md",
+    "register_uri": "https://hoa.tanhdev.com/oauth2/register",
+    "claim_uri": "https://hoa.tanhdev.com/oauth2/claim",
     "identity_types_supported": [
       "anonymous",
       "identity_assertion"

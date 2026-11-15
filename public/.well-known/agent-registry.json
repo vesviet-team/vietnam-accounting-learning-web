@@ -6,7 +6,7 @@
     {
       "id": "vietnam-accounting-learning-agent",
       "name": "Vietnam Accounting 30-Day Learning Agent",
-      "url": "https://learn.tanhdev.com/.well-known/agent-card.json",
+      "url": "https://hoa.tanhdev.com/.well-known/agent-card.json",
       "protocol_version": "1.0",
       "capabilities": [
         "coa-lookup-vietnam",

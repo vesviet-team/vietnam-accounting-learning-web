@@ -7,7 +7,7 @@
  * - Seamless offline fallback for navigation and static assets
  */
 
-const CACHE_VERSION = 'v1';
+const CACHE_VERSION = 'v2';
 const STATIC_CACHE_NAME = `vnacc-app-shell-${CACHE_VERSION}`;
 const DYNAMIC_CACHE_NAME = `vnacc-dynamic-${CACHE_VERSION}`;
 const FONT_CACHE_NAME = `vnacc-fonts-${CACHE_VERSION}`;

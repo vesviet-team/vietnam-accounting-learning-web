@@ -7,8 +7,8 @@
       "name": "Vietnam Chart of Accounts Lookup",
       "type": "api",
       "description": "Search Vietnamese accounting accounts across Circular 99/2025/TT-BTC, Circular 200/2014/TT-BTC, and Circular 133/2016/TT-BTC",
-      "endpoint": "https://learn.tanhdev.com/#coa",
-      "url": "https://learn.tanhdev.com/#coa",
+      "endpoint": "https://hoa.tanhdev.com/#coa",
+      "url": "https://hoa.tanhdev.com/#coa",
       "method": "GET",
       "auth": "none"
     },
@@ -17,8 +17,8 @@
       "name": "B01-DN, B02-DN & B03-DN Financial Statements Simulation",
       "type": "api",
       "description": "Generate Statement of Financial Position (B01-DN), Income Statement (B02-DN), and Indirect Cash Flow Statement (B03-DN)",
-      "endpoint": "https://learn.tanhdev.com/#financial-statements",
-      "url": "https://learn.tanhdev.com/#financial-statements",
+      "endpoint": "https://hoa.tanhdev.com/#financial-statements",
+      "url": "https://hoa.tanhdev.com/#financial-statements",
       "method": "GET",
       "auth": "none"
     },
@@ -26,9 +26,9 @@
       "id": "mcp-server",
       "name": "MCP Server Discovery",
       "type": "mcp",
-      "description": "Stateless MCP 2026-07-28 tool provider at https://learn.tanhdev.com/mcp",
-      "endpoint": "https://learn.tanhdev.com/.well-known/mcp/server-card.json",
-      "url": "https://learn.tanhdev.com/.well-known/mcp/server-card.json",
+      "description": "Stateless MCP 2026-07-28 tool provider at https://hoa.tanhdev.com/mcp",
+      "endpoint": "https://hoa.tanhdev.com/.well-known/mcp/server-card.json",
+      "url": "https://hoa.tanhdev.com/.well-known/mcp/server-card.json",
       "method": "GET",
       "auth": "none"
     }

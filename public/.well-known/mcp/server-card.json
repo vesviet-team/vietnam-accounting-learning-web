@@ -12,15 +12,15 @@
   },
   "transport": {
     "type": "streamable-http",
-    "url": "https://learn.tanhdev.com/mcp"
+    "url": "https://hoa.tanhdev.com/mcp"
   },
   "auth": {
     "type": "oauth2",
     "grant_types": [
       "authorization_code"
     ],
-    "authorization_endpoint": "https://learn.tanhdev.com/oauth2/auth",
-    "token_endpoint": "https://learn.tanhdev.com/oauth2/token",
+    "authorization_endpoint": "https://hoa.tanhdev.com/oauth2/auth",
+    "token_endpoint": "https://hoa.tanhdev.com/oauth2/token",
     "pkce": true
   },
   "capabilities": {
@@ -84,9 +84,9 @@
     }
   ],
   "discovery": {
-    "llms_txt": "https://learn.tanhdev.com/llms.txt",
-    "agent_skills": "https://learn.tanhdev.com/.well-known/agent-skills/index.json",
-    "server_card": "https://learn.tanhdev.com/.well-known/mcp/server-card.json"
+    "llms_txt": "https://hoa.tanhdev.com/llms.txt",
+    "agent_skills": "https://hoa.tanhdev.com/.well-known/agent-skills/index.json",
+    "server_card": "https://hoa.tanhdev.com/.well-known/mcp/server-card.json"
   },
   "content_language": "vi",
   "last_updated": "2026-10-31"

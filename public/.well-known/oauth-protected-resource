@@ -1,7 +1,7 @@
 {
-  "resource": "https://learn.tanhdev.com",
+  "resource": "https://hoa.tanhdev.com",
   "authorization_servers": [
-    "https://learn.tanhdev.com"
+    "https://hoa.tanhdev.com"
   ],
   "scopes_supported": [
     "read",
