@@ -6,6 +6,7 @@ import { CoaExplorer } from '@/components/coa/CoaExplorer';
 import { CurriculumPreview } from '@/components/curriculum/CurriculumPreview';
 import { Journalizer } from '@/components/workbench/Journalizer';
 import { VoucherInspector } from '@/components/workbench/VoucherInspector';
+import { TaxComplianceTools } from '@/components/voucher/TaxComplianceTools';
 import { SettingsView } from '@/components/settings/SettingsView';
 import { QuizModal } from '@/components/assessment/QuizModal';
 import { FinancialStatementsView } from '@/components/workbench/FinancialStatementsView';
@@ -128,6 +129,18 @@ export function App() {
               >
                 <span>🏭 Giá Vốn &amp; Giá Thành (COGS)</span>
               </button>
+              <button
+                type="button"
+                data-testid="tab-tax-tools"
+                onClick={() => setActiveTab('tax')}
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                  activeTab === 'tax'
+                    ? 'bg-emerald-600 text-white shadow-xs'
+                    : 'bg-purple-50 dark:bg-purple-950/60 text-purple-800 dark:text-purple-300 border border-purple-300 dark:border-purple-800 hover:bg-purple-100'
+                }`}
+              >
+                <span>🧮 Thuế TMĐT &amp; R&D</span>
+              </button>
             </div>
 
             {(activeTab === 'financial-statements' || activeTab === 'bctc') && (
@@ -167,6 +180,8 @@ export function App() {
           {activeTab === 'voucher' && (
             <VoucherInspector currentRegime={currentRegime} />
           )}
+
+          {activeTab === 'tax' && <TaxComplianceTools />}
 
           {(activeTab === 'financial-statements' || activeTab === 'bctc') && (
             <FinancialStatementsView

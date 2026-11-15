@@ -7,10 +7,11 @@ import {
   HardDrive,
   Info,
   Factory,
+  Calculator,
 } from 'lucide-react';
 import { AccountingRegime } from '@/types/coa';
 
-export type NavTab = 'coa' | 'curriculum' | 'workbench' | 'cogs' | 'voucher' | 'settings';
+export type NavTab = 'coa' | 'curriculum' | 'workbench' | 'cogs' | 'voucher' | 'tax' | 'settings';
 
 interface SidebarProps {
   activeTab: NavTab;
@@ -76,6 +77,14 @@ export const Sidebar: FC<SidebarProps> = ({
       icon: FileCheck2,
       badge: 'Sẵn sàng',
       milestone: 'M4',
+    },
+    {
+      id: 'tax',
+      labelVi: 'Thuế TMĐT & R&D',
+      subtextVi: 'NĐ 117/2025 & Khấu trừ 200% Luật 67/2025',
+      icon: Calculator,
+      badge: 'Mới',
+      milestone: 'M6',
     },
     {
       id: 'settings',
