@@ -20,9 +20,9 @@ type memStore struct {
 }
 
 type sessionRow struct {
-	id     uuid.UUID
-	userID uuid.UUID
-	device string
+	id      uuid.UUID
+	userID  uuid.UUID
+	device  string
 	revoked bool
 }
 

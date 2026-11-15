@@ -28,26 +28,26 @@ const (
 
 // ProgressInput is the client's local learning-progress state for one push.
 type ProgressInput struct {
-	CompletedDays   []int             `json:"completed_days"`
-	MilestoneScores map[string]int    `json:"milestone_scores"` // milestone day -> highest score
-	CurrentDay      int               `json:"current_day"`
-	Regime          string            `json:"regime"`
-	Revision        int64             `json:"revision"`
-	DeviceID        string            `json:"device_id"`
+	CompletedDays   []int          `json:"completed_days"`
+	MilestoneScores map[string]int `json:"milestone_scores"` // milestone day -> highest score
+	CurrentDay      int            `json:"current_day"`
+	Regime          string         `json:"regime"`
+	Revision        int64          `json:"revision"`
+	DeviceID        string         `json:"device_id"`
 }
 
 // AttemptInput is one milestone attempt. ID is a client-generated uuid so
 // re-pushes from any device are idempotent.
 type AttemptInput struct {
-	ID            string          `json:"id"`
-	MilestoneDay  int             `json:"milestone_day"`
-	Answers       json.RawMessage `json:"answers"`
-	Score         int             `json:"score"`
-	Passed        bool            `json:"passed"`
-	DokBreakdown  json.RawMessage `json:"dok_breakdown"`
-	ItemResults   json.RawMessage `json:"item_results"`
-	AttemptTS     string          `json:"attempt_ts"`
-	DeviceID      string          `json:"device_id"`
+	ID           string          `json:"id"`
+	MilestoneDay int             `json:"milestone_day"`
+	Answers      json.RawMessage `json:"answers"`
+	Score        int             `json:"score"`
+	Passed       bool            `json:"passed"`
+	DokBreakdown json.RawMessage `json:"dok_breakdown"`
+	ItemResults  json.RawMessage `json:"item_results"`
+	AttemptTS    string          `json:"attempt_ts"`
+	DeviceID     string          `json:"device_id"`
 }
 
 // ActiveDayInput is one calendar day of learning activity (VN date).
@@ -76,26 +76,26 @@ type PushInput struct {
 
 // ProgressEntity is the canonical server-side progress state.
 type ProgressEntity struct {
-	CompletedDays   []int             `json:"completed_days"`
-	MilestoneScores map[string]int    `json:"milestone_scores"`
-	CurrentDay      int               `json:"current_day"`
-	Regime          string            `json:"regime"`
-	Revision        int64             `json:"revision"`
-	DeviceID        string            `json:"device_id"`
-	UpdatedAt       string            `json:"updated_at,omitempty"`
+	CompletedDays   []int          `json:"completed_days"`
+	MilestoneScores map[string]int `json:"milestone_scores"`
+	CurrentDay      int            `json:"current_day"`
+	Regime          string         `json:"regime"`
+	Revision        int64          `json:"revision"`
+	DeviceID        string         `json:"device_id"`
+	UpdatedAt       string         `json:"updated_at,omitempty"`
 }
 
 // AttemptEntity is the canonical server-side attempt row.
 type AttemptEntity struct {
-	ID            string          `json:"id"`
-	MilestoneDay  int             `json:"milestone_day"`
-	Answers       json.RawMessage `json:"answers"`
-	Score         int             `json:"score"`
-	Passed        bool            `json:"passed"`
-	DokBreakdown  json.RawMessage `json:"dok_breakdown,omitempty"`
-	ItemResults   json.RawMessage `json:"item_results,omitempty"`
-	AttemptTS     string          `json:"attempt_ts"`
-	DeviceID      string          `json:"device_id,omitempty"`
+	ID           string          `json:"id"`
+	MilestoneDay int             `json:"milestone_day"`
+	Answers      json.RawMessage `json:"answers"`
+	Score        int             `json:"score"`
+	Passed       bool            `json:"passed"`
+	DokBreakdown json.RawMessage `json:"dok_breakdown,omitempty"`
+	ItemResults  json.RawMessage `json:"item_results,omitempty"`
+	AttemptTS    string          `json:"attempt_ts"`
+	DeviceID     string          `json:"device_id,omitempty"`
 }
 
 // ActiveDayEntity is the canonical server-side active day.
@@ -117,11 +117,11 @@ type WorkbenchEntity struct {
 // State is the canonical full state of all synced entities plus the pull
 // cursor (max seq observed).
 type State struct {
-	Cursor     int64              `json:"cursor"`
-	Progress   *ProgressEntity    `json:"progress"`
-	Attempts   []AttemptEntity    `json:"attempts"`
-	ActiveDays []ActiveDayEntity  `json:"active_days"`
-	Workbench  []WorkbenchEntity  `json:"workbench"`
+	Cursor     int64             `json:"cursor"`
+	Progress   *ProgressEntity   `json:"progress"`
+	Attempts   []AttemptEntity   `json:"attempts"`
+	ActiveDays []ActiveDayEntity `json:"active_days"`
+	Workbench  []WorkbenchEntity `json:"workbench"`
 }
 
 // PullResult is a subset state (only kinds requested, only rows changed

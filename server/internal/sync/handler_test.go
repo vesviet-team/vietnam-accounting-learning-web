@@ -308,11 +308,11 @@ func TestSync_ExportContainsEverything(t *testing.T) {
 	uid := uuid.Must(uuid.NewV7())
 
 	_, err := store.Merge(ctx, uid, PushInput{
-		DeviceID: "dev-1",
-		Progress: &ProgressInput{CompletedDays: []int{1, 2}, MilestoneScores: map[string]int{"3": 90}, CurrentDay: 3, Regime: "CIRCULAR_200", Revision: 4},
-		Attempts: []AttemptInput{{ID: uuid.Must(uuid.NewV7()).String(), MilestoneDay: 3, Score: 90, Passed: true, AttemptTS: "2026-11-15T10:00:00Z"}},
+		DeviceID:   "dev-1",
+		Progress:   &ProgressInput{CompletedDays: []int{1, 2}, MilestoneScores: map[string]int{"3": 90}, CurrentDay: 3, Regime: "CIRCULAR_200", Revision: 4},
+		Attempts:   []AttemptInput{{ID: uuid.Must(uuid.NewV7()).String(), MilestoneDay: 3, Score: 90, Passed: true, AttemptTS: "2026-11-15T10:00:00Z"}},
 		ActiveDays: []ActiveDayInput{{Day: "2026-11-15", Source: "lesson"}},
-		Workbench: []WorkbenchInput{{Kind: "cogs", Payload: json.RawMessage(`{"v":1}`), Revision: 2}},
+		Workbench:  []WorkbenchInput{{Kind: "cogs", Payload: json.RawMessage(`{"v":1}`), Revision: 2}},
 	})
 	if err != nil {
 		t.Fatalf("merge: %v", err)
