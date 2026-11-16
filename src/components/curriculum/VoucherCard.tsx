@@ -123,7 +123,7 @@ export const VoucherCard: FC<VoucherCardProps> = ({ voucher }) => {
                 <span>Rủi ro thanh toán &gt;= 20 triệu VNĐ</span>
               </div>
               <p className="text-slate-500 dark:text-slate-400 leading-relaxed text-[11px]">
-                Hóa đơn từ 20 triệu đồng (đã có VAT) bắt buộc phải thanh toán bằng UNC chuyển khoản ngân hàng theo Thông tư 219/2013 và Thông tư 96/2015. Thanh toán tiền mặt sẽ bị loại trừ toàn bộ thuế GTGT và chi phí hợp lý.
+                Hóa đơn từ 20 triệu đồng (đã có VAT) bắt buộc phải thanh toán bằng UNC chuyển khoản ngân hàng theo Thông tư 69/2025/TT-BTC (thay thế Thông tư 219/2013/TT-BTC) và Thông tư 20/2026/TT-BTC (thay thế Thông tư 78/2014/TT-BTC và Thông tư 96/2015/TT-BTC). Thanh toán tiền mặt sẽ bị loại trừ toàn bộ thuế GTGT và chi phí hợp lý.
               </p>
             </div>
           </div>
@@ -401,7 +401,7 @@ const BankTransferVisual: FC<{ unc: BankTransferData }> = ({ unc }) => {
       {unc.isNonCashRuleApplicable && (
         <div className="p-2.5 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 rounded-lg text-[11px] text-blue-900 dark:text-blue-200 flex items-center space-x-2">
           <ShieldCheck className="w-4 h-4 text-blue-600 shrink-0" />
-          <span>Chứng từ thanh toán không dùng tiền mặt bắt buộc cho giao dịch &ge; 20.000.000 VNĐ (TT 219/2013).</span>
+          <span>Chứng từ thanh toán không dùng tiền mặt bắt buộc cho giao dịch &ge; 20.000.000 VNĐ (TT 69/2025 (thay TT 219/2013)).</span>
         </div>
       )}
 

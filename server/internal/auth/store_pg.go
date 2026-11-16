@@ -77,6 +77,37 @@ func (s *PGStore) CreateSession(ctx context.Context, sess Session) error {
 	return err
 }
 
+func (s *PGStore) RotateSession(ctx context.Context, oldSessionID uuid.UUID, newSession Session) error {
+	tx, err := s.pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	tag, err := tx.Exec(ctx,
+		"UPDATE oauth_sessions SET revoked_at = now(), last_used_at = now() WHERE id = $1 AND revoked_at IS NULL",
+		oldSessionID,
+	)
+	if err != nil {
+		return err
+	}
+	if tag.RowsAffected() == 0 {
+		return ErrSessionRevoked
+	}
+
+	_, err = tx.Exec(ctx, `
+		INSERT INTO oauth_sessions
+			(id, user_id, device_id, refresh_hash, rotated_from, scope, expires_at)
+		VALUES ($1,$2,$3,$4,$5,$6,$7)`,
+		newSession.ID, newSession.UserID, newSession.DeviceID, newSession.RefreshHash,
+		newSession.RotatedFrom, newSession.Scope, newSession.ExpiresAt,
+	)
+	if err != nil {
+		return err
+	}
+	return tx.Commit(ctx)
+}
+
 const sessionCols = `id, user_id, device_id, refresh_hash, rotated_from, scope, revoked_at, created_at, last_used_at, expires_at`
 
 func scanSession(row pgx.Row) (Session, error) {

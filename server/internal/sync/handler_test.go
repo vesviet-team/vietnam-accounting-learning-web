@@ -352,3 +352,35 @@ func jsonNumber(v int64) string {
 	b, _ := json.Marshal(v)
 	return string(b)
 }
+
+func TestSync_EnforcesScopeAndSessionValid(t *testing.T) {
+	store := newMemStore()
+	readOnlyHandler := &Handler{
+		Store: store,
+		Keys: stubVerifier{claims: httpx.AccessClaims{
+			Subject:   uuid.Must(uuid.NewV7()).String(),
+			SessionID: uuid.Must(uuid.NewV7()).String(),
+			Scope:     "read",
+		}},
+	}
+	// Write without "write" scope -> 403 insufficient_scope.
+	rec := doPush(readOnlyHandler, `{"device_id":"d1","progress":{"completed_days":[1],"milestone_scores":{},"current_day":1,"regime":"CIRCULAR_200","revision":1}}`)
+	if rec.Code != http.StatusForbidden {
+		t.Fatalf("push without write scope = %d, want 403", rec.Code)
+	}
+
+	// Revoked session rejected -> 401 invalid_token.
+	revokedHandler := &Handler{
+		Store: store,
+		Keys: stubVerifier{claims: httpx.AccessClaims{
+			Subject:   uuid.Must(uuid.NewV7()).String(),
+			SessionID: uuid.Must(uuid.NewV7()).String(),
+			Scope:     "read write",
+		}},
+		SessionValid: func(_ context.Context, _, _ uuid.UUID) (bool, error) { return false, nil },
+	}
+	rec = doPull(revokedHandler, "")
+	if rec.Code != http.StatusUnauthorized {
+		t.Fatalf("pull with revoked session = %d, want 401", rec.Code)
+	}
+}

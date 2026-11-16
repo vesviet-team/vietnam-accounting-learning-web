@@ -4,6 +4,7 @@ package httpx
 import (
 	"encoding/json"
 	"net/http"
+	"strings"
 )
 
 // AccessClaims is the minimal bearer-token identity handlers need,
@@ -44,4 +45,14 @@ func Plain(w http.ResponseWriter, status int, text string) {
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	w.WriteHeader(status)
 	_, _ = w.Write([]byte(text))
+}
+
+// HasScope reports whether space-delimited scopeList contains required.
+func HasScope(scopeList, required string) bool {
+	for _, s := range strings.Fields(scopeList) {
+		if s == required {
+			return true
+		}
+	}
+	return false
 }

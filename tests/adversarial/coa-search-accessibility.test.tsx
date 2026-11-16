@@ -269,9 +269,11 @@ describe('CHALLENGER BATTERY: Diacritic Search & Account Accessibility in CoaExp
   // 4. REACHABILITY & CLASSIFICATION OF TT200 & TT133 ACCOUNTS
   // =========================================================================
   describe('4. Reachability & Correct Classification of TT200 and TT133 Accounts', () => {
-    it('documents actual account counts in current dataset (154 in TT200, 57 in TT133)', () => {
-      expect(allAccounts200).toHaveLength(154);
+    it('documents actual account counts in current dataset (156 in TT200, 57 in TT133)', () => {
+      expect(allAccounts200).toHaveLength(156);
       expect(allAccounts133).toHaveLength(57);
+      expect(allAccounts200.some((a) => a.code === '2147')).toBe(true);
+      expect(allAccounts200.some((a) => a.code === '2292')).toBe(true);
     });
 
     it('verifies zero duplicated account codes within each regime', () => {
@@ -421,7 +423,7 @@ describe('CHALLENGER BATTERY: Diacritic Search & Account Accessibility in CoaExp
       expect(hasAccountBadge('111')).toBe(false);
     });
 
-    it('verifies that EVERY single account in TT200 (all 154) can be reached by its exact code', () => {
+    it('verifies that EVERY single account in TT200 (all 156) can be reached by its exact code', () => {
       const { unmount } = render(
         <CoaExplorer currentRegime="CIRCULAR_200" onRegimeChange={() => {}} />
       );

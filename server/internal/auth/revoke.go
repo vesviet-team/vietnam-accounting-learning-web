@@ -100,6 +100,6 @@ func (h *TokenHandler) logout(w http.ResponseWriter, r *http.Request, all bool) 
 		httpx.OAuthError(w, http.StatusInternalServerError, "server_error", "")
 		return
 	}
-	clearRefreshCookie(w)
+	clearRefreshCookie(w, !h.InsecureCookies)
 	writeJSON(w, http.StatusOK, map[string]bool{"revoked": true})
 }

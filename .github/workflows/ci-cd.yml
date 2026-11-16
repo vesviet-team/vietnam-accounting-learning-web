@@ -104,6 +104,9 @@ jobs:
       - name: Run TypeScript Check
         run: npx tsc --noEmit
 
+      - name: Run ESLint Check
+        run: npm run lint
+
       - name: 'Secret Scanner: Detect Committed Secrets'
         run: |
           echo "=== Secret Scanner ==="

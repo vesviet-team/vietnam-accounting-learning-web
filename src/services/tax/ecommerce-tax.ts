@@ -267,7 +267,7 @@ export function reconcileSellerWithPlatform(
   const variancePercent = (Math.abs(variance) / platformReportedRevenue) * 100;
 
   let adjustmentNeeded: 'NONE' | 'ADDITIONAL_DECLARATION' | 'REFUND_CLAIM' = 'NONE';
-  let explanationVi = '';
+  let explanationVi: string;
 
   if (variance > 0 && variancePercent > RECONCILIATION_VARIANCE_THRESHOLD_PERCENT) {
     adjustmentNeeded = 'ADDITIONAL_DECLARATION';

@@ -1,7 +1,7 @@
 /**
  * Core Calculation Engine for COGS & Cost Accounting Workbench
  * Vietnam Accounting Standards (VAS 02 / IAS 2, Circular 200, Circular 133, Circular 99/2025)
- * & CIT Law (Decree 254/2026, Circular 96/2015, Circular 78/2014)
+ * & CIT Law (Decree 254/2026, Circular 20/2026/TT-BTC replacing Circular 78/2014 & Circular 96/2015)
  *
  * Zero external dependencies, pure functions, sub-millisecond execution latency (<0.1ms).
  */
@@ -408,7 +408,7 @@ export function calculateManufacturingCost(
   const totalEligibleCost = normalMaterialCost + normalLaborCost + overheadCost;
   const cogsDirectExpense = abnormalMaterialCost + abnormalLaborCost;
 
-  // 2. Tax impact on CIT Schedule B4 (Circular 96/2015 & Circular 78/2014)
+  // 2. Tax impact on CIT Schedule B4 (Circular 20/2026 replacing Circular 78/2014 & Circular 96/2015)
   const scheduleB4Amount = cogsDirectExpense;
   const citTaxImpact = Math.round(scheduleB4Amount * 0.2);
 
@@ -418,9 +418,9 @@ export function calculateManufacturingCost(
           code: 'B4_ABNORMAL_COST',
           amount: scheduleB4Amount,
           reasonVi:
-            'Chi phí nguyên vật liệu, nhân công vượt định mức kinh tế - kỹ thuật theo VAS 02 Đoạn 11 & Thông tư 96/2015/TT-BTC',
+            'Chi phí nguyên vật liệu, nhân công vượt định mức kinh tế - kỹ thuật theo VAS 02 Đoạn 11 & Thông tư 20/2026/TT-BTC (thay thế Thông tư 78/2014/TT-BTC, Thông tư 96/2015/TT-BTC)',
           statutoryBasis:
-            'Khoản 2.3 Điều 6 Thông tư 78/2014/TT-BTC, sửa đổi bởi Điều 4 Thông tư 96/2015/TT-BTC',
+            'Khoản 2.3 Điều 6 Thông tư 20/2026/TT-BTC (thay thế Thông tư 78/2014/TT-BTC và Thông tư 96/2015/TT-BTC)',
         }
       : undefined;
 
@@ -453,8 +453,8 @@ export function calculateManufacturingCost(
   }
 
   // 4. Total Cost Z and Unit Cost z
-  let totalCostZ = 0;
-  let unitCostZ = 0;
+  let totalCostZ: number;
+  let unitCostZ: number;
 
   if (finishedUnits === 0) {
     totalCostZ = 0;

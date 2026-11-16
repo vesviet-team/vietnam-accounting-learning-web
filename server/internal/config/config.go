@@ -27,6 +27,11 @@ type Config struct {
 	// P0 supports exactly one static first-party client.
 	OAuthClientID          string
 	OAuthClientRedirectURI string
+
+	// CORSAllowedOrigins defaults to [https://hoa.tanhdev.com] when unset.
+	CORSAllowedOrigins []string
+	// SecureCookies defaults to true for HTTPS issuers, false for plain-HTTP dev issuers.
+	SecureCookies bool
 }
 
 // Load reads configuration from the environment. It returns a descriptive
@@ -74,6 +79,27 @@ func Load(getenv func(string) string) (*Config, error) {
 	cfg.OAuthClientRedirectURI = strings.TrimSpace(getenv("OAUTH_CLIENT_REDIRECT_URI"))
 	if cfg.OAuthClientRedirectURI == "" {
 		return nil, fmt.Errorf("config: OAUTH_CLIENT_REDIRECT_URI is required (must match the redirect URI registered for the client)")
+	}
+
+	if rawOrigins := strings.TrimSpace(getenv("CORS_ALLOWED_ORIGINS")); rawOrigins != "" {
+		for _, o := range strings.Split(rawOrigins, ",") {
+			o = strings.TrimRight(strings.TrimSpace(o), "/")
+			if o != "" {
+				cfg.CORSAllowedOrigins = append(cfg.CORSAllowedOrigins, o)
+			}
+		}
+	}
+	if len(cfg.CORSAllowedOrigins) == 0 {
+		cfg.CORSAllowedOrigins = []string{"https://hoa.tanhdev.com"}
+	}
+
+	cfg.SecureCookies = strings.HasPrefix(cfg.OAuthIssuer, "https://")
+	if v := strings.TrimSpace(getenv("COOKIE_SECURE")); v != "" {
+		b, err := strconv.ParseBool(v)
+		if err != nil {
+			return nil, fmt.Errorf("config: COOKIE_SECURE must be a boolean, got %q", v)
+		}
+		cfg.SecureCookies = b
 	}
 
 	return cfg, nil

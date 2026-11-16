@@ -106,7 +106,7 @@ export const MILESTONE_TEST_02: MilestoneTest = {
       misconceptionFocus: 'INPUT_VAT_JOURNALIZING_ERROR',
       errorPriority: 1,
       remediationStepVi: 'Xem lại cách tách thuế GTGT đầu vào Nợ TK 1331 khi thanh toán chi phí tại Khái niệm 3 Ngày 4.',
-      statutoryReference: 'Thông tư 200/2014/TT-BTC Điều 19, Điều 67; Thông tư 219/2013/TT-BTC Điều 15',
+      statutoryReference: 'Thông tư 200/2014/TT-BTC Điều 19, Điều 67; Thông tư 69/2025/TT-BTC (thay TT 219/2013) Điều 15',
     },
     {
       id: 'm02-q07',

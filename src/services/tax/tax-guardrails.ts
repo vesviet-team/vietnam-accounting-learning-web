@@ -3,7 +3,7 @@
  * Vietnam Accounting Platform (Circular 200 & Circular 133)
  *
  * Implements:
- * 1. Non-Cash Payment Threshold Check (>= 20M VND) under Circular 219/2013/TT-BTC & Circular 96/2015/TT-BTC
+ * 1. Non-Cash Payment Threshold Check (>= 20M VND) under Circular 69/2025/TT-BTC (replaces 219/2013) & Circular 20/2026/TT-BTC (replaces 78/2014, 96/2015)
  * 2. Vendor Tax Status Evaluation (Status 00 Active vs 03 Suspended vs 04 Runaway) under Decree 254/2026/ND-CP
  * 3. CIT Schedule B4 (Chỉ tiêu B4 - Chi phí không được trừ) calculation & CIT Tax Adjustment Engine
  * 4. FCT (Thuế nhà thầu) under Circular 89/2026/TT-BTC (effective 01/07/2026, replaces TT 103/2014/TT-BTC)
@@ -17,7 +17,7 @@ export const NON_CASH_THRESHOLD_VAT_LAW_2024 = 5_000_000;
 export const STANDARD_CIT_RATE = 0.20;
 
 export const STATUTORY_BASIS_NON_CASH =
-  'Khoản 1 Điều 6 Thông tư 78/2014/TT-BTC, sửa đổi bởi Điều 4 Thông tư 96/2015/TT-BTC và Khoản 2 Điều 15 Thông tư 219/2013/TT-BTC';
+  'Khoản 1 Điều 15 Thông tư 69/2025/TT-BTC (hiệu lực 01/07/2025, thay thế Thông tư 219/2013/TT-BTC) và Điều 4 Thông tư 20/2026/TT-BTC (hiệu lực 12/03/2026, thay thế Thông tư 78/2014/TT-BTC, Thông tư 96/2015/TT-BTC) quy định hóa đơn từ 20 triệu đồng trở lên (đã bao gồm thuế GTGT) bắt buộc phải có chứng từ thanh toán không dùng tiền mặt để được khấu trừ thuế GTGT và tính chi phí hợp lý khi xác định thuế TNDN.';
 
 export const STATUTORY_BASIS_VAT_LAW_2024 =
   'Điểm b Khoản 2 Điều 14 Luật Thuế giá trị gia tăng số 48/2024/QH15 (hiệu lực từ 01/07/2025) và Nghị định hướng dẫn thi hành';
@@ -260,7 +260,7 @@ export function calculateCitAdjustments(
     code: d.code,
     amount: d.amount,
     reasonVi: d.reasonVi,
-    statutoryBasis: 'Khoản 2 Điều 6 Thông tư 78/2014/TT-BTC & Thông tư 96/2015/TT-BTC',
+    statutoryBasis: 'Khoản 2 Điều 6 Thông tư 20/2026/TT-BTC (thay thế Thông tư 78/2014/TT-BTC, Thông tư 96/2015/TT-BTC)',
   }));
 
   return calculateCitScheduleB4(accountingProfitBeforeTax, items);

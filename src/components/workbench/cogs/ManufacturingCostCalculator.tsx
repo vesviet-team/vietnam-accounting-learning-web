@@ -947,9 +947,10 @@ export const ManufacturingCostCalculator: FC<ManufacturingCostCalculatorProps> =
                 {calculationOutput.scheduleB4Amount > 0 ? (
                   <>
                     <p className="text-xs text-rose-800 dark:text-rose-200 leading-relaxed">
-                      Theo chuẩn mực <strong className="font-semibold">VAS 02 Đoạn 11</strong> & Khoản 2.3 Điều 6{' '}
-                      <strong className="font-semibold">Thông tư 78/2014</strong> (sửa đổi bởi{' '}
-                      <strong className="font-semibold">Thông tư 96/2015</strong>), chi phí NVL & nhân công
+                      Theo chuẩn mực <strong className="font-semibold">VAS 02 Đoạn 11</strong> &amp; Khoản 2.3 Điều 6{' '}
+                      <strong className="font-semibold">
+                        Thông tư 20/2026/TT-BTC (thay thế Thông tư 78/2014/TT-BTC và Thông tư 96/2015/TT-BTC)
+                      </strong>, chi phí NVL &amp; nhân công
                       vượt mức bình thường bị loại khỏi giá thành Z, hạch toán thẳng vào{' '}
                       <strong className="font-semibold font-mono">Nợ TK 632</strong> và{' '}
                       <strong className="font-semibold">không được trừ khi tính thuế TNDN</strong>.

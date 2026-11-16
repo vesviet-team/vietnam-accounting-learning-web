@@ -5,7 +5,7 @@
  * - Circular 200/2014/TT-BTC & Circular 99/2025/TT-BTC (replacing TT 200 from 2026)
  * - Circular 133/2016/TT-BTC (SME Accounting Regime)
  * - Decree 254/2026/ND-CP (E-Invoices & Internal Dispatch Note Form 03/XKNB)
- * - Circular 96/2015/TT-BTC & Circular 78/2014/TT-BTC (CIT Deductible Expenses & Schedule B4)
+ * - Circular 20/2026 (replaces 78/2014, 96/2015)/TT-BTC & Circular 20/2026 (replaces 78/2014, 96/2015)/TT-BTC (CIT Deductible Expenses & Schedule B4)
  */
 
 import {
@@ -278,13 +278,13 @@ export const COGS_SCENARIOS: CogsScenario[] = [
       'Lô hàng hoàn thành 10.000 sản phẩm nhập kho thành phẩm. Chi phí nhân công trực tiếp 600.000.000 đ và sản xuất chung 300.000.000 đ đều nằm trong định mức. ' +
       'Kế toán trưởng phải xử lý đúng chuẩn mực VAS 02 Đoạn 11 và IAS 2 Đoạn 16: ' +
       'Không được vốn hóa 300M chi phí vượt định mức vào giá thành thành phẩm Z (TK 155), mà phải ghi nhận thẳng vào Chi phí giá vốn trong kỳ (Nợ 632 / Có 621). ' +
-      'Đồng thời, theo Điều 4 Thông tư 96/2015/TT-BTC, phần chi phí NVL vượt định mức này là chi phí không được trừ khi quyết toán thuế TNDN, ' +
+      'Đồng thời, theo Điều 4 Thông tư 20/2026/TT-BTC (thay thế Thông tư 78/2014/TT-BTC, Thông tư 96/2015/TT-BTC), phần chi phí NVL vượt định mức này là chi phí không được trừ khi quyết toán thuế TNDN, ' +
       'bắt buộc phải kê khai điều chỉnh tăng thu nhập chịu thuế tại Chỉ tiêu B4 trên Tờ khai 03/TNDN, làm phát sinh tiền thuế TNDN bổ sung 20% = 60.000.000 đ.',
     dokLevel: 3,
     dokLevelKey: 'DOK_3',
     industryVi: 'Sản xuất & May mặc dệt may xuất khẩu',
     regulatoryBasisVi:
-      'VAS 02 Đoạn 11; IAS 2 Đoạn 16; Thông tư 96/2015/TT-BTC Điều 4; Tờ khai Quyết toán Thuế TNDN Mẫu 03/TNDN Chỉ tiêu B4',
+      'VAS 02 Đoạn 11; IAS 2 Đoạn 16; Thông tư 20/2026/TT-BTC (thay thế Thông tư 78/2014/TT-BTC, Thông tư 96/2015/TT-BTC) Điều 4; Tờ khai Quyết toán Thuế TNDN Mẫu 03/TNDN Chỉ tiêu B4',
     learningObjectivesVi: [
       'Nắm vững nguyên tắc không vốn hóa hao hụt bất thường vượt định mức kỹ thuật vào giá thành sản phẩm Z theo VAS 02 / IAS 2.',
       'Thực hành lập bút toán kép bóc tách Nợ 632 / Có 621 (hoặc Có 154 trong TT 133) đối với 300M chi phí bất thường.',

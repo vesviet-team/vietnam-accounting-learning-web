@@ -112,6 +112,19 @@ export class AuthService {
   }
 
   /**
+   * Restores session on app boot: completes an OAuth redirect if present,
+   * otherwise attempts a silent refresh via the httpOnly cookie (or
+   * sessionStorage fallback) so reloads stay signed in.
+   */
+  async init(): Promise<AuthUser | null> {
+    const redirected = await this.handleRedirectIfPresent();
+    if (!redirected && !this.user) {
+      await this.getAccessToken();
+    }
+    return this.user;
+  }
+
+  /**
    * Completes the flow when the browser lands back with ?code&state
    * (any path — the registered redirect_uri decides where that is).
    * Returns true when a login was completed.
@@ -119,28 +132,26 @@ export class AuthService {
   async handleRedirectIfPresent(): Promise<boolean> {
     if (typeof window === 'undefined') return false;
     const url = new URL(window.location.href);
+    const oauthError = url.searchParams.get('error');
     const code = url.searchParams.get('code');
     const state = url.searchParams.get('state');
+    if (oauthError) {
+      this.cleanUrl();
+      this.clearAuthChallenge();
+      this.emit(null);
+      return false;
+    }
     if (!code || !state) return false;
 
-    let expected: string | null = null;
-    try {
-      expected = sessionStorage.getItem(STATE_KEY);
-    } catch {
-      /* ignore */
-    }
+    const expected = this.readSession(STATE_KEY);
     this.cleanUrl();
-    if (expected && state !== expected) {
+    if (!expected || state !== expected) {
+      this.clearAuthChallenge();
       this.emit(null);
       return false;
     }
     const verifier = this.readSession(VERIFIER_KEY) ?? '';
-    try {
-      sessionStorage.removeItem(VERIFIER_KEY);
-      sessionStorage.removeItem(STATE_KEY);
-    } catch {
-      /* ignore */
-    }
+    this.clearAuthChallenge();
     const ok = await this.exchangeCode(code, verifier);
     this.emit(ok ? this.user : null);
     return ok;
@@ -301,7 +312,11 @@ export class AuthService {
         };
         if (!tokens.access_token) return null;
         this.setTokens(tokens);
-        if (!this.user) await this.loadUser();
+        const hadUser = this.user !== null;
+        if (!this.user) {
+          await this.loadUser();
+          if (!hadUser && this.user) this.emit(this.user);
+        }
         return tokens.access_token;
       } catch {
         return null;
@@ -359,11 +374,22 @@ export class AuthService {
     }
   }
 
+  private clearAuthChallenge(): void {
+    try {
+      sessionStorage.removeItem(VERIFIER_KEY);
+      sessionStorage.removeItem(STATE_KEY);
+    } catch {
+      /* ignore */
+    }
+  }
+
   private cleanUrl(): void {
     try {
       const url = new URL(window.location.href);
       url.searchParams.delete('code');
       url.searchParams.delete('state');
+      url.searchParams.delete('error');
+      url.searchParams.delete('error_description');
       window.history.replaceState(null, '', url.toString());
     } catch {
       /* ignore */

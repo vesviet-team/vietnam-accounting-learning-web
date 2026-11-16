@@ -596,6 +596,9 @@ export const TaxComplianceTools: FC = () => {
           (2) khấu trừ thêm chi phí R&D khi quyết toán thuế TNDN. Mọi kết luận đều hiển thị căn cứ
           pháp lý (statutoryBasis) truy vết được về văn bản gốc.
         </p>
+        <p className="text-xs text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/60 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700/70">
+          Đối chiếu song song: Quy định nền tảng hiện hành (Thông tư 219/2013/TT-BTC, Thông tư 78/2014/TT-BTC, Thông tư 200/2014/TT-BTC) kèm các cập nhật mới (Luật Thuế GTGT 48/2024/QH15, Thông tư 69/2025/TT-BTC, Thông tư 20/2026/TT-BTC).
+        </p>
 
         {/* Tool switcher */}
         <div className="flex flex-wrap items-center gap-2 pt-1">

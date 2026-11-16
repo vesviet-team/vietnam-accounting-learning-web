@@ -65,6 +65,10 @@ type Store interface {
 
 	CreateSession(ctx context.Context, s Session) error
 
+	// RotateSession atomically revokes oldSessionID (only if currently
+	// non-revoked, returning ErrSessionRevoked otherwise) and inserts newSession.
+	RotateSession(ctx context.Context, oldSessionID uuid.UUID, newSession Session) error
+
 	// GetSessionByRefreshHash looks up a session by the SHA-256 hash of the
 	// presented refresh token. Old hashes stay in the DB (each rotation
 	// step is its own row), which is what makes reuse detection possible.

@@ -39,7 +39,7 @@ export const MODULE_5_LESSONS: DailyLesson[] = [
         id: 'c13-3',
         titleVi: 'Hồ Sơ Hợp Lý Hóa Chi Phí Lương Khi Quyết Toán Thuế TNDN',
         summaryVi: 'Hợp đồng lao động, bảng chấm công, bảng tính lương có ký nhận và chứng từ chi trả ngân hàng.',
-        contentVi: 'Theo Điều 4 Thông tư 96/2015/TT-BTC, để chi phí tiền lương được tính vào chi phí được trừ khi quyết toán thuế TNDN, doanh nghiệp bắt buộc phải có: Hợp đồng lao động hợp pháp; Quy chế tài chính hoặc Quy chế lương thưởng; Bảng chấm công hàng ngày; Bảng tính và thanh toán tiền lương; Chứng từ thanh toán lương (UNC chuyển khoản ngân hàng hoặc Phiếu chi có chữ ký người nhận); và hồ sơ đóng bảo hiểm xã hội hợp lệ.',
+        contentVi: 'Theo Điều 4 Thông tư 20/2026/TT-BTC (thay TT 96/2015, 78/2014), để chi phí tiền lương được tính vào chi phí được trừ khi quyết toán thuế TNDN, doanh nghiệp bắt buộc phải có: Hợp đồng lao động hợp pháp; Quy chế tài chính hoặc Quy chế lương thưởng; Bảng chấm công hàng ngày; Bảng tính và thanh toán tiền lương; Chứng từ thanh toán lương (UNC chuyển khoản ngân hàng hoặc Phiếu chi có chữ ký người nhận); và hồ sơ đóng bảo hiểm xã hội hợp lệ.',
         keyTakeawayVi: 'Tiền lương hạch toán trên sổ nhưng đến hạn nộp hồ sơ quyết toán năm thực tế chưa chi trả sẽ bị loại trừ chi phí thuế.',
       },
     ],

@@ -71,24 +71,46 @@ func run() error {
 	userStore := user.NewPGStore(pool)
 	users := user.NewService(userStore)
 
+	userActive := func(ctx context.Context, userID uuid.UUID) (bool, error) {
+		_, err := users.GetActiveByID(ctx, userID)
+		if errors.Is(err, user.ErrNotFound) || errors.Is(err, user.ErrDisabled) {
+			return false, nil
+		}
+		return err == nil, err
+	}
+	sessionValid := func(ctx context.Context, userID, sessionID uuid.UUID) (bool, error) {
+		active, err := userActive(ctx, userID)
+		if err != nil || !active {
+			return false, err
+		}
+		sess, err := authStore.GetSessionByID(ctx, sessionID)
+		if errors.Is(err, auth.ErrNotFound) {
+			return false, nil
+		}
+		if err != nil {
+			return false, err
+		}
+		if sess.UserID != userID || sess.RevokedAt != nil || time.Now().After(sess.ExpiresAt) {
+			return false, nil
+		}
+		_ = authStore.TouchSession(ctx, sessionID)
+		return true, nil
+	}
+
 	tokenHandler := &auth.TokenHandler{
-		ClientID: cfg.OAuthClientID,
-		Store:    authStore,
-		Keys:     keys,
-		UserActive: func(ctx context.Context, userID uuid.UUID) (bool, error) {
-			_, err := users.GetActiveByID(ctx, userID)
-			if errors.Is(err, user.ErrNotFound) || errors.Is(err, user.ErrDisabled) {
-				return false, nil
-			}
-			return err == nil, err
-		},
+		ClientID:        cfg.OAuthClientID,
+		Store:           authStore,
+		Keys:            keys,
+		InsecureCookies: !cfg.SecureCookies,
+		UserActive:      userActive,
 	}
 	authorizeHandler := auth.NewAuthorizeHandler(
 		cfg.OAuthClientID, cfg.OAuthClientRedirectURI, cfg.OAuthIssuer, users, authStore)
+	authorizeHandler.InsecureCookies = !cfg.SecureCookies
 	userHandler := &user.Handler{Service: users, Keys: keys}
-	backupHandler := &backup.Handler{Store: backup.NewPGStore(pool), Keys: keys}
+	backupHandler := &backup.Handler{Store: backup.NewPGStore(pool), Keys: keys, SessionValid: sessionValid}
 	syncStore := sync.NewPGStore(pool)
-	syncHandler := &sync.Handler{Store: syncStore, Keys: keys}
+	syncHandler := &sync.Handler{Store: syncStore, Keys: keys, SessionValid: sessionValid}
 	accountHandler := &account.Handler{
 		Store: account.NewPGStore(pool, authStore, syncStore),
 		Keys:  keys,
@@ -108,9 +130,9 @@ func run() error {
 		middleware.RateLimitRemoteAddr(5, time.Minute)(http.HandlerFunc(authorizeHandler.AuthorizeSubmit)))
 	mux.Handle("POST /oauth2/token", middleware.RateLimit(30, time.Minute)(tokenHandler))
 	mux.HandleFunc("GET /oauth2/jwks", keys.JWKSHandler)
-	mux.HandleFunc("POST /oauth2/revoke", tokenHandler.Revoke)
-	mux.HandleFunc("POST /oauth2/logout", tokenHandler.Logout)
-	mux.HandleFunc("POST /oauth2/logout-all", tokenHandler.LogoutAll)
+	mux.Handle("POST /oauth2/revoke", middleware.RateLimit(30, time.Minute)(http.HandlerFunc(tokenHandler.Revoke)))
+	mux.Handle("POST /oauth2/logout", middleware.RateLimit(30, time.Minute)(http.HandlerFunc(tokenHandler.Logout)))
+	mux.Handle("POST /oauth2/logout-all", middleware.RateLimit(10, time.Minute)(http.HandlerFunc(tokenHandler.LogoutAll)))
 
 	mux.Handle("GET /me", middleware.RateLimit(120, time.Minute)(http.HandlerFunc(userHandler.Me)))
 	// Register is unauthenticated and open in production: strict per-IP limit
@@ -118,8 +140,8 @@ func run() error {
 	mux.Handle("POST /auth/register",
 		middleware.RateLimitRemoteAddr(3, time.Minute)(http.HandlerFunc(userHandler.Register)))
 
-	mux.HandleFunc("PUT /sync/backup", backupHandler.Put)
-	mux.HandleFunc("GET /sync/backup", backupHandler.Get)
+	mux.Handle("PUT /sync/backup", middleware.RateLimit(60, time.Minute)(http.HandlerFunc(backupHandler.Put)))
+	mux.Handle("GET /sync/backup", middleware.RateLimit(120, time.Minute)(http.HandlerFunc(backupHandler.Get)))
 
 	// P1 per-entity sync + account management (bearer-authenticated,
 	// rate-limited; payloads are never logged).
@@ -136,7 +158,7 @@ func run() error {
 	handler := middleware.Recover(logger)(
 		middleware.Logging(logger)(
 			middleware.RequestID(
-				middleware.CORS(mux),
+				middleware.CORSWithOrigins(cfg.CORSAllowedOrigins)(mux),
 			),
 		),
 	)

@@ -1,6 +1,7 @@
 package backup
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -13,8 +14,9 @@ import (
 
 // Handler serves PUT/GET /sync/backup.
 type Handler struct {
-	Store Store
-	Keys  httpx.BearerVerifier
+	Store        Store
+	Keys         httpx.BearerVerifier
+	SessionValid func(ctx context.Context, userID, sessionID uuid.UUID) (bool, error)
 }
 
 type putRequest struct {
@@ -28,7 +30,7 @@ type putRequest struct {
 // "device_id": "..."}. A revision <= the stored revision returns 409 with
 // the current revision; a greater revision is stored as-is.
 func (h *Handler) Put(w http.ResponseWriter, r *http.Request) {
-	claims, ok := h.claims(w, r)
+	claims, ok := h.claims(w, r, "write")
 	if !ok {
 		return
 	}
@@ -76,7 +78,7 @@ func (h *Handler) Put(w http.ResponseWriter, r *http.Request) {
 
 // Get GET /sync/backup — returns the latest blob and its revision.
 func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
-	claims, ok := h.claims(w, r)
+	claims, ok := h.claims(w, r, "read")
 	if !ok {
 		return
 	}
@@ -103,11 +105,32 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (h *Handler) claims(w http.ResponseWriter, r *http.Request) (httpx.AccessClaims, bool) {
+func (h *Handler) claims(w http.ResponseWriter, r *http.Request, requiredScope string) (httpx.AccessClaims, bool) {
 	claims, err := h.Keys.ParseBearerClaims(r)
 	if err != nil {
 		httpx.OAuthError(w, http.StatusUnauthorized, "invalid_token", "valid bearer token required")
 		return httpx.AccessClaims{}, false
+	}
+	if requiredScope != "" && !httpx.HasScope(claims.Scope, requiredScope) {
+		httpx.OAuthError(w, http.StatusForbidden, "insufficient_scope", "missing required scope: "+requiredScope)
+		return httpx.AccessClaims{}, false
+	}
+	if h.SessionValid != nil {
+		uid, uerr := uuid.Parse(claims.Subject)
+		sid, serr := uuid.Parse(claims.SessionID)
+		if uerr != nil || serr != nil {
+			httpx.OAuthError(w, http.StatusUnauthorized, "invalid_token", "valid session required")
+			return httpx.AccessClaims{}, false
+		}
+		ok, verr := h.SessionValid(r.Context(), uid, sid)
+		if verr != nil {
+			httpx.OAuthError(w, http.StatusInternalServerError, "server_error", "")
+			return httpx.AccessClaims{}, false
+		}
+		if !ok {
+			httpx.OAuthError(w, http.StatusUnauthorized, "invalid_token", "session is no longer active")
+			return httpx.AccessClaims{}, false
+		}
 	}
 	return claims, true
 }

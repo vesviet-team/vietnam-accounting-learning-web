@@ -52,7 +52,10 @@ export const MergeAnonymousDialog: FC = () => {
 
   const handleDecline = () => {
     const u = authService.getUser();
-    if (u) syncService.markMergeAsked(u.id);
+    if (u) {
+      syncService.markMergeAsked(u.id);
+      syncService.setLastAccountId(u.id);
+    }
     setOpen(false);
   };
 

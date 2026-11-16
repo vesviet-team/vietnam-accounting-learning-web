@@ -166,4 +166,39 @@ describe('AuthService (OAuth 2.1 + PKCE S256)', () => {
     expect(sessionStorage.getItem('vnacc_rt')).toBeNull();
     expect(logoutCalls.length).toBeGreaterThan(0);
   });
+
+  it('init() silently restores session on page reload using refresh token', async () => {
+    const { impl } = fetchRouter({
+      token: (body) => {
+        expect(body.get('grant_type')).toBe('refresh_token');
+        return { status: 200, json: { access_token: 'restored-at', expires_in: 900, refresh_token: 'rt-2' } };
+      },
+      me: { json: { id: 'u1', email: 'a@b.c', display_name: 'An' } },
+    });
+    const { deps } = makeRedirectDeps({ fetchImpl: impl });
+    const svc = new AuthService(deps);
+    sessionStorage.setItem('vnacc_rt', 'rt-1');
+
+    const fired: (null | { id: string })[] = [];
+    svc.onAuthChange(({ user }) => fired.push(user ? { id: user.id } : null));
+
+    const user = await svc.init();
+    expect(user?.id).toBe('u1');
+    expect(svc.isAuthenticated()).toBe(true);
+    expect(fired[fired.length - 1]).toEqual({ id: 'u1' });
+  });
+
+  it('handleRedirectIfPresent() rejects callback when stored state is missing (CSRF protection) and cleans error URLs', async () => {
+    const { impl, calls } = fetchRouter({ token: { status: 200, json: { access_token: 'at' } } });
+    const { deps } = makeRedirectDeps({ fetchImpl: impl });
+    const svc = new AuthService(deps);
+
+    window.history.replaceState(null, '', '/oauth2/callback?code=stolen&state=arbitrary');
+    expect(await svc.handleRedirectIfPresent()).toBe(false);
+    expect(calls.filter((c) => c.url.includes('token'))).toHaveLength(0);
+
+    window.history.replaceState(null, '', '/oauth2/callback?error=access_denied&state=abc');
+    expect(await svc.handleRedirectIfPresent()).toBe(false);
+    expect(window.location.search).toBe('');
+  });
 });

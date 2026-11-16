@@ -312,4 +312,88 @@ describe('SyncService (P1 per-entity sync)', () => {
     const q2 = new URL(pulls[1].url, 'https://app.test').searchParams.get('cursor');
     expect(Number(q2)).toBeGreaterThanOrEqual(Number(q1));
   });
+
+  it('does not bump journalizer revision when journalizer is empty and untouched (prevents LWW wipeout)', async () => {
+    const { svc, storage, calls } = makeService(() => ({ ok: true, status: 200, json: canonical() }));
+    svc.init();
+    await storage.saveLearnerProgress({
+      currentDay: 2,
+      unlockedDays: [1, 2, 3],
+      completedDays: [1],
+      milestoneScores: {},
+      streakDays: 1,
+      lastActiveDate: '2026-11-15T10:00:00.000Z',
+    });
+    await sleep(140);
+    svc.dispose();
+
+    const pushCall = calls.find((c) => c.url.startsWith('/sync/push'));
+    expect(pushCall).toBeTruthy();
+    const body = JSON.parse(pushCall!.init!.body as string) as {
+      workbench: { kind: string; revision: number }[];
+    };
+    const j = body.workbench.find((w) => w.kind === 'journalizer');
+    expect(j?.revision).toBe(0);
+  });
+
+  it('syncs preferred_regime, notifies onRemoteApplied, and isolates local data when switching users', async () => {
+    let activeUser = { id: 'user-a', email: 'a@b.c' };
+    let authListener: ((s: { user: { id: string; email: string } | null }) => void) | null = null;
+    const calls: FetchCall[] = [];
+    const storage = new StorageService();
+    const svc = new SyncService({
+      storage,
+      debounceMs: 20,
+      retryBaseMs: 10,
+      retryMaxMs: 20,
+      auth: {
+        async fetchWithAuth(url: string, init?: RequestInit) {
+          calls.push({ url, init });
+          return {
+            ok: true,
+            status: 200,
+            json: async () =>
+              canonical({
+                progress: {
+                  completed_days: activeUser.id === 'user-b' ? [1] : [1, 2, 3],
+                  milestone_scores: {},
+                  current_day: activeUser.id === 'user-b' ? 2 : 5,
+                  regime: 'CIRCULAR_133',
+                  revision: 3,
+                },
+              }),
+          } as unknown as Response;
+        },
+        isAuthenticated: () => true,
+        onAuthChange: (cb) => {
+          authListener = cb;
+          return () => {
+            authListener = null;
+          };
+        },
+        getUser: () => activeUser,
+      },
+    });
+
+    let remoteNotified = 0;
+    svc.onRemoteApplied(() => {
+      remoteNotified++;
+    });
+    svc.init();
+    await sleep(80);
+    expect(await storage.getPreferredRegime()).toBe('CIRCULAR_133');
+    expect(remoteNotified).toBeGreaterThanOrEqual(1);
+
+    // Simulate user A local data then switch to user B.
+    svc.setLastAccountId('user-a');
+    await storage.saveWorkbenchState({ postedEntries: [{ id: 'a-entry' }], voucherScores: {} } as never, { silent: true });
+    activeUser = { id: 'user-b', email: 'b@b.c' };
+    authListener!({ user: activeUser });
+    await sleep(120);
+
+    const wb = await storage.loadWorkbenchState();
+    expect(wb.postedEntries).toHaveLength(0);
+    expect(localStorage.getItem('vnacc_sync_meta:user-b')).toBeTruthy();
+    svc.dispose();
+  });
 });

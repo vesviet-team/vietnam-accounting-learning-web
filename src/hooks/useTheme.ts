@@ -26,12 +26,7 @@ export function useTheme() {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
     const applyTheme = () => {
-      let isDark = false;
-      if (theme === 'system') {
-        isDark = mediaQuery.matches;
-      } else {
-        isDark = theme === 'dark';
-      }
+      const isDark = theme === 'system' ? mediaQuery.matches : theme === 'dark';
 
       setResolvedTheme(isDark ? 'dark' : 'light');
       if (isDark) {

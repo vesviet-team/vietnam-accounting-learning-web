@@ -95,6 +95,7 @@ export const QuizModal: FC<QuizModalProps> = ({
 
     const updatedProgress = recordMilestoneAttempt(currentProgress, assessmentResult);
     await storageService.saveLearnerProgress(updatedProgress);
+    void storageService.recordStreakActivity();
 
     if (updatedProgress.scoreHistory?.[milestoneDay]) {
       setHistoryList(updatedProgress.scoreHistory[milestoneDay]);

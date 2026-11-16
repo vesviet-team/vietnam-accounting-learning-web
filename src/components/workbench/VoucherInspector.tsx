@@ -193,15 +193,11 @@ export const VoucherInspector: FC<VoucherInspectorProps> = ({ currentRegime }) =
     if (overallDecisionCorrect) score += 20;
 
     const isPerfect = score === 100;
-    let feedbackVi = '';
-
-    if (isPerfect) {
-      feedbackVi = actualIsValid
+    const feedbackVi = isPerfect
+      ? actualIsValid
         ? 'Chính xác tuyệt đối (100/100)! Chứng từ này hoàn toàn hợp lệ, đầy đủ điều kiện khấu trừ thuế GTGT và tính chi phí hợp lý.'
-        : 'Chính xác tuyệt đối (100/100)! Bạn đã phát hiện đúng toàn bộ sai phạm và rủi ro pháp lý của chứng từ này.';
-    } else {
-      feedbackVi = `Bạn đạt ${score}/100 điểm. Hãy xem chi tiết các tiêu chí kiểm tra và căn cứ pháp lý phía dưới để rút kinh nghiệm.`;
-    }
+        : 'Chính xác tuyệt đối (100/100)! Bạn đã phát hiện đúng toàn bộ sai phạm và rủi ro pháp lý của chứng từ này.'
+      : `Bạn đạt ${score}/100 điểm. Hãy xem chi tiết các tiêu chí kiểm tra và căn cứ pháp lý phía dưới để rút kinh nghiệm.`;
 
     const result: AuditResult = {
       score,
@@ -250,7 +246,7 @@ export const VoucherInspector: FC<VoucherInspectorProps> = ({ currentRegime }) =
           Soát Xét Hóa Đơn Điện Tử & Phát Hiện Rủi Ro Thuế Thực Tế
         </h1>
         <p className="text-sm text-slate-500 dark:text-slate-400">
-          Rèn luyện kỹ năng kiểm toán chứng từ thực chiến: Thẩm tra trạng thái mã số thuế người bán (Status 03/04), kiểm soát ngưỡng thanh toán không dùng tiền mặt &ge; 20 triệu đồng (Thông tư 219/2013), kiểm tra tính toán số học và chữ ký thẩm quyền.
+          Rèn luyện kỹ năng kiểm toán chứng từ thực chiến: Thẩm tra trạng thái mã số thuế người bán (Status 03/04), kiểm soát ngưỡng thanh toán không dùng tiền mặt &ge; 20 triệu đồng (đối chiếu song song Thông tư 219/2013/TT-BTC, Thông tư 78/2014/TT-BTC hiện hành và cập nhật Thông tư 69/2025/TT-BTC, Thông tư 20/2026/TT-BTC, ngưỡng 5 triệu theo Luật Thuế GTGT 48/2024/QH15), kiểm tra tính toán số học và chữ ký thẩm quyền.
         </p>
       </div>
 
@@ -652,7 +648,7 @@ export const VoucherInspector: FC<VoucherInspectorProps> = ({ currentRegime }) =
                   2. Vi phạm quy tắc thanh toán không dùng tiền mặt
                 </span>
                 <span className="text-slate-500 dark:text-slate-400 block text-[11px]">
-                  Hóa đơn có tổng thanh toán &ge; 20.000.000 VNĐ nhưng lại trả bằng Tiền mặt (TM) thay vì Ủy nhiệm chi chuyển khoản (TT 219/2013).
+                  Hóa đơn có tổng thanh toán &ge; 20.000.000 VNĐ nhưng lại trả bằng Tiền mặt (TM) thay vì Ủy nhiệm chi chuyển khoản (Thông tư 69/2025/TT-BTC thay thế Thông tư 219/2013/TT-BTC).
                 </span>
               </div>
             </label>

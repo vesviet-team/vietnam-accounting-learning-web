@@ -190,100 +190,71 @@ func insertAttempt(ctx context.Context, tx execer, userID uuid.UUID, a AttemptIn
 func (s *PGStore) Pull(ctx context.Context, userID uuid.UUID, cursor int64, kinds []string) (PullResult, error) {
 	kindSet := normalizeKinds(kinds)
 	res := PullResult{Cursor: cursor, Attempts: []AttemptEntity{}, ActiveDays: []ActiveDayEntity{}, Workbench: []WorkbenchEntity{}}
+	newCursor := cursor
 
 	for _, k := range kindSet {
 		switch k {
 		case KindProgress:
-			p, err := s.loadProgress(ctx, userID, cursor)
+			p, seq, err := s.loadProgress(ctx, userID, cursor)
 			if err != nil {
 				return PullResult{}, err
 			}
 			res.Progress = p // nil when absent or not changed since cursor
+			if seq > newCursor {
+				newCursor = seq
+			}
 		case KindAttempts:
-			rows, err := s.loadAttempts(ctx, userID, cursor)
+			rows, seq, err := s.loadAttempts(ctx, userID, cursor)
 			if err != nil {
 				return PullResult{}, err
 			}
 			res.Attempts = rows
+			if seq > newCursor {
+				newCursor = seq
+			}
 		case KindActiveDays:
-			rows, err := s.loadActiveDays(ctx, userID, cursor)
+			rows, seq, err := s.loadActiveDays(ctx, userID, cursor)
 			if err != nil {
 				return PullResult{}, err
 			}
 			res.ActiveDays = rows
+			if seq > newCursor {
+				newCursor = seq
+			}
 		case KindWorkbench:
-			rows, err := s.loadWorkbench(ctx, userID, cursor)
+			rows, seq, err := s.loadWorkbench(ctx, userID, cursor)
 			if err != nil {
 				return PullResult{}, err
 			}
 			res.Workbench = rows
+			if seq > newCursor {
+				newCursor = seq
+			}
 		}
 	}
 
-	newCursor := cursor
-	for _, a := range res.Attempts {
-		if seq, ok, serr := s.seqOf(ctx, userID, "test_attempts", "id", a.ID); serr == nil && ok && seq > newCursor {
-			newCursor = seq
-		}
-	}
-	for _, d := range res.ActiveDays {
-		if seq, ok, serr := s.seqOf(ctx, userID, "active_days", "day", d.Day); serr == nil && ok && seq > newCursor {
-			newCursor = seq
-		}
-	}
-	for _, w := range res.Workbench {
-		if seq, ok, serr := s.seqOf(ctx, userID, "workbench_snapshots", "kind", w.Kind); serr == nil && ok && seq > newCursor {
-			newCursor = seq
-		}
-	}
-	if res.Progress != nil {
-		if seq, ok, serr := s.progressSeq(ctx, userID); serr == nil && ok && seq > newCursor {
-			newCursor = seq
-		}
-	}
 	res.Cursor = newCursor
 	return res, nil
 }
 
 func (s *PGStore) ExportAll(ctx context.Context, userID uuid.UUID) (State, error) {
 	st := State{Attempts: []AttemptEntity{}, ActiveDays: []ActiveDayEntity{}, Workbench: []WorkbenchEntity{}}
-	p, err := s.loadProgress(ctx, userID, 0)
+	p, pSeq, err := s.loadProgress(ctx, userID, 0)
 	if err != nil {
 		return State{}, err
 	}
 	st.Progress = p
-	if st.Attempts, err = s.loadAttempts(ctx, userID, 0); err != nil {
+	var aSeq, dSeq, wSeq int64
+	if st.Attempts, aSeq, err = s.loadAttempts(ctx, userID, 0); err != nil {
 		return State{}, err
 	}
-	if st.ActiveDays, err = s.loadActiveDays(ctx, userID, 0); err != nil {
+	if st.ActiveDays, dSeq, err = s.loadActiveDays(ctx, userID, 0); err != nil {
 		return State{}, err
 	}
-	if st.Workbench, err = s.loadWorkbench(ctx, userID, 0); err != nil {
+	if st.Workbench, wSeq, err = s.loadWorkbench(ctx, userID, 0); err != nil {
 		return State{}, err
 	}
-	st.Cursor = 0
-	// Cursor = max seq across all rows so the exported cursor never
-	// regresses for the client.
-	for _, a := range st.Attempts {
-		if seq, ok, serr := s.seqOf(ctx, userID, "test_attempts", "id", a.ID); serr == nil && ok && seq > st.Cursor {
-			st.Cursor = seq
-		}
-	}
-	for _, d := range st.ActiveDays {
-		if seq, ok, serr := s.seqOf(ctx, userID, "active_days", "day", d.Day); serr == nil && ok && seq > st.Cursor {
-			st.Cursor = seq
-		}
-	}
-	for _, w := range st.Workbench {
-		if seq, ok, serr := s.seqOf(ctx, userID, "workbench_snapshots", "kind", w.Kind); serr == nil && ok && seq > st.Cursor {
-			st.Cursor = seq
-		}
-	}
-	if st.Progress != nil {
-		if seq, ok, serr := s.progressSeq(ctx, userID); serr == nil && ok && seq > st.Cursor {
-			st.Cursor = seq
-		}
-	}
+	st.Cursor = max(pSeq, aSeq, dSeq, wSeq)
 	return st, nil
 }
 

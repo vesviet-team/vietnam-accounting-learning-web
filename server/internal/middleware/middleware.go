@@ -102,26 +102,41 @@ func Recover(log *slog.Logger) func(http.Handler) http.Handler {
 	}
 }
 
-// AllowedOrigin is the single origin permitted by CORS.
+// AllowedOrigin is the single default origin permitted by CORS.
 const AllowedOrigin = "https://hoa.tanhdev.com"
 
-// CORS sets CORS headers for the allowed origin only.
+// CORS sets CORS headers for the default allowed origin only.
 func CORS(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		origin := r.Header.Get("Origin")
-		if origin == AllowedOrigin {
-			w.Header().Set("Access-Control-Allow-Origin", origin)
-			w.Header().Set("Vary", "Origin")
-			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, OPTIONS")
-			w.Header().Set("Access-Control-Allow-Headers", "Authorization, Content-Type, X-Device-ID, X-Request-ID")
-			w.Header().Set("Access-Control-Max-Age", "600")
+	return CORSWithOrigins([]string{AllowedOrigin})(next)
+}
+
+// CORSWithOrigins sets CORS headers only when the request Origin matches one
+// of the configured origins.
+func CORSWithOrigins(origins []string) func(http.Handler) http.Handler {
+	allowed := make(map[string]bool, len(origins))
+	for _, o := range origins {
+		o = strings.TrimRight(strings.TrimSpace(o), "/")
+		if o != "" {
+			allowed[o] = true
 		}
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		next.ServeHTTP(w, r)
-	})
+	}
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			origin := r.Header.Get("Origin")
+			if origin != "" && allowed[origin] {
+				w.Header().Set("Access-Control-Allow-Origin", origin)
+				w.Header().Set("Vary", "Origin")
+				w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, OPTIONS")
+				w.Header().Set("Access-Control-Allow-Headers", "Authorization, Content-Type, X-Device-ID, X-Request-ID")
+				w.Header().Set("Access-Control-Max-Age", "600")
+			}
+			if r.Method == http.MethodOptions {
+				w.WriteHeader(http.StatusNoContent)
+				return
+			}
+			next.ServeHTTP(w, r)
+		})
+	}
 }
 
 // rateLimiter is a tiny fixed-window in-memory limiter keyed by string
@@ -156,12 +171,25 @@ func newRateLimiter(limit int, window time.Duration) *rateLimiter {
 	return rl
 }
 
+const maxRateLimiterBuckets = 10000
+
 func (rl *rateLimiter) allow(key string) bool {
 	rl.mu.Lock()
 	defer rl.mu.Unlock()
 	now := time.Now()
 	b, ok := rl.buckets[key]
 	if !ok || now.After(b.windowEnd) {
+		if !ok && len(rl.buckets) >= maxRateLimiterBuckets {
+			for k, existing := range rl.buckets {
+				if now.After(existing.windowEnd) {
+					delete(rl.buckets, k)
+				}
+			}
+			// Bound memory even under same-window distributed flood.
+			if len(rl.buckets) >= maxRateLimiterBuckets {
+				return false
+			}
+		}
 		rl.buckets[key] = &bucket{count: 1, windowEnd: now.Add(rl.window)}
 		return true
 	}

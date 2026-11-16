@@ -69,7 +69,7 @@ export function diagnoseRuleOfOne(
   const priority = primaryError.errorPriority ?? 4;
   const correctCount = totalItemsCount - incorrectItems.length;
 
-  let priorityNameVi = '';
+  let priorityNameVi: string;
   switch (priority) {
     case 1:
       priorityNameVi = 'Lỗi Khái Niệm Cốt Lõi (Định khoản Nợ/Có & Bản chất Tài khoản)';
@@ -93,7 +93,7 @@ export function diagnoseRuleOfOne(
   }${primaryError.explanationVi.slice(0, 180)}...`;
 
   // Growth Mindset framing: Praise effort / partial success + "Not Yet" framing
-  let praisePrefix = '';
+  let praisePrefix: string;
   if (correctCount >= 7) {
     praisePrefix = `Bạn đã làm rất tốt khi trả lời đúng ${correctCount}/${totalItemsCount} câu hỏi (${score}/100 điểm). Bạn đã vượt qua bài test và chỉ còn một chút vướng mắc nhỏ`;
   } else if (correctCount >= 4) {

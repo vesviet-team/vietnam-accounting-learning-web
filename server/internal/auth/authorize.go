@@ -27,12 +27,13 @@ type userAuthenticator interface {
 
 // AuthorizeHandler serves GET/POST /oauth2/auth.
 type AuthorizeHandler struct {
-	ClientID      string
-	RedirectURI   string
-	Issuer        string
-	Users         userAuthenticator
-	Store         Store
-	loginFormTmpl *template.Template
+	ClientID        string
+	RedirectURI     string
+	Issuer          string
+	Users           userAuthenticator
+	Store           Store
+	InsecureCookies bool
+	loginFormTmpl   *template.Template
 }
 
 // authorizeParams is the validated OAuth authorize request carried through
@@ -96,7 +97,7 @@ func (h *AuthorizeHandler) Authorize(w http.ResponseWriter, r *http.Request) {
 		Value:    token,
 		Path:     "/oauth2/auth",
 		HttpOnly: true,
-		Secure:   true,
+		Secure:   !h.InsecureCookies,
 		SameSite: http.SameSiteStrictMode,
 		MaxAge:   600,
 	})
@@ -275,7 +276,7 @@ func (h *AuthorizeHandler) renderFormError(w http.ResponseWriter, r *http.Reques
 		csrf = hex.EncodeToString(b)
 		http.SetCookie(w, &http.Cookie{
 			Name: csrfCookie, Value: csrf, Path: "/oauth2/auth",
-			HttpOnly: true, Secure: true, SameSite: http.SameSiteStrictMode, MaxAge: 600,
+			HttpOnly: true, Secure: !h.InsecureCookies, SameSite: http.SameSiteStrictMode, MaxAge: 600,
 		})
 	}
 	data := loginFormData{

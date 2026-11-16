@@ -170,13 +170,10 @@ export function generateIncomeStatement(
   const accountingProfitBeforeTax = operatingProfit + otherProfit; // Mã 50 = 30 + 40
 
   // CIT Calculation
-  let citExpense = 0;
-  if (explicitCitExpense !== undefined) {
-    citExpense = explicitCitExpense;
-  } else {
-    const taxableIncome = Math.max(0, accountingProfitBeforeTax + nonDeductibleB4);
-    citExpense = Math.round(taxableIncome * taxRate);
-  }
+  const citExpense =
+    explicitCitExpense !== undefined
+      ? explicitCitExpense
+      : Math.round(Math.max(0, accountingProfitBeforeTax + nonDeductibleB4) * taxRate);
 
   const netProfitAfterTax = accountingProfitBeforeTax - citExpense; // Mã 60 = 50 - 51
 

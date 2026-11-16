@@ -111,4 +111,23 @@ func TestLoad_IssuerTrailingSlashTrimmed(t *testing.T) {
 	if cfg.OAuthIssuer != "https://hoa.tanhdev.com" {
 		t.Fatalf("issuer = %q, trailing slash must be trimmed", cfg.OAuthIssuer)
 	}
+	if !cfg.SecureCookies {
+		t.Fatal("SecureCookies should default to true for https issuer")
+	}
+}
+
+func TestLoad_CORSAndCookieSecure(t *testing.T) {
+	cfg, err := Load(testEnv(t, map[string]string{
+		"OAUTH_ISSUER":         "http://localhost:8080",
+		"CORS_ALLOWED_ORIGINS": "http://localhost:5173/, https://hoa.tanhdev.com",
+	}))
+	if err != nil {
+		t.Fatalf("load: %v", err)
+	}
+	if cfg.SecureCookies {
+		t.Fatal("SecureCookies should default to false for http issuer")
+	}
+	if len(cfg.CORSAllowedOrigins) != 2 || cfg.CORSAllowedOrigins[0] != "http://localhost:5173" {
+		t.Fatalf("CORSAllowedOrigins = %v", cfg.CORSAllowedOrigins)
+	}
 }

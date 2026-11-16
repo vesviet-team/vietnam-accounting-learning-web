@@ -45,28 +45,33 @@ export function App() {
   const [streakDays, setStreakDays] = useState(1);
   const [careerLevel, setCareerLevel] = useState<CareerLevel | undefined>();
 
-  // Load preferred regime, streak, and career level on mount
+  // Load preferred regime, streak, and career level on mount + refresh on remote sync
   useEffect(() => {
     let isMounted = true;
-    Promise.all([
-      storageService.getPreferredRegime(),
-      storageService.getStreakState(),
-      storageService.getLearnerProgress(),
-    ]).then(([regime, streak, progress]) => {
-      if (!isMounted) return;
-      if (regime) setCurrentRegime(regime);
-      if (streak) {
-        setStreakDays(streak.currentStreak);
-        const milestoneCount = progress?.milestoneScores
-          ? Object.values(progress.milestoneScores).filter((s) => s >= 70).length
-          : 0;
-        setCareerLevel(
-          StreakEngine.determineCareerLevel(milestoneCount, streak.currentStreak)
-        );
-      }
-    });
+    const loadAppProgress = () => {
+      Promise.all([
+        storageService.getPreferredRegime(),
+        storageService.getStreakState(),
+        storageService.getLearnerProgress(),
+      ]).then(([regime, streak, progress]) => {
+        if (!isMounted) return;
+        if (regime) setCurrentRegime(regime);
+        if (streak) {
+          setStreakDays(streak.currentStreak);
+          const milestoneCount = progress?.milestoneScores
+            ? Object.values(progress.milestoneScores).filter((s) => s >= 70).length
+            : 0;
+          setCareerLevel(
+            StreakEngine.determineCareerLevel(milestoneCount, streak.currentStreak)
+          );
+        }
+      });
+    };
+    loadAppProgress();
+    const offSync = syncService.onRemoteApplied(loadAppProgress);
     return () => {
       isMounted = false;
+      offSync();
     };
   }, []);
 

@@ -60,6 +60,21 @@ func (m *memStore) CreateSession(_ context.Context, s Session) error {
 	return nil
 }
 
+func (m *memStore) RotateSession(_ context.Context, oldSessionID uuid.UUID, newSession Session) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	old, ok := m.sessions[oldSessionID]
+	if !ok || old.RevokedAt != nil {
+		return ErrSessionRevoked
+	}
+	now := time.Now()
+	old.RevokedAt = &now
+	old.LastUsedAt = &now
+	cp := newSession
+	m.sessions[newSession.ID] = &cp
+	return nil
+}
+
 func (m *memStore) GetSessionByRefreshHash(_ context.Context, refreshHash string) (Session, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()

@@ -1,6 +1,7 @@
 package sync
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"strconv"
@@ -18,11 +19,12 @@ const MaxPayloadBytes = 8 << 20
 // POST /sync/merge-anonymous. All require a Bearer access token. Learning
 // payload contents are never logged.
 type Handler struct {
-	Store Store
-	Keys  httpx.BearerVerifier
+	Store        Store
+	Keys         httpx.BearerVerifier
+	SessionValid func(ctx context.Context, userID, sessionID uuid.UUID) (bool, error)
 }
 
-func (h *Handler) claims(w http.ResponseWriter, r *http.Request) (uuid.UUID, bool) {
+func (h *Handler) claims(w http.ResponseWriter, r *http.Request, requiredScope string) (uuid.UUID, bool) {
 	c, err := h.Keys.ParseBearerClaims(r)
 	if err != nil {
 		httpx.OAuthError(w, http.StatusUnauthorized, "invalid_token", "valid bearer token required")
@@ -33,13 +35,33 @@ func (h *Handler) claims(w http.ResponseWriter, r *http.Request) (uuid.UUID, boo
 		httpx.OAuthError(w, http.StatusUnauthorized, "invalid_token", "valid bearer token required")
 		return uuid.Nil, false
 	}
+	if requiredScope != "" && !httpx.HasScope(c.Scope, requiredScope) {
+		httpx.OAuthError(w, http.StatusForbidden, "insufficient_scope", "missing required scope: "+requiredScope)
+		return uuid.Nil, false
+	}
+	if h.SessionValid != nil {
+		sid, serr := uuid.Parse(c.SessionID)
+		if serr != nil {
+			httpx.OAuthError(w, http.StatusUnauthorized, "invalid_token", "valid session required")
+			return uuid.Nil, false
+		}
+		ok, verr := h.SessionValid(r.Context(), userID, sid)
+		if verr != nil {
+			httpx.OAuthError(w, http.StatusInternalServerError, "server_error", "")
+			return uuid.Nil, false
+		}
+		if !ok {
+			httpx.OAuthError(w, http.StatusUnauthorized, "invalid_token", "session is no longer active")
+			return uuid.Nil, false
+		}
+	}
 	return userID, true
 }
 
 // Pull GET /sync/pull?cursor=<seq>&kinds=progress,attempts,active_days,workbench
 // Returns entities changed after the cursor plus the new cursor.
 func (h *Handler) Pull(w http.ResponseWriter, r *http.Request) {
-	userID, ok := h.claims(w, r)
+	userID, ok := h.claims(w, r, "read")
 	if !ok {
 		return
 	}
@@ -68,7 +90,7 @@ func (h *Handler) Push(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	userID, ok := h.claims(w, r)
+	userID, ok := h.claims(w, r, "write")
 	if !ok {
 		return
 	}

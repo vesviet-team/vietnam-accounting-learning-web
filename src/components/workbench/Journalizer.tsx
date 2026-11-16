@@ -300,8 +300,8 @@ export const Journalizer: FC<JournalizerProps> = ({
     setEntryDescription(scen.titleVi);
     setRows(
       scen.rows.map((r, i) => {
-        let code = r.accountCode;
-        let name = r.accountNameVi;
+        const code = r.accountCode;
+        const name = r.accountNameVi;
 
         // If regime is 133 and code is 641 in scen-05, we let learner experience the prohibition warning
         if (currentRegime === 'CIRCULAR_133' && code === '641') {

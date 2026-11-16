@@ -850,7 +850,7 @@ export const COA_CIRCULAR_99: AccountItem[] = [
     category: 'ASSET',
     regimes: ['CIRCULAR_99'],
     normalBalance: 'DEBIT',
-    description: 'Phản ánh các chi phí thực tế đã phát sinh nhưng có liên quan đến kết quả hoạt động SXKD của nhiều kỳ kế toán, chờ phân bổ dần vào chi phí theo kỳ (tối đa không quá 36 tháng theo TT 96/2015). Từ 01/01/2026 tiếp nhận nội dung chi phí trả trước (gộp từ TK 142, 242) theo TT 99/2025/TT-BTC.',
+    description: 'Phản ánh các chi phí thực tế đã phát sinh nhưng có liên quan đến kết quả hoạt động SXKD của nhiều kỳ kế toán, chờ phân bổ dần vào chi phí theo kỳ (tối đa không quá 36 tháng theo Thông tư 20/2026/TT-BTC, thay thế Thông tư 78/2014/TT-BTC và Thông tư 96/2015/TT-BTC). Từ 01/01/2026 tiếp nhận nội dung chi phí trả trước (gộp từ TK 142, 242) theo TT 99/2025/TT-BTC.',
     level: 1,
   },
   {

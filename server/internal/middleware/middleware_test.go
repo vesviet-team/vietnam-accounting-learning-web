@@ -187,3 +187,16 @@ func TestRateLimitRemoteAddr(t *testing.T) {
 		t.Fatalf("independent RemoteAddr status = %d, want 200", rec.Code)
 	}
 }
+
+func TestCORSWithOrigins(t *testing.T) {
+	next := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(200) })
+	h := CORSWithOrigins([]string{"http://localhost:5173", "https://hoa.tanhdev.com"})(next)
+
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.Header.Set("Origin", "http://localhost:5173")
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+	if rec.Header().Get("Access-Control-Allow-Origin") != "http://localhost:5173" {
+		t.Fatalf("expected custom origin CORS header, got %q", rec.Header().Get("Access-Control-Allow-Origin"))
+	}
+}

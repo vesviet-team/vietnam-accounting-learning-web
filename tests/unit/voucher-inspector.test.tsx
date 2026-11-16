@@ -109,7 +109,7 @@ describe('VOUCHER INSPECTION ROOM UNIT TESTS', () => {
 
       // Perfect score
       expect(screen.getByText(/100\/100 ĐIỂM/i)).toBeInTheDocument();
-      expect(screen.getByText(/Điều 15 Thông tư 219\/2013\/TT-BTC/i)).toBeInTheDocument();
+      expect(screen.getByText(/Điều 15 Thông tư 69\/2025\/TT-BTC.*Thông tư 219\/2013\/TT-BTC/i)).toBeInTheDocument();
       expect(screen.getByText(/BỊ LOẠI TOÀN BỘ 1\.481\.481 VNĐ thuế GTGT/i)).toBeInTheDocument();
     });
 

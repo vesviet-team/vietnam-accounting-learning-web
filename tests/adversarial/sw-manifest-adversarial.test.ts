@@ -168,6 +168,65 @@ describe('Adversarial Challenge: ServiceWorker & Web App Manifest Security', () 
     it('serves fallback offline HTML page when offline navigation has no cached index.html', () => {
       expect(swCode).toContain('<!DOCTYPE html><html><body><h1>Ngoại Tuyến</h1>');
     });
+
+    it('never intercepts or caches OAuth/API endpoints (/oauth2/auth, /sync/*, /me) while allowing /oauth2/callback SPA route', () => {
+      const listeners: Record<string, Function[]> = {};
+      const fakeSelf = {
+        location: { origin: 'https://hoa.tanhdev.com' },
+        addEventListener: (event: string, fn: Function) => {
+          listeners[event] = listeners[event] || [];
+          listeners[event].push(fn);
+        },
+        clients: { claim: vi.fn() },
+        skipWaiting: vi.fn(),
+      };
+      const fakeCaches = {
+        match: vi.fn().mockResolvedValue(undefined),
+        open: vi.fn().mockResolvedValue({ match: vi.fn(), put: vi.fn() }),
+      };
+
+      const swFunc = new Function('self', 'caches', swCode);
+      swFunc(fakeSelf, fakeCaches);
+      const fetchHandler = listeners['fetch']?.[0];
+      expect(fetchHandler).toBeDefined();
+
+      const bypassUrls = [
+        'https://hoa.tanhdev.com/oauth2/auth?response_type=code&client_id=vnacc-spa',
+        'https://hoa.tanhdev.com/sync/pull?cursor=0',
+        'https://hoa.tanhdev.com/me',
+        'https://hoa.tanhdev.com/me/sessions',
+        'https://hoa.tanhdev.com/me/export',
+      ];
+      for (const url of bypassUrls) {
+        let respondWithCalled = false;
+        fetchHandler({
+          request: {
+            method: 'GET',
+            mode: 'navigate',
+            url,
+            headers: new Headers({ accept: 'text/html' }),
+          },
+          respondWith: () => {
+            respondWithCalled = true;
+          },
+        });
+        expect(respondWithCalled).toBe(false);
+      }
+
+      let callbackRespondWith = false;
+      fetchHandler({
+        request: {
+          method: 'GET',
+          mode: 'navigate',
+          url: 'https://hoa.tanhdev.com/oauth2/callback?code=abc&state=123',
+          headers: new Headers({ accept: 'text/html' }),
+        },
+        respondWith: () => {
+          callbackRespondWith = true;
+        },
+      });
+      expect(callbackRespondWith).toBe(true);
+    });
   });
 
   // =========================================================================

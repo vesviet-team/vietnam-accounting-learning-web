@@ -127,6 +127,14 @@ export class StorageService implements IStorageAdapter {
     ]);
   }
 
+  /**
+   * Clears user-scoped synced learning records without notifying sync listeners
+   * (used when switching between different authenticated accounts).
+   */
+  async clearSyncedUserData(): Promise<void> {
+    await Promise.all(Array.from(SYNCED_KEYS).map((k) => this.removeItem(k)));
+  }
+
   // --- Learner Progress Persistence ---
   async getLearnerProgress(): Promise<LearnerProgress | null> {
     return await this.getItem<LearnerProgress>('learner_progress');
@@ -164,8 +172,17 @@ export class StorageService implements IStorageAdapter {
     return val || 'CIRCULAR_200';
   }
 
-  async setPreferredRegime(regime: AccountingRegime): Promise<void> {
+  async setPreferredRegime(regime: AccountingRegime, opts: { silent?: boolean } = {}): Promise<void> {
     await this.localAdapter.setItem('preferred_regime', regime);
+    if (!opts.silent) {
+      for (const listener of this.syncListeners) {
+        try {
+          listener('preferred_regime');
+        } catch {
+          /* listener errors never break storage writes */
+        }
+      }
+    }
   }
 
   // --- Workbench State Persistence (Milestone 3 / Offline-First) ---

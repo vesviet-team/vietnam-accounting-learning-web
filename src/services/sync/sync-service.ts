@@ -27,10 +27,18 @@ import { storageService, SYNCED_KEYS } from '@/services/storage/storage-service'
 import { authService } from '@/services/auth/auth-service';
 import { getDeviceId } from '@/services/auth/device';
 import { computeUnlockedDays } from '@/engine/gating-engine';
+import type { AccountingRegime } from '@/types/coa';
 
 const META_KEY = 'vnacc_sync_meta';
 const ACTIVE_DAYS_KEY = 'vnacc_active_days';
 const MERGE_ASKED_KEY = 'vnacc_merge_asked';
+const LAST_ACCOUNT_KEY = 'vnacc_last_account_id';
+const VALID_REGIMES = new Set<AccountingRegime>([
+  'CIRCULAR_200',
+  'CIRCULAR_133',
+  'CIRCULAR_99',
+  'CIRCULAR_58',
+]);
 
 export type SyncStatus = 'idle' | 'syncing' | 'error';
 
@@ -92,10 +100,12 @@ export class SyncService {
   private applyingRemote = false;
   private inFlight = false;
   private pushQueued = false;
+  private dirtyWorkbench = new Set<WorkbenchKind>();
   private unsubscribeStorage: (() => void) | null = null;
   private unsubscribeAuth: (() => void) | null = null;
   private focusHandler: (() => void) | null = null;
   private statusListeners = new Set<(s: SyncStatusState) => void>();
+  private remoteAppliedListeners = new Set<() => void>();
 
   private state: SyncStatusState = { status: 'idle', lastSyncAt: null, lastError: null };
 
@@ -113,7 +123,17 @@ export class SyncService {
   init(): void {
     if (this.unsubscribeStorage) return;
     this.unsubscribeStorage = this.storage.subscribeChanges((key) => {
-      if (SYNCED_KEYS.has(key)) this.schedulePush();
+      if (key === 'workbench_state') this.dirtyWorkbench.add('journalizer');
+      if (key === 'cogs_state') this.dirtyWorkbench.add('cogs');
+      if (
+        key === 'learner_progress' ||
+        key === 'workbench_state' ||
+        key === 'cogs_state' ||
+        key === 'user_streak_state'
+      ) {
+        this.recordActiveDayToday(key === 'learner_progress' ? 'lesson' : 'workbench');
+      }
+      if (SYNCED_KEYS.has(key) || key === 'preferred_regime') this.schedulePush();
     });
     if (typeof window !== 'undefined') {
       this.focusHandler = () => void this.pull();
@@ -121,8 +141,7 @@ export class SyncService {
     }
     this.unsubscribeAuth = this.auth.onAuthChange(({ user }) => {
       if (user) {
-        void this.pull();
-        this.schedulePush();
+        void this.onUserSignedIn(user.id);
       } else {
         this.cancelTimers();
       }
@@ -143,6 +162,7 @@ export class SyncService {
     this.unsubscribeAuth = null;
     this.focusHandler = null;
     this.statusListeners.clear();
+    this.remoteAppliedListeners.clear();
   }
 
   getStatus(): SyncStatusState {
@@ -152,6 +172,11 @@ export class SyncService {
   onStatusChange(cb: (s: SyncStatusState) => void): () => void {
     this.statusListeners.add(cb);
     return () => this.statusListeners.delete(cb);
+  }
+
+  onRemoteApplied(cb: () => void): () => void {
+    this.remoteAppliedListeners.add(cb);
+    return () => this.remoteAppliedListeners.delete(cb);
   }
 
   /** Whether this device has local learning data worth merging. */
@@ -209,7 +234,9 @@ export class SyncService {
       const preMeta = this.loadMeta();
       this.updateMetaFromState(canonical);
       await this.applyCanonical(canonical, preMeta);
+      this.dirtyWorkbench.clear();
       this.markMergeAsked(user.id);
+      this.setLastAccountId(user.id);
       this.setStatus('idle', null);
       return true;
     } catch (err) {
@@ -219,6 +246,49 @@ export class SyncService {
   }
 
   // --- Internals ----------------------------------------------------------
+
+  private async onUserSignedIn(userId: string): Promise<void> {
+    const prevAccount = this.getLastAccountId();
+    if (prevAccount && prevAccount !== userId) {
+      // Different account on shared browser: isolate local storage before pulling.
+      await this.storage.clearSyncedUserData().catch(() => undefined);
+      this.dirtyWorkbench.clear();
+      this.setLastAccountId(userId);
+    }
+    await this.pull();
+    // Only auto-push if merge decision was already made (or there is no local anonymous data).
+    const hasLocal = await this.hasLocalLearningData();
+    if (this.wasMergeAsked(userId) || !hasLocal) {
+      this.setLastAccountId(userId);
+      if (hasLocal) this.schedulePush();
+    }
+  }
+
+  private getLastAccountId(): string | null {
+    try {
+      return localStorage.getItem(LAST_ACCOUNT_KEY);
+    } catch {
+      return null;
+    }
+  }
+
+  setLastAccountId(userId: string): void {
+    try {
+      localStorage.setItem(LAST_ACCOUNT_KEY, userId);
+    } catch {
+      /* ignore */
+    }
+  }
+
+  private recordActiveDayToday(source: string): void {
+    const today = vnDay(new Date().toISOString());
+    if (!today) return;
+    const log = this.loadActiveDaysLog();
+    if (!log[today]) {
+      log[today] = source;
+      this.saveActiveDaysLog(log);
+    }
+  }
 
   /** Debounced push after any local write of a synced key. */
   private schedulePush(): void {
@@ -260,9 +330,19 @@ export class SyncService {
     }
   }
 
+  private metaKey(): string {
+    const uid = this.auth.getUser?.()?.id;
+    return uid ? `${META_KEY}:${uid}` : META_KEY;
+  }
+
+  private activeDaysKey(): string {
+    const uid = this.auth.getUser?.()?.id;
+    return uid ? `${ACTIVE_DAYS_KEY}:${uid}` : ACTIVE_DAYS_KEY;
+  }
+
   private loadMeta(): SyncMeta {
     try {
-      const raw = localStorage.getItem(META_KEY);
+      const raw = localStorage.getItem(this.metaKey());
       return raw ? { ...emptyMeta(), ...(JSON.parse(raw) as SyncMeta) } : emptyMeta();
     } catch {
       return emptyMeta();
@@ -271,7 +351,7 @@ export class SyncService {
 
   private saveMeta(meta: SyncMeta): void {
     try {
-      localStorage.setItem(META_KEY, JSON.stringify(meta));
+      localStorage.setItem(this.metaKey(), JSON.stringify(meta));
     } catch {
       /* ignore */
     }
@@ -279,7 +359,7 @@ export class SyncService {
 
   private loadActiveDaysLog(): Record<string, string> {
     try {
-      const raw = localStorage.getItem(ACTIVE_DAYS_KEY);
+      const raw = localStorage.getItem(this.activeDaysKey());
       return raw ? (JSON.parse(raw) as Record<string, string>) : {};
     } catch {
       return {};
@@ -288,7 +368,7 @@ export class SyncService {
 
   private saveActiveDaysLog(log: Record<string, string>): void {
     try {
-      localStorage.setItem(ACTIVE_DAYS_KEY, JSON.stringify(log));
+      localStorage.setItem(this.activeDaysKey(), JSON.stringify(log));
     } catch {
       /* ignore */
     }
@@ -348,10 +428,10 @@ export class SyncService {
       };
     }
 
-    // Calendar activity days deriveable locally (streak state + progress).
+    // Calendar activity days deriveable locally (streak state + progress + recorded log).
     const streak = await this.storage.getStreakState().catch(() => null);
     const days = new Set<string>();
-    for (const d of [vnDay(progress?.lastActiveDate), vnDay(streak?.lastActiveDate), vnDay(new Date().toISOString())]) {
+    for (const d of [vnDay(progress?.lastActiveDate), vnDay(streak?.lastActiveDate)]) {
       if (d) days.add(d);
     }
     const activeLog = this.loadActiveDaysLog();
@@ -360,17 +440,30 @@ export class SyncService {
 
     const workbench: SyncWorkbenchEntity[] = [];
     const journalizer = await this.storage.loadWorkbenchState();
+    const journalizerHasData =
+      journalizer.postedEntries.length > 0 ||
+      Object.keys(journalizer.ledgerTAccounts ?? {}).length > 0 ||
+      (journalizer.completedVoucherCases?.length ?? 0) > 0 ||
+      Object.keys(journalizer.voucherScores ?? {}).length > 0;
+    const journalizerDirty =
+      this.dirtyWorkbench.has('journalizer') ||
+      (meta.workbenchRevisions.journalizer === undefined && journalizerHasData);
     workbench.push({
       kind: 'journalizer',
       payload: journalizer,
-      revision: (meta.workbenchRevisions.journalizer ?? 0) + 1,
+      revision: journalizerDirty
+        ? (meta.workbenchRevisions.journalizer ?? 0) + 1
+        : (meta.workbenchRevisions.journalizer ?? 0),
     });
     const cogs = await this.storage.loadCogsState();
     if (cogs) {
+      const cogsDirty = this.dirtyWorkbench.has('cogs') || meta.workbenchRevisions.cogs === undefined;
       workbench.push({
         kind: 'cogs',
         payload: cogs,
-        revision: (meta.workbenchRevisions.cogs ?? 0) + 1,
+        revision: cogsDirty
+          ? (meta.workbenchRevisions.cogs ?? 0) + 1
+          : (meta.workbenchRevisions.cogs ?? 0),
       });
     }
 
@@ -416,6 +509,7 @@ export class SyncService {
       const preMeta = this.loadMeta();
       this.updateMetaFromState(canonical);
       await this.applyCanonical(canonical, preMeta);
+      this.dirtyWorkbench.clear();
       this.retryAttempt = 0;
       this.setStatus('idle', null);
     } catch (err) {
@@ -514,6 +608,9 @@ export class SyncService {
         }
         merged.unlockedDays = computeUnlockedDays(merged);
         await this.storage.saveLearnerProgress(merged, { silent: true });
+        if (state.progress.regime && VALID_REGIMES.has(state.progress.regime as AccountingRegime)) {
+          await this.storage.setPreferredRegime(state.progress.regime as AccountingRegime, { silent: true });
+        }
       }
 
       // 2) Attempts: append server attempts unknown locally (union by uuid).
@@ -575,6 +672,14 @@ export class SyncService {
           if (payload) await this.storage.saveWorkbenchState(payload, { silent: true });
         } else if (w.kind === 'cogs') {
           await this.storage.saveCogsState(w.payload as never, { silent: true });
+        }
+      }
+
+      for (const cb of this.remoteAppliedListeners) {
+        try {
+          cb();
+        } catch {
+          /* listener errors never break sync */
         }
       }
     } catch {

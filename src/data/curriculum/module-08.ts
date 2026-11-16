@@ -51,7 +51,7 @@ export const MODULE_8_LESSONS: DailyLesson[] = [
         id: 'c23-2',
         titleVi: 'Quy Định Trần Khống Chế Phân Bổ Tối Đa 36 Tháng Theo Thông Tư 96/2015',
         summaryVi: 'Thời gian phân bổ chi phí trả trước vào chi phí tính thuế TNDN tối đa không quá 36 tháng (3 năm).',
-        contentVi: 'Theo Điều 4 Thông tư 96/2015/TT-BTC: Đối với công cụ, dụng cụ, bao bì luân chuyển, đồ dùng cho thuê và các khoản chi phí trả trước liên quan đến hoạt động SXKD của nhiều kỳ, thời hạn phân bổ vào chi phí sản xuất kinh doanh tối đa KHÔNG QUÁ 36 THÁNG. Nếu doanh nghiệp đăng ký phân bổ 5 năm (60 tháng): Chi phí phân bổ từ tháng thứ 37 trở đi sẽ bị cơ quan thuế LOẠI BỎ hoàn toàn khỏi chi phí được trừ khi tính thuế TNDN!',
+        contentVi: 'Theo Điều 4 Thông tư 20/2026/TT-BTC (thay TT 96/2015, 78/2014): Đối với công cụ, dụng cụ, bao bì luân chuyển, đồ dùng cho thuê và các khoản chi phí trả trước liên quan đến hoạt động SXKD của nhiều kỳ, thời hạn phân bổ vào chi phí sản xuất kinh doanh tối đa KHÔNG QUÁ 36 THÁNG. Nếu doanh nghiệp đăng ký phân bổ 5 năm (60 tháng): Chi phí phân bổ từ tháng thứ 37 trở đi sẽ bị cơ quan thuế LOẠI BỎ hoàn toàn khỏi chi phí được trừ khi tính thuế TNDN!',
         detailedTAccounts: [
           {
             accountCode: '242',

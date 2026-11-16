@@ -30,6 +30,7 @@ import { QuizModal } from '@/components/assessment/QuizModal';
 import { TAccountView } from './TAccountView';
 import { VoucherCard } from './VoucherCard';
 import { storageService } from '@/services/storage/storage-service';
+import { syncService } from '@/services/sync/sync-service';
 
 interface LessonReaderProps {
   initialDay?: number;
@@ -74,8 +75,12 @@ export const LessonReader: FC<LessonReaderProps> = ({
         }
       }
     });
+    const offSync = syncService.onRemoteApplied(() => {
+      if (isMounted) void loadProgressFromStorage();
+    });
     return () => {
       isMounted = false;
+      offSync();
     };
   }, []);
 
@@ -108,6 +113,9 @@ export const LessonReader: FC<LessonReaderProps> = ({
 
     setLearnerProgress(updatedProgress);
     await storageService.saveLearnerProgress(updatedProgress);
+    if (!isCurrentDayCompleted) {
+      void storageService.recordStreakActivity();
+    }
   };
 
   const handleSelectDay = (day: number) => {
@@ -451,6 +459,10 @@ export const LessonReader: FC<LessonReaderProps> = ({
                     {lesson.concepts[activeConceptIndex].keyTakeawayVi}
                   </p>
                 </div>
+              </div>
+
+              <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700/70 text-[11px] text-slate-500 dark:text-slate-400">
+                <strong>Đối chiếu văn bản pháp luật:</strong> Nội dung bài giảng đối chiếu song song quy định hiện hành (Thông tư 200/2014/TT-BTC, Thông tư 133/2016/TT-BTC, Thông tư 219/2013/TT-BTC, Thông tư 78/2014/TT-BTC) cùng các lộ trình cập nhật (Thông tư 99/2025/TT-BTC, Thông tư 69/2025/TT-BTC, Thông tư 20/2026/TT-BTC).
               </div>
             </div>
           )}

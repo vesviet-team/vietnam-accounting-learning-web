@@ -7,7 +7,8 @@
     "code"
   ],
   "grant_types_supported": [
-    "authorization_code"
+    "authorization_code",
+    "refresh_token"
   ],
   "code_challenge_methods_supported": [
     "S256"
@@ -15,8 +16,7 @@
   "client_id_metadata_document_supported": true,
   "agent_auth": {
     "skill": "https://hoa.tanhdev.com/auth.md",
-    "register_uri": "https://hoa.tanhdev.com/oauth2/register",
-    "claim_uri": "https://hoa.tanhdev.com/oauth2/claim",
+    "register_uri": "https://hoa.tanhdev.com/auth/register",
     "identity_types_supported": [
       "anonymous",
       "identity_assertion"

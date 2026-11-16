@@ -18,7 +18,7 @@ export const VoucherPreview: FC<VoucherPreviewProps> = ({ currentRegime }) => {
           Mô Phỏng Hóa Đơn Điện Tử NĐ 254/2026 & Kiểm Tra Điều Kiện Khấu Trừ Thuế
         </h1>
         <p className="text-sm text-slate-500 dark:text-slate-400">
-          Rèn luyện kỹ năng phát hiện sai phạm thực tế: Ngưỡng thanh toán không dùng tiền mặt &ge; 20 triệu đồng (TT 219/2013), kiểm tra MST doanh nghiệp ngừng hoạt động, tính hợp lệ của mã CQT (MCCQT).
+          Rèn luyện kỹ năng phát hiện sai phạm thực tế: Ngưỡng thanh toán không dùng tiền mặt &ge; 20 triệu đồng (TT 69/2025 (thay TT 219/2013)), kiểm tra MST doanh nghiệp ngừng hoạt động, tính hợp lệ của mã CQT (MCCQT).
         </p>
       </div>
 
@@ -129,7 +129,7 @@ export const VoucherPreview: FC<VoucherPreviewProps> = ({ currentRegime }) => {
               Hóa đơn có tổng giá trị thanh toán <strong>27.500.000 đ &ge; 20.000.000 đ</strong> nhưng lại thanh toán bằng <strong>Tiền mặt (TM)</strong> thay vì Ủy nhiệm chi chuyển khoản từ tài khoản công ty.
             </p>
             <div className="font-semibold text-rose-700 dark:text-rose-300 pt-1">
-              Hậu quả pháp lý: Doanh nghiệp KHÔNG ĐƯỢC khấu trừ 2.500.000 đ thuế GTGT đầu vào (Khoản 2 Điều 15 TT 219/2013) và KHÔNG ĐƯỢC tính 25.000.000 đ vào chi phí hợp lý khi tính thuế TNDN (Điều 4 TT 96/2015).
+              Hậu quả pháp lý: Doanh nghiệp KHÔNG ĐƯỢC khấu trừ 2.500.000 đ thuế GTGT đầu vào (Khoản 2 Điều 15 Thông tư 69/2025/TT-BTC, thay thế Thông tư 219/2013/TT-BTC) và KHÔNG ĐƯỢC tính 25.000.000 đ vào chi phí hợp lý khi tính thuế TNDN (Điều 4 Thông tư 20/2026/TT-BTC, thay thế Thông tư 78/2014/TT-BTC và Thông tư 96/2015/TT-BTC).
             </div>
           </div>
         </div>

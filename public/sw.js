@@ -7,7 +7,7 @@
  * - Seamless offline fallback for navigation and static assets
  */
 
-const CACHE_VERSION = 'v2';
+const CACHE_VERSION = 'v3';
 const STATIC_CACHE_NAME = `vnacc-app-shell-${CACHE_VERSION}`;
 const DYNAMIC_CACHE_NAME = `vnacc-dynamic-${CACHE_VERSION}`;
 const FONT_CACHE_NAME = `vnacc-fonts-${CACHE_VERSION}`;
@@ -74,6 +74,19 @@ function isGoogleFontRequest(url) {
   return GOOGLE_FONT_DOMAINS.some((domain) => url.hostname.includes(domain));
 }
 
+// Helper: Check if URL path is a dynamic auth/API endpoint that must bypass SW cache
+function isBypassApiOrAuthPath(pathname) {
+  if (pathname === '/oauth2/callback') return false;
+  return (
+    pathname.startsWith('/oauth2/') ||
+    pathname.startsWith('/auth/') ||
+    pathname.startsWith('/sync/') ||
+    pathname === '/me' ||
+    pathname.startsWith('/me/') ||
+    pathname.startsWith('/agent/')
+  );
+}
+
 // Helper: Check if request is a navigation request
 function isNavigationRequest(request) {
   return (
@@ -92,6 +105,11 @@ self.addEventListener('fetch', (event) => {
   if (request.method !== 'GET') return;
   const url = new URL(request.url);
   if (!url.protocol.startsWith('http')) return;
+
+  // Never intercept or cache OAuth/API endpoints (/oauth2/auth, /sync/*, /me, /auth/*)
+  if (url.origin === self.location.origin && isBypassApiOrAuthPath(url.pathname)) {
+    return;
+  }
 
   // Strategy A: External Google Fonts (Stale-While-Revalidate)
   if (isGoogleFontRequest(url)) {

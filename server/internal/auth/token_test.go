@@ -474,3 +474,52 @@ func TestLogout_NoCredentials(t *testing.T) {
 		t.Fatalf("status = %d, want 401", rec.Code)
 	}
 }
+
+func TestRefresh_DisabledUserRejectedAndRevoked(t *testing.T) {
+	store := newMemStore()
+	h := newTokenHandler(t, store)
+	userID := uuid.Must(uuid.NewV7())
+	s := Session{
+		ID:          uuid.Must(uuid.NewV7()),
+		UserID:      userID,
+		RefreshHash: hashToken("rt-disabled"),
+		Scope:       "read write",
+		ExpiresAt:   time.Now().Add(RefreshTokenTTL),
+	}
+	_ = store.CreateSession(context.Background(), s)
+	h.UserActive = func(_ context.Context, _ uuid.UUID) (bool, error) { return false, nil }
+
+	rec := postToken(t, h, url.Values{
+		"grant_type":    {"refresh_token"},
+		"client_id":     {"test-client"},
+		"refresh_token": {"rt-disabled"},
+	})
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("status = %d, want 400", rec.Code)
+	}
+	if !store.isRevoked(s.ID) {
+		t.Fatal("disabled user's session must be revoked on refresh attempt")
+	}
+}
+
+func TestRotateSession_AtomicRejectsSecondRotation(t *testing.T) {
+	store := newMemStore()
+	userID := uuid.Must(uuid.NewV7())
+	s1 := Session{
+		ID:          uuid.Must(uuid.NewV7()),
+		UserID:      userID,
+		RefreshHash: hashToken("r1"),
+		Scope:       "read",
+		ExpiresAt:   time.Now().Add(RefreshTokenTTL),
+	}
+	_ = store.CreateSession(context.Background(), s1)
+
+	s2 := Session{ID: uuid.Must(uuid.NewV7()), UserID: userID, RefreshHash: hashToken("r2"), RotatedFrom: &s1.ID, Scope: "read", ExpiresAt: time.Now().Add(RefreshTokenTTL)}
+	if err := store.RotateSession(context.Background(), s1.ID, s2); err != nil {
+		t.Fatalf("first RotateSession failed: %v", err)
+	}
+	s3 := Session{ID: uuid.Must(uuid.NewV7()), UserID: userID, RefreshHash: hashToken("r3"), RotatedFrom: &s1.ID, Scope: "read", ExpiresAt: time.Now().Add(RefreshTokenTTL)}
+	if err := store.RotateSession(context.Background(), s1.ID, s3); err != ErrSessionRevoked {
+		t.Fatalf("second RotateSession err = %v, want ErrSessionRevoked", err)
+	}
+}

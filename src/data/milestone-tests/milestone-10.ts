@@ -157,7 +157,7 @@ export const MILESTONE_TEST_10: MilestoneTest = {
       misconceptionFocus: 'RUNAWAY_VENDOR_STATUS_04_TAX_AUDIT_RISK',
       errorPriority: 2,
       remediationStepVi: 'Xem kỹ Khái niệm 2 Ngày 30 về Kỹ năng soát xét hóa đơn của doanh nghiệp bỏ trốn (Status 03/04) và biện pháp bảo vệ hồ sơ chứng từ.',
-      statutoryReference: 'Nghị định 125/2020/NĐ-CP Điều 16, Điều 17; Thông tư 219/2013/TT-BTC Điều 15',
+      statutoryReference: 'Nghị định 125/2020/NĐ-CP Điều 16, Điều 17; Thông tư 69/2025/TT-BTC (thay TT 219/2013) Điều 15',
     },
     {
       id: 'm10-q10',

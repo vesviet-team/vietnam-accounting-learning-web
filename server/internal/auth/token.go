@@ -18,27 +18,27 @@ import (
 // token for non-cookie clients (backwards compatible with P0).
 const RefreshCookieName = "vnacc_rt"
 
-// setRefreshCookie writes the httpOnly refresh cookie (Secure + SameSite
-// Strict; the service is always reached through HTTPS in production).
-func setRefreshCookie(w http.ResponseWriter, value string) {
+// setRefreshCookie writes the httpOnly refresh cookie (Secure by default +
+// SameSite Strict; the service is always reached through HTTPS in production).
+func setRefreshCookie(w http.ResponseWriter, value string, secure bool) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     RefreshCookieName,
 		Value:    value,
 		Path:     "/",
 		HttpOnly: true,
-		Secure:   true,
+		Secure:   secure,
 		SameSite: http.SameSiteStrictMode,
 		MaxAge:   int(RefreshTokenTTL.Seconds()),
 	})
 }
 
-func clearRefreshCookie(w http.ResponseWriter) {
+func clearRefreshCookie(w http.ResponseWriter, secure bool) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     RefreshCookieName,
 		Value:    "",
 		Path:     "/",
 		HttpOnly: true,
-		Secure:   true,
+		Secure:   secure,
 		SameSite: http.SameSiteStrictMode,
 		MaxAge:   -1,
 	})
@@ -48,9 +48,10 @@ func clearRefreshCookie(w http.ResponseWriter) {
 // authorization_code (PKCE S256 required) and refresh_token (rotation with
 // reuse detection).
 type TokenHandler struct {
-	ClientID string
-	Store    Store
-	Keys     *Keys
+	ClientID        string
+	Store           Store
+	Keys            *Keys
+	InsecureCookies bool
 	// UserActive reports whether the user still exists and is not disabled.
 	UserActive func(ctx context.Context, userID uuid.UUID) (bool, error)
 }
@@ -175,6 +176,14 @@ func (h *TokenHandler) refreshGrant(w http.ResponseWriter, r *http.Request) {
 		httpx.OAuthError(w, http.StatusBadRequest, "invalid_grant", "refresh token expired")
 		return
 	}
+	if h.UserActive != nil {
+		active, uerr := h.UserActive(r.Context(), session.UserID)
+		if uerr != nil || !active {
+			_ = h.Store.RevokeAllForUser(r.Context(), session.UserID)
+			httpx.OAuthError(w, http.StatusBadRequest, "invalid_grant", "user is not active")
+			return
+		}
+	}
 
 	refresh, err := randomToken(32)
 	if err != nil {
@@ -190,11 +199,12 @@ func (h *TokenHandler) refreshGrant(w http.ResponseWriter, r *http.Request) {
 		Scope:       session.Scope,
 		ExpiresAt:   now.Add(RefreshTokenTTL),
 	}
-	if err := h.Store.CreateSession(r.Context(), newSession); err != nil {
-		httpx.OAuthError(w, http.StatusInternalServerError, "server_error", "")
-		return
-	}
-	if err := h.Store.RevokeSession(r.Context(), session.ID); err != nil {
+	if err := h.Store.RotateSession(r.Context(), session.ID, newSession); err != nil {
+		if errors.Is(err, ErrSessionRevoked) {
+			_ = h.Store.RevokeFamily(r.Context(), session.ID)
+			httpx.OAuthError(w, http.StatusBadRequest, "invalid_grant", "refresh token reuse detected; session family revoked")
+			return
+		}
 		httpx.OAuthError(w, http.StatusInternalServerError, "server_error", "")
 		return
 	}
@@ -207,7 +217,7 @@ func (h *TokenHandler) issue(w http.ResponseWriter, userID, sessionID uuid.UUID,
 		httpx.OAuthError(w, http.StatusInternalServerError, "server_error", "")
 		return
 	}
-	setRefreshCookie(w, refresh)
+	setRefreshCookie(w, refresh, !h.InsecureCookies)
 	writeJSON(w, http.StatusOK, map[string]any{
 		"access_token":  access,
 		"token_type":    "Bearer",

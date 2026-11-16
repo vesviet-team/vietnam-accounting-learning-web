@@ -4,7 +4,7 @@
  *
  * Ground truth challenges covering:
  * 1. Supplier tax codes: Status 00 (Active) vs Status 03 (Suspended) vs Status 04 (Runaway)
- * 2. Cash payment threshold breach >= 20M VND (Circular 219/2013 & Circular 96/2015)
+ * 2. Cash payment threshold breach >= 20M VND (Circular 69/2025 (replaces 219/2013) & Circular 20/2026 (replaces 96/2015, 78/2014))
  * 3. Missing mandatory signatures on internal vouchers (Law on Accounting 88/2015)
  * 4. VAT arithmetic discrepancies (Decree 254/2026)
  * 5. Decision 1450 MCCQT format verification
@@ -112,7 +112,7 @@ export const VOUCHER_AUDIT_CASES: VoucherAuditCaseData[] = [
     hasArithmeticError: false,
     missingSignature: false,
     invalidMccqt: false,
-    statutoryBasis: 'Khoản 1 Điều 15 Thông tư 219/2013/TT-BTC & Điều 4 Thông tư 96/2015/TT-BTC',
+    statutoryBasis: 'Khoản 1 Điều 15 Thông tư 69/2025/TT-BTC (thay thế 219/2013) & Điều 4 Thông tư 20/2026/TT-BTC (thay thế 96/2015, 78/2014)',
     vatConsequenceVi: 'Được khấu trừ toàn bộ 1.363.636 VNĐ thuế GTGT đầu vào.',
     citConsequenceVi: 'Được tính trọn vẹn 13.636.364 VNĐ vào chi phí được trừ khi tính thuế TNDN.',
     remedyActionVi: 'Chứng từ hoàn toàn chuẩn mực, lưu trữ theo hồ sơ thanh toán tiền mặt.',
@@ -161,7 +161,7 @@ export const VOUCHER_AUDIT_CASES: VoucherAuditCaseData[] = [
     missingSignature: false,
     invalidMccqt: false,
     statutoryBasis:
-      'Điều 15 Thông tư 219/2013/TT-BTC (sửa đổi bởi TT 173/2016) & Điều 4 Thông tư 96/2015/TT-BTC',
+      'Điều 15 Thông tư 69/2025/TT-BTC (thay thế Thông tư 219/2013/TT-BTC, sửa đổi bởi Thông tư 173/2016/TT-BTC) & Điều 4 Thông tư 20/2026/TT-BTC (thay thế Thông tư 78/2014/TT-BTC, Thông tư 96/2015/TT-BTC)',
     vatConsequenceVi:
       'BỊ LOẠI TOÀN BỘ 1.481.481 VNĐ thuế GTGT đầu vào; không được kê khai khấu trừ.',
     citConsequenceVi:
@@ -265,7 +265,7 @@ export const VOUCHER_AUDIT_CASES: VoucherAuditCaseData[] = [
     missingSignature: false,
     invalidMccqt: false,
     statutoryBasis:
-      'Công văn số 11797/BTC-TCT & Thông tư 219/2013/TT-BTC về rủi ro doanh nghiệp bỏ trốn',
+      'Công văn số 11797/BTC-TCT & Thông tư 69/2025/TT-BTC (thay thế 219/2013) về rủi ro doanh nghiệp bỏ trốn',
     vatConsequenceVi:
       'Hóa đơn không có giá trị pháp lý; kiên quyết không khấu trừ 8.000.000 VNĐ thuế GTGT.',
     citConsequenceVi:
@@ -402,7 +402,7 @@ export const VOUCHER_AUDIT_CASES: VoucherAuditCaseData[] = [
     missingSignature: false,
     invalidMccqt: false,
     statutoryBasis:
-      'Nghị định 254/2026/NĐ-CP & Khoản 1 Điều 15 Thông tư 219/2013/TT-BTC (có UNC hợp lệ)',
+      'Nghị định 254/2026/NĐ-CP & Khoản 1 Điều 15 Thông tư 69/2025/TT-BTC (thay thế 219/2013) (có UNC hợp lệ)',
     vatConsequenceVi: 'Được khấu trừ đầy đủ 5.000.000 VNĐ thuế GTGT đầu vào.',
     citConsequenceVi: 'Được tính 50.000.000 VNĐ vào chi phí được trừ khi tính thuế TNDN.',
     remedyActionVi: 'Hồ sơ đầy đủ điều kiện pháp lý, kẹp UNC cùng hóa đơn để lưu trữ.',

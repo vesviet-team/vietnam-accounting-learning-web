@@ -55,7 +55,7 @@ export const MILESTONE_TEST_09: MilestoneTest = {
       misconceptionFocus: 'CIT_STANDARD_RATE_IDENTIFICATION',
       errorPriority: 4,
       remediationStepVi: 'Ghi nhớ thuế suất thuế TNDN phổ thông hiện hành của Việt Nam là 20%.',
-      statutoryReference: 'Luật Thuế Thu nhập doanh nghiệp Điều 11; Thông tư 78/2014/TT-BTC Điều 11',
+      statutoryReference: 'Luật Thuế Thu nhập doanh nghiệp Điều 11; Thông tư 20/2026/TT-BTC (thay thế Thông tư 78/2014/TT-BTC) Điều 11',
     },
     {
       id: 'm09-q04',
@@ -157,7 +157,7 @@ export const MILESTONE_TEST_09: MilestoneTest = {
       misconceptionFocus: 'CIT_TAX_RECONCILIATION_INDICATOR_B4_IMPACT',
       errorPriority: 2,
       remediationStepVi: 'Xem lại Khái niệm 2 Ngày 27 về Công thức điều chỉnh chỉ tiêu B4: Thu nhập tính thuế = Lợi nhuận kế toán + Các khoản chi phí không được trừ.',
-      statutoryReference: 'Thông tư 78/2014/TT-BTC Điều 6, Điều 11; Thông tư 96/2015/TT-BTC',
+      statutoryReference: 'Thông tư 20/2026/TT-BTC (thay thế Thông tư 78/2014/TT-BTC, Thông tư 96/2015/TT-BTC) Điều 6, Điều 11',
     },
     {
       id: 'm09-q10',

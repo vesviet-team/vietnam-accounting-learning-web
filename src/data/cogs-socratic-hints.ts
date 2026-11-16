@@ -136,7 +136,7 @@ export const COGS_SOCRATIC_HINTS: Record<string, CogsScenarioHints> = {
         legalBasisVi: [
           'VAS 02 Đoạn 13-18 & IAS 2 Đoạn 25: Doanh nghiệp phải áp dụng nhất quán một phương pháp tính giá tồn kho cho các hàng tồn kho có cùng tính chất và công dụng.',
           'VAS 01 (Chuẩn mực chung) — Nguyên tắc Nhất quán (Consistency): Chính sách kế toán đã chọn phải được áp dụng thống nhất ít nhất trong một niên độ kế toán.',
-          'Luật Thuế TNDN số 14/2008/QH12 & Thông tư 96/2015/TT-BTC: Thuế suất phổ thông 20%. Thuế TNDN = (Doanh thu - Chi phí được trừ) x 20%.',
+          'Luật Thuế TNDN số 14/2008/QH12 & Thông tư 20/2026/TT-BTC (thay thế Thông tư 78/2014/TT-BTC, Thông tư 96/2015/TT-BTC): Thuế suất phổ thông 20%. Thuế TNDN = (Doanh thu - Chi phí được trừ) x 20%.',
           'Quy chuẩn Thẩm định Tín dụng Ngân hàng Thương mại: Chỉ tiêu CR = Tài sản ngắn hạn / Nợ ngắn hạn >= 1.5; Biên lợi nhuận gộp phản ánh sức khỏe tài chính.',
         ],
         accountingPrinciplesVi: [
@@ -205,13 +205,13 @@ export const COGS_SOCRATIC_HINTS: Record<string, CogsScenarioHints> = {
       {
         level: 2,
         titleVi: 'Nấc 2: Cơ Sở Pháp Lý VAS 02 Đoạn 11 & Luật Thuế TNDN',
-        subtitleVi: 'VAS 02, IAS 2 Đoạn 16, Thông tư 96/2015/TT-BTC Điều 4 & Chỉ tiêu B4 Tờ khai 03/TNDN.',
+        subtitleVi: 'VAS 02, IAS 2 Đoạn 16, Thông tư 20/2026/TT-BTC (thay thế Thông tư 78/2014/TT-BTC, Thông tư 96/2015/TT-BTC) Điều 4 & Chỉ tiêu B4 Tờ khai 03/TNDN.',
         badgeVi: 'Nấc 2: Bản Chất Pháp Lý',
         contentVi:
           'Quy định pháp luật bắt buộc phải bóc tách chi phí vượt định mức ra khỏi giá thành thành phẩm:',
         legalBasisVi: [
           'VAS 02 Đoạn 11 & IAS 2 Đoạn 16(a): "Chi phí nguyên vật liệu, chi phí nhân công và chi phí sản xuất khác vượt mức bình thường không được tính vào giá thành hàng tồn kho mà phải kết chuyển thẳng vào chi phí sản xuất kinh doanh trong kỳ (Nợ TK 632)".',
-          'Thông tư 96/2015/TT-BTC Điều 4 (sửa đổi Điều 6 Thông tư 78/2014/TT-BTC): Phần chi phí nguyên vật liệu vượt mức tiêu hao hợp lý do doanh nghiệp tự xây dựng là CHI PHÍ KHÔNG ĐƯỢC TRỪ khi xác định thu nhập chịu thuế TNDN.',
+          'Thông tư 20/2026/TT-BTC (thay thế Thông tư 78/2014/TT-BTC và Thông tư 96/2015/TT-BTC) Điều 4: Phần chi phí nguyên vật liệu vượt mức tiêu hao hợp lý do doanh nghiệp tự xây dựng là CHI PHÍ KHÔNG ĐƯỢC TRỪ khi xác định thu nhập chịu thuế TNDN.',
           'Mẫu 03/TNDN (Tờ khai quyết toán thuế TNDN): Chỉ tiêu B4 — Các khoản chi không được trừ khi xác định thu nhập chịu thuế.',
         ],
         accountingPrinciplesVi: [

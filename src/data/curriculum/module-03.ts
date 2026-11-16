@@ -62,7 +62,7 @@ export const MODULE_3_LESSONS: DailyLesson[] = [
     day: 8,
     moduleNumber: 3,
     moduleTitleVi: 'Khối 3: Mua Hàng, Hàng Tồn Kho & Luật Thanh Toán Không Dùng Tiền Mặt',
-    dayTitleVi: 'Ngày 8: Quy Tắc Bắt Buộc Thanh Toán Không Dùng Tiền Mặt >= 20 Triệu Đồng (TT 219/2013)',
+    dayTitleVi: 'Ngày 8: Quy Tắc Bắt Buộc Thanh Toán Không Dùng Tiền Mặt >= 20 Triệu Đồng (TT 69/2025/TT-BTC thay TT 219/2013)',
     estimatedMinutes: 20,
     isMilestoneDay: false,
     concepts: [
@@ -70,7 +70,7 @@ export const MODULE_3_LESSONS: DailyLesson[] = [
         id: 'c8-1',
         titleVi: 'Căn Cứ Pháp Lý & Ngưỡng 20 Triệu Đồng (Đã Gồm Thuế GTGT)',
         summaryVi: 'Hóa đơn từ 20.000.000 VNĐ trở lên bắt buộc phải chuyển khoản ngân hàng từ tài khoản người mua sang người bán.',
-        contentVi: 'Theo Điều 15 Thông tư 219/2013/TT-BTC (sửa đổi bởi TT 173/2016/TT-BTC) và Điều 4 Thông tư 96/2015/TT-BTC: Hóa đơn mua hàng từng lần có giá trị từ 20 triệu đồng trở lên (đã bao gồm thuế GTGT) bắt buộc phải có chứng từ thanh toán không dùng tiền mặt (chuyển khoản từ tài khoản công ty mua sang tài khoản công ty bán đã đăng ký với cơ quan thuế) mới đủ điều kiện khấu trừ thuế GTGT và tính chi phí được trừ khi tính thuế TNDN.',
+        contentVi: 'Theo Điều 15 Thông tư 69/2025/TT-BTC (thay thế Thông tư 219/2013/TT-BTC, sửa đổi bởi Thông tư 173/2016/TT-BTC) và Điều 4 Thông tư 20/2026/TT-BTC (thay thế Thông tư 78/2014/TT-BTC, Thông tư 96/2015/TT-BTC): Hóa đơn mua hàng từng lần có giá trị từ 20 triệu đồng trở lên (đã bao gồm thuế GTGT) bắt buộc phải có chứng từ thanh toán không dùng tiền mặt (chuyển khoản từ tài khoản công ty mua sang tài khoản công ty bán đã đăng ký với cơ quan thuế) mới đủ điều kiện khấu trừ thuế GTGT và tính chi phí được trừ khi tính thuế TNDN. (Lưu ý: Từ 01/07/2025 theo Luật Thuế GTGT 48/2024/QH15, ngưỡng này được hạ xuống còn 5.000.000 VNĐ).',
         keyTakeawayVi: 'Ngưỡng 20 triệu đồng tính trên TỔNG GIÁ THANH TOÁN (đã có thuế GTGT), không phải giá trước thuế.',
       },
       {
