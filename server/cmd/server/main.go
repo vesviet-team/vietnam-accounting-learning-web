@@ -102,7 +102,10 @@ func run() error {
 	})
 
 	mux.HandleFunc("GET /oauth2/auth", authorizeHandler.Authorize)
-	mux.HandleFunc("POST /oauth2/auth", authorizeHandler.AuthorizeSubmit)
+	// Login submit verifies argon2id hashes: rate-limit per remote address
+	// (XFF ignored — untrusted key until trusted-proxy support lands).
+	mux.Handle("POST /oauth2/auth",
+		middleware.RateLimitRemoteAddr(5, time.Minute)(http.HandlerFunc(authorizeHandler.AuthorizeSubmit)))
 	mux.Handle("POST /oauth2/token", middleware.RateLimit(30, time.Minute)(tokenHandler))
 	mux.HandleFunc("GET /oauth2/jwks", keys.JWKSHandler)
 	mux.HandleFunc("POST /oauth2/revoke", tokenHandler.Revoke)
@@ -110,7 +113,10 @@ func run() error {
 	mux.HandleFunc("POST /oauth2/logout-all", tokenHandler.LogoutAll)
 
 	mux.Handle("GET /me", middleware.RateLimit(120, time.Minute)(http.HandlerFunc(userHandler.Me)))
-	mux.HandleFunc("POST /auth/register", userHandler.Register)
+	// Register is unauthenticated and open in production: strict per-IP limit
+	// to blunt email-squatting / scripted account creation.
+	mux.Handle("POST /auth/register",
+		middleware.RateLimitRemoteAddr(3, time.Minute)(http.HandlerFunc(userHandler.Register)))
 
 	mux.HandleFunc("PUT /sync/backup", backupHandler.Put)
 	mux.HandleFunc("GET /sync/backup", backupHandler.Get)

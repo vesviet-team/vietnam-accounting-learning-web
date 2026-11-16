@@ -12,6 +12,7 @@ import (
 	"log/slog"
 	"net"
 	"net/http"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -173,17 +174,43 @@ func (rl *rateLimiter) allow(key string) bool {
 
 // RateLimit limits requests per client IP. Keyed independently per call site.
 func RateLimit(limit int, window time.Duration) func(http.Handler) http.Handler {
+	return rateLimitBy(limit, window, ClientIP)
+}
+
+// RateLimitRemoteAddr limits requests per remote address (TCP peer) ONLY —
+// X-Forwarded-For is deliberately ignored. Used for credential endpoints
+// (login/register) where a spoofed XFF must not rotate the bucket key.
+//
+// TODO: the effective key behind the nginx proxy is the proxy pod IP, so all
+// clients share one bucket per replica; move to a trusted-proxy-aware key
+// (or a shared limiter) when needed.
+func RateLimitRemoteAddr(limit int, window time.Duration) func(http.Handler) http.Handler {
+	return rateLimitBy(limit, window, remoteAddrHost)
+}
+
+func rateLimitBy(limit int, window time.Duration, keyFn func(*http.Request) string) func(http.Handler) http.Handler {
 	rl := newRateLimiter(limit, window)
+	retryAfter := strconv.Itoa(int((window + time.Second - 1) / time.Second))
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if !rl.allow(ClientIP(r)) {
-				w.Header().Set("Retry-After", "60")
+			if !rl.allow(keyFn(r)) {
+				w.Header().Set("Retry-After", retryAfter)
 				http.Error(w, `{"error":"slow_down"}`, http.StatusTooManyRequests)
 				return
 			}
 			next.ServeHTTP(w, r)
 		})
 	}
+}
+
+// remoteAddrHost returns the host part of RemoteAddr without honoring any
+// forwarding headers (untrusted for rate-limit keys).
+func remoteAddrHost(r *http.Request) string {
+	host, _, err := net.SplitHostPort(r.RemoteAddr)
+	if err != nil {
+		return r.RemoteAddr
+	}
+	return host
 }
 
 // ClientIP extracts the remote client IP (X-Forwarded-For first hop when

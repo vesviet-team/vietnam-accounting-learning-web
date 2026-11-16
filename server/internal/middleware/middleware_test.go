@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"fmt"
 	"io"
 	"log/slog"
 	"net/http"
@@ -134,5 +135,55 @@ func TestClientIP_XForwardedFor(t *testing.T) {
 	req.Header.Del("X-Forwarded-For")
 	if got := ClientIP(req); got != "192.168.1.1" {
 		t.Fatalf("ClientIP = %q, want 192.168.1.1", got)
+	}
+}
+
+func TestRateLimitRemoteAddr(t *testing.T) {
+	limit := 3
+	h := RateLimitRemoteAddr(limit, time.Minute)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(200)
+	}))
+
+	// Limit applies per RemoteAddr, ignoring X-Forwarded-For entirely.
+	ok, limited := 0, 0
+	for i := 0; i < limit+1; i++ {
+		req := httptest.NewRequest(http.MethodPost, "/auth/register", nil)
+		req.RemoteAddr = "10.0.0.1:1234"
+		req.Header.Set("X-Forwarded-For", fmt.Sprintf("203.0.113.%d, 10.9.9.9", i)) // must not rotate the key
+		rec := httptest.NewRecorder()
+		h.ServeHTTP(rec, req)
+		switch rec.Code {
+		case http.StatusOK:
+			ok++
+		case http.StatusTooManyRequests:
+			limited++
+		default:
+			t.Fatalf("unexpected status %d", rec.Code)
+		}
+	}
+	if ok != limit || limited != 1 {
+		t.Fatalf("ok = %d, limited = %d; want %d, 1", ok, limited, limit)
+	}
+
+	// 429 must carry Retry-After.
+	req := httptest.NewRequest(http.MethodPost, "/auth/register", nil)
+	req.RemoteAddr = "10.0.0.1:1234"
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+	if rec.Code != http.StatusTooManyRequests {
+		t.Fatalf("status = %d, want 429", rec.Code)
+	}
+	if ra := rec.Header().Get("Retry-After"); ra == "" {
+		t.Fatal("Retry-After header missing on 429")
+	}
+
+	// A different RemoteAddr gets its own bucket even with the same spoofed XFF.
+	req = httptest.NewRequest(http.MethodPost, "/auth/register", nil)
+	req.RemoteAddr = "10.0.0.2:1234"
+	req.Header.Set("X-Forwarded-For", "203.0.113.99")
+	rec = httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("independent RemoteAddr status = %d, want 200", rec.Code)
 	}
 }
