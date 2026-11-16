@@ -1,7 +1,22 @@
 import type { FC } from 'react';
-import { BookOpen, Flame, HardDrive, Menu, X, ShieldCheck, Award } from 'lucide-react';
+import {
+  BookOpen,
+  Flame,
+  HardDrive,
+  Menu,
+  X,
+  ShieldCheck,
+  Award,
+  LogIn,
+  LogOut,
+  UserRound,
+  UserPlus,
+  Loader2,
+} from 'lucide-react';
 import { AccountingRegime } from '@/types/coa';
 import { CareerLevel } from '@/engine/streak-engine';
+import type { AuthUser } from '@/types/auth';
+import type { SyncStatusState } from '@/services/sync/sync-service';
 import { ThemeToggle } from './ThemeToggle';
 
 interface HeaderProps {
@@ -13,6 +28,12 @@ interface HeaderProps {
   onToggleMobileMenu: () => void;
   streakDays?: number;
   careerLevel?: CareerLevel;
+  user?: AuthUser | null;
+  syncStatus?: SyncStatusState;
+  onLogin?: () => void;
+  onLogout?: () => void;
+  onOpenAccount?: () => void;
+  onOpenRegister?: () => void;
 }
 
 export const Header: FC<HeaderProps> = ({
@@ -24,6 +45,12 @@ export const Header: FC<HeaderProps> = ({
   onToggleMobileMenu,
   streakDays = 1,
   careerLevel,
+  user = null,
+  syncStatus,
+  onLogin,
+  onLogout,
+  onOpenAccount,
+  onOpenRegister,
 }) => {
   return (
     <header className="sticky top-0 z-40 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 transition-colors">
@@ -55,72 +82,72 @@ export const Header: FC<HeaderProps> = ({
           </div>
 
           {/* Center: Regime Quick Selector */}
-          <div className="hidden lg:flex items-center space-x-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700">
+          <div className="hidden xl:flex items-center space-x-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700 whitespace-nowrap">
             <button
               type="button"
               onClick={() => onRegimeChange('CIRCULAR_200')}
-              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+              className={`flex items-center space-x-1 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
                 currentRegime === 'CIRCULAR_200'
                   ? 'bg-white dark:bg-slate-700 text-emerald-700 dark:text-emerald-300 shadow-sm'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
               }`}
             >
-              <ShieldCheck className="w-3.5 h-3.5" />
-              <span>Thông tư 200 (DN Lớn)</span>
+              <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
+              <span>TT 200 (DN Lớn)</span>
             </button>
             <button
               type="button"
               onClick={() => onRegimeChange('CIRCULAR_133')}
-              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+              className={`flex items-center space-x-1 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
                 currentRegime === 'CIRCULAR_133'
                   ? 'bg-white dark:bg-slate-700 text-blue-700 dark:text-blue-300 shadow-sm'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
               }`}
             >
-              <ShieldCheck className="w-3.5 h-3.5" />
-              <span>Thông tư 133 (DN Vừa & Nhỏ)</span>
+              <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
+              <span>TT 133 (SME)</span>
             </button>
             <button
               type="button"
               onClick={() => onRegimeChange('CIRCULAR_99')}
-              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+              className={`flex items-center space-x-1 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
                 currentRegime === 'CIRCULAR_99'
                   ? 'bg-white dark:bg-slate-700 text-purple-700 dark:text-purple-300 shadow-sm'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
               }`}
             >
-              <ShieldCheck className="w-3.5 h-3.5" />
-              <span>Thông tư 99/2025 (Mới)</span>
+              <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
+              <span>TT 99/2025</span>
             </button>
             <button
               type="button"
               onClick={() => onRegimeChange('CIRCULAR_58')}
-              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+              className={`flex items-center space-x-1 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
                 currentRegime === 'CIRCULAR_58'
                   ? 'bg-white dark:bg-slate-700 text-amber-700 dark:text-amber-300 shadow-sm'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
               }`}
             >
-              <ShieldCheck className="w-3.5 h-3.5" />
+              <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
               <span>TT 58/2026</span>
             </button>
           </div>
 
           {/* Right: Actions */}
-          <div className="flex items-center space-x-2 sm:space-x-3">
+          <div className="flex items-center space-x-1.5 sm:space-x-2.5">
             {/* Streak Badge */}
-            <div className="flex items-center space-x-1.5 px-2.5 py-1 bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800/80 rounded-lg text-amber-700 dark:text-amber-400 text-xs font-semibold">
-              <Flame className="w-4 h-4 fill-amber-500 text-amber-500 animate-pulse" />
+            <div className="hidden sm:flex items-center space-x-1.5 px-2.5 py-1 bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800/80 rounded-lg text-amber-700 dark:text-amber-400 text-xs font-semibold whitespace-nowrap">
+              <Flame className="w-4 h-4 fill-amber-500 text-amber-500 animate-pulse shrink-0" />
               <span>{streakDays} Ngày</span>
             </div>
 
             {/* Career Title Badge */}
             {careerLevel && (
               <div
-                className={`hidden md:flex items-center space-x-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold border shadow-xs ${careerLevel.colorClass}`}
+                className={`hidden 2xl:flex items-center space-x-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold border shadow-xs whitespace-nowrap ${careerLevel.colorClass}`}
                 title={`Cấp bậc nghề nghiệp: ${careerLevel.titleVi} (${careerLevel.titleEn}) - ${careerLevel.descriptionVi}`}
               >
-                <Award className="w-3.5 h-3.5" />
+                <Award className="w-3.5 h-3.5 shrink-0" />
                 <span>{careerLevel.titleVi}</span>
               </div>
             )}
@@ -131,11 +158,71 @@ export const Header: FC<HeaderProps> = ({
                 type="button"
                 onClick={() => onOpenMilestoneTest()}
                 title="Làm bài kiểm tra Cột mốc định kỳ 3 ngày"
-                className="flex items-center space-x-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 dark:hover:bg-emerald-900 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 rounded-lg text-xs font-bold transition-all shadow-xs"
+                className="flex items-center space-x-1.5 px-2.5 py-1.5 bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 dark:hover:bg-emerald-900 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 rounded-lg text-xs font-bold transition-all shadow-xs whitespace-nowrap"
               >
-                <Award className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                <span className="hidden sm:inline">Bài Test Định Kỳ</span>
+                <Award className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                <span className="hidden md:inline">Bài Test Định Kỳ</span>
               </button>
+            )}
+
+            {/* Auth Controls: Login / Register or User + Logout */}
+            {user ? (
+              <div className="flex items-center space-x-1.5" data-testid="header-auth-controls">
+                <button
+                  type="button"
+                  data-testid="header-account-btn"
+                  onClick={onOpenAccount}
+                  title={`Tài khoản: ${user.email} — Nhấn để quản lý đồng bộ & thiết bị`}
+                  className="flex items-center space-x-1.5 px-2.5 py-1.5 bg-emerald-50 dark:bg-emerald-950/50 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-emerald-800 dark:text-emerald-200 border border-emerald-200 dark:border-emerald-800 rounded-lg text-xs font-semibold transition-colors max-w-[160px]"
+                >
+                  {syncStatus?.status === 'syncing' ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-600 shrink-0" />
+                  ) : (
+                    <span
+                      className={`w-2 h-2 rounded-full shrink-0 ${
+                        syncStatus?.status === 'error' ? 'bg-amber-500' : 'bg-emerald-500'
+                      }`}
+                    />
+                  )}
+                  <UserRound className="w-3.5 h-3.5 shrink-0 hidden sm:inline" />
+                  <span className="truncate">{user.display_name || user.email}</span>
+                </button>
+                <button
+                  type="button"
+                  data-testid="header-logout-btn"
+                  onClick={onLogout}
+                  title="Đăng xuất khỏi thiết bị này"
+                  className="flex items-center space-x-1 px-2.5 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-slate-700 dark:text-slate-200 hover:text-rose-700 dark:hover:text-rose-300 border border-slate-200 dark:border-slate-700 hover:border-rose-200 dark:hover:border-rose-800 rounded-lg text-xs font-semibold transition-colors whitespace-nowrap"
+                >
+                  <LogOut className="w-3.5 h-3.5 shrink-0" />
+                  <span className="hidden sm:inline">Đăng xuất</span>
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center space-x-1.5" data-testid="header-auth-controls">
+                <button
+                  type="button"
+                  data-testid="header-login-btn"
+                  onClick={onLogin}
+                  title="Đăng nhập để đồng bộ tiến độ & bài học"
+                  className="flex items-center space-x-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow-xs transition-colors whitespace-nowrap"
+                >
+                  <LogIn className="w-3.5 h-3.5 shrink-0" />
+                  <span>Đăng nhập</span>
+                </button>
+                {onOpenRegister && (
+                  <button
+                    type="button"
+                    data-testid="header-register-btn"
+                    onClick={onOpenRegister}
+                    title="Tạo tài khoản mới"
+                    className="hidden sm:flex items-center space-x-1 px-2.5 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-semibold transition-colors whitespace-nowrap"
+                  >
+                    <UserPlus className="w-3.5 h-3.5 shrink-0" />
+                    <span>Đăng ký</span>
+                  </button>
+                )}
+              </div>
             )}
 
             {/* Backup / Export */}

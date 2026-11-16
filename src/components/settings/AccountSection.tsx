@@ -56,13 +56,17 @@ function deviceLabel(deviceId: string, current: boolean): string {
   return deviceId.length > 24 ? `${deviceId.slice(0, 24)}…` : deviceId;
 }
 
+interface AccountSectionProps {
+  /** Incremented by parent when user chooses "Đăng ký" from global navigation. */
+  openRegisterSignal?: number;
+}
+
 /**
  * Account section of Settings (P1): login state, device sessions with
  * per-device revoke, cloud data export, account deletion (2-step confirm)
- * and last-sync status. Only this section + the merge dialog were added;
- * all other settings UI is untouched.
+ * and last-sync status.
  */
-export const AccountSection: FC = () => {
+export const AccountSection: FC<AccountSectionProps> = ({ openRegisterSignal = 0 }) => {
   const [user, setUser] = useState<AuthUser | null>(authService.getUser());
   const [sessions, setSessions] = useState<DeviceSession[]>([]);
   const [sessionsError, setSessionsError] = useState<string | null>(null);
@@ -85,6 +89,13 @@ export const AccountSection: FC = () => {
       offSync();
     };
   }, []);
+
+  useEffect(() => {
+    if (openRegisterSignal > 0 && !user) {
+      setShowRegister(true);
+      setRegError(null);
+    }
+  }, [openRegisterSignal, user]);
 
   const refreshSessions = async () => {
     if (!authService.isAuthenticated()) return;

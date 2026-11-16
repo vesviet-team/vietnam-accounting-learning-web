@@ -64,6 +64,7 @@ func (m *memStore) Merge(_ context.Context, userID uuid.UUID, in PushInput) (Sta
 		existing, ok := m.progress[userID]
 		merged := ProgressEntity{
 			CompletedDays:   append([]int{}, p.CompletedDays...),
+			SavedDays:       normalizeDaySlice(p.SavedDays),
 			MilestoneScores: map[string]int{},
 			CurrentDay:      p.CurrentDay,
 			Regime:          p.Regime,
@@ -77,8 +78,11 @@ func (m *memStore) Merge(_ context.Context, userID uuid.UUID, in PushInput) (Sta
 		if merged.CurrentDay < 1 {
 			merged.CurrentDay = 1
 		}
-		if ok { // max/union merge
+		if ok { // max/union merge; saved_days updates only on strictly newer revision
 			merged.CompletedDays = append(merged.CompletedDays, existing.CompletedDays...)
+			if merged.Revision <= existing.Revision {
+				merged.SavedDays = append([]int{}, existing.SavedDays...)
+			}
 			for k, v := range existing.MilestoneScores {
 				merged.MilestoneScores[k] = v
 			}

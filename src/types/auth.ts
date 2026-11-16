@@ -24,6 +24,7 @@ export type SyncEntityKind = 'progress' | 'attempts' | 'active_days' | 'workbenc
 /** learning_progress canonical entity (milestone day -> highest score). */
 export interface SyncProgressEntity {
   completed_days: number[];
+  saved_days?: number[];
   milestone_scores: Record<string, number>;
   current_day: number;
   regime: string;
@@ -93,6 +94,7 @@ export interface AnonymousSnapshot {
   device_id: string;
   progress: {
     completed_days: number[];
+    saved_days?: number[];
     milestone_scores: Record<string, number>;
     current_day: number;
     regime: string;

@@ -68,6 +68,7 @@ export interface LearnerProgress {
   currentDay: number;
   unlockedDays: number[]; // e.g. [1, 2, 3]
   completedDays: number[];
+  savedDays?: number[]; // bookmarked / saved lessons for quick review
   milestoneScores: Record<number, number>; // milestoneDay -> highest score (0-100)
   scoreHistory?: Record<number, MilestoneAssessmentResult[]>; // milestoneDay -> attempt history
   streakDays: number;

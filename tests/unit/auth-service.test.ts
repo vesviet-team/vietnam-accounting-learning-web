@@ -201,4 +201,26 @@ describe('AuthService (OAuth 2.1 + PKCE S256)', () => {
     expect(await svc.handleRedirectIfPresent()).toBe(false);
     expect(window.location.search).toBe('');
   });
+
+  it('init() skips POST /oauth2/token for anonymous visitors with no session hint', async () => {
+    const { impl, calls } = fetchRouter({ token: { status: 400, json: { error: 'invalid_request' } } });
+    const { deps } = makeRedirectDeps({ fetchImpl: impl });
+    const svc = new AuthService(deps);
+
+    const user = await svc.init();
+    expect(user).toBeNull();
+    expect(calls).toHaveLength(0);
+  });
+
+  it('init() clears stale session hint when silent refresh fails', async () => {
+    const { impl, calls } = fetchRouter({ token: { status: 400, json: { error: 'invalid_grant' } } });
+    const { deps } = makeRedirectDeps({ fetchImpl: impl });
+    const svc = new AuthService(deps);
+    localStorage.setItem('vnacc_session_hint', '1');
+
+    const user = await svc.init();
+    expect(user).toBeNull();
+    expect(calls.filter((c) => c.url.includes('/oauth2/token'))).toHaveLength(1);
+    expect(localStorage.getItem('vnacc_session_hint')).toBeNull();
+  });
 });

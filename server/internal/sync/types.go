@@ -29,6 +29,7 @@ const (
 // ProgressInput is the client's local learning-progress state for one push.
 type ProgressInput struct {
 	CompletedDays   []int          `json:"completed_days"`
+	SavedDays       []int          `json:"saved_days,omitempty"`
 	MilestoneScores map[string]int `json:"milestone_scores"` // milestone day -> highest score
 	CurrentDay      int            `json:"current_day"`
 	Regime          string         `json:"regime"`
@@ -77,6 +78,7 @@ type PushInput struct {
 // ProgressEntity is the canonical server-side progress state.
 type ProgressEntity struct {
 	CompletedDays   []int          `json:"completed_days"`
+	SavedDays       []int          `json:"saved_days"`
 	MilestoneScores map[string]int `json:"milestone_scores"`
 	CurrentDay      int            `json:"current_day"`
 	Regime          string         `json:"regime"`

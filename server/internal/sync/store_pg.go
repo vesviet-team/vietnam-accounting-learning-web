@@ -54,18 +54,21 @@ func (s *PGStore) Merge(ctx context.Context, userID uuid.UUID, in PushInput) (St
 			regime = regime[:64]
 		}
 		scores := marshalScores(p.MilestoneScores)
+		savedDays := normalizeDaySlice(p.SavedDays)
 		revision := p.Revision
 		if revision < 1 {
 			revision = 1
 		}
 		deviceID := truncateDeviceID(firstNonEmpty(in.DeviceID, p.DeviceID))
 		// max/union merge: completed_days union (sorted, deduped),
+		// saved_days LWW by revision (bookmarks support explicit removal),
 		// milestone_scores max-per-day, current_day max, revision = max.
 		_, err = tx.Exec(ctx, `
 			INSERT INTO learning_progress
-				(user_id, completed_days, milestone_scores, current_day, regime, revision, device_id, updated_at)
+				(user_id, completed_days, saved_days, milestone_scores, current_day, regime, revision, device_id, updated_at)
 			VALUES ($1,
 			        COALESCE($2::int[], '{}'),
+			        COALESCE($8::int[], '{}'),
 			        $3::jsonb,
 			        GREATEST(COALESCE($4, 1), 1),
 			        $5, $6, $7, now())
@@ -74,6 +77,10 @@ func (s *PGStore) Merge(ctx context.Context, userID uuid.UUID, in PushInput) (St
 					SELECT coalesce(array_agg(DISTINCT d ORDER BY d), '{}')
 					FROM unnest(learning_progress.completed_days || COALESCE(EXCLUDED.completed_days, '{}')) AS d
 				),
+				saved_days = CASE
+					WHEN EXCLUDED.revision > learning_progress.revision THEN COALESCE(EXCLUDED.saved_days, '{}')
+					ELSE learning_progress.saved_days
+				END,
 				milestone_scores = (
 					SELECT coalesce(jsonb_object_agg(k, v), '{}'::jsonb) FROM (
 						SELECT key AS k, max((value #>> '{}')::numeric)::int AS v
@@ -91,7 +98,7 @@ func (s *PGStore) Merge(ctx context.Context, userID uuid.UUID, in PushInput) (St
 				device_id = EXCLUDED.device_id,
 				seq = nextval('sync_entity_seq'),
 				updated_at = now()`,
-			userID, p.CompletedDays, scores, p.CurrentDay, regime, revision, deviceID,
+			userID, p.CompletedDays, scores, p.CurrentDay, regime, revision, deviceID, savedDays,
 		)
 		if err != nil {
 			return State{}, err

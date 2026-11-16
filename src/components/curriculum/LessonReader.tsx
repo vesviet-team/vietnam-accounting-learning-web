@@ -12,9 +12,14 @@ import {
   ListFilter,
   Lock,
   ShieldAlert,
+  Bookmark,
+  BookmarkCheck,
+  Cloud,
+  LogIn,
 } from 'lucide-react';
 import { DailyLesson, LearnerProgress } from '@/types/curriculum';
 import { MilestoneAssessmentResult } from '@/types/assessment';
+import { AuthUser } from '@/types/auth';
 import {
   getAllLessons,
   getLessonByDay,
@@ -30,24 +35,31 @@ import { QuizModal } from '@/components/assessment/QuizModal';
 import { TAccountView } from './TAccountView';
 import { VoucherCard } from './VoucherCard';
 import { storageService } from '@/services/storage/storage-service';
-import { syncService } from '@/services/sync/sync-service';
+import { authService } from '@/services/auth/auth-service';
+import { syncService, SyncStatusState } from '@/services/sync/sync-service';
 
 interface LessonReaderProps {
   initialDay?: number;
   onNavigateToCoa?: () => void;
   onBackToOverview?: () => void;
+  onLogin?: () => void;
 }
 
 export const LessonReader: FC<LessonReaderProps> = ({
   initialDay = 1,
   onNavigateToCoa,
   onBackToOverview,
+  onLogin,
 }) => {
   const [currentDay, setCurrentDay] = useState<number>(initialDay);
   const [completedDays, setCompletedDays] = useState<number[]>([]);
+  const [savedDays, setSavedDays] = useState<number[]>([]);
+  const [saveNotice, setSaveNotice] = useState<string | null>(null);
   const [learnerProgress, setLearnerProgress] = useState<LearnerProgress>(createInitialLearnerProgress());
   const [activeConceptIndex, setActiveConceptIndex] = useState<number>(0);
   const [isDaySelectorOpen, setIsDaySelectorOpen] = useState<boolean>(false);
+  const [user, setUser] = useState<AuthUser | null>(authService.getUser());
+  const [syncStatus, setSyncStatus] = useState<SyncStatusState>(syncService.getStatus());
 
   // Quiz Modal State
   const [isQuizModalOpen, setIsQuizModalOpen] = useState<boolean>(false);
@@ -58,31 +70,50 @@ export const LessonReader: FC<LessonReaderProps> = ({
     const prog = await storageService.getLearnerProgress();
     if (prog) {
       setLearnerProgress(prog);
-      if (prog.completedDays) {
-        setCompletedDays(prog.completedDays);
-      }
+      setCompletedDays(prog.completedDays ?? []);
+      setSavedDays(prog.savedDays ?? []);
     }
   };
 
-  // Load persistence progress on mount
+  // Load persistence progress on mount + keep auth/sync status current
   useEffect(() => {
     let isMounted = true;
     storageService.getLearnerProgress().then((prog) => {
       if (isMounted && prog) {
         setLearnerProgress(prog);
-        if (prog.completedDays) {
-          setCompletedDays(prog.completedDays);
-        }
+        setCompletedDays(prog.completedDays ?? []);
+        setSavedDays(prog.savedDays ?? []);
       }
     });
     const offSync = syncService.onRemoteApplied(() => {
       if (isMounted) void loadProgressFromStorage();
     });
+    const offAuth = authService.onAuthChange(({ user: u }) => {
+      if (isMounted) setUser(u);
+    });
+    const offSyncStatus = syncService.onStatusChange((s) => {
+      if (isMounted) setSyncStatus(s);
+    });
     return () => {
       isMounted = false;
       offSync();
+      offAuth();
+      offSyncStatus();
     };
   }, []);
+
+  const persistProgress = async (patch: Partial<LearnerProgress>): Promise<LearnerProgress> => {
+    const updatedProgress: LearnerProgress = {
+      ...learnerProgress,
+      ...patch,
+      lastActiveDate: new Date().toISOString(),
+    };
+    setLearnerProgress(updatedProgress);
+    if (patch.completedDays) setCompletedDays(patch.completedDays);
+    if (patch.savedDays) setSavedDays(patch.savedDays);
+    await storageService.saveLearnerProgress(updatedProgress);
+    return updatedProgress;
+  };
 
   const lesson: DailyLesson = useMemo(() => {
     return getLessonByDay(currentDay) || getLessonByDay(1)!;
@@ -93,29 +124,39 @@ export const LessonReader: FC<LessonReaderProps> = ({
   }, [lesson.moduleNumber]);
 
   const isCurrentDayCompleted = completedDays.includes(currentDay);
+  const isCurrentDaySaved = savedDays.includes(currentDay);
   const isCurrentDayAccessible = canAccessDay(currentDay, learnerProgress);
 
   const handleToggleComplete = async () => {
-    let newCompleted: number[];
-    if (isCurrentDayCompleted) {
-      newCompleted = completedDays.filter((d) => d !== currentDay);
-    } else {
-      newCompleted = [...completedDays, currentDay];
-    }
-    setCompletedDays(newCompleted);
+    const newCompleted = isCurrentDayCompleted
+      ? completedDays.filter((d) => d !== currentDay)
+      : Array.from(new Set([...completedDays, currentDay])).sort((a, b) => a - b);
 
-    const updatedProgress: LearnerProgress = {
-      ...learnerProgress,
+    await persistProgress({
       currentDay,
       completedDays: newCompleted,
-      lastActiveDate: new Date().toISOString(),
-    };
-
-    setLearnerProgress(updatedProgress);
-    await storageService.saveLearnerProgress(updatedProgress);
+    });
     if (!isCurrentDayCompleted) {
       void storageService.recordStreakActivity();
     }
+  };
+
+  const handleToggleSaveLesson = async () => {
+    const nextSaved = isCurrentDaySaved
+      ? savedDays.filter((d) => d !== currentDay)
+      : Array.from(new Set([...savedDays, currentDay])).sort((a, b) => a - b);
+
+    await persistProgress({
+      currentDay,
+      savedDays: nextSaved,
+    });
+    setSaveNotice(
+      isCurrentDaySaved
+        ? 'Đã bỏ lưu bài học khỏi danh sách ôn tập.'
+        : user
+          ? 'Đã lưu bài học vào thiết bị và hàng đợi đồng bộ tài khoản.'
+          : 'Đã lưu bài học trên trình duyệt (đăng nhập để đồng bộ đa thiết bị).',
+    );
   };
 
   const handleSelectDay = (day: number) => {
@@ -126,6 +167,10 @@ export const LessonReader: FC<LessonReaderProps> = ({
     }
 
     setLockedDayAlert(null);
+    setSaveNotice(null);
+    if (day !== currentDay) {
+      void persistProgress({ currentDay: day });
+    }
     setCurrentDay(day);
     setActiveConceptIndex(0);
     setIsDaySelectorOpen(false);
@@ -180,7 +225,7 @@ export const LessonReader: FC<LessonReaderProps> = ({
             </span>
           </div>
 
-          <div className="flex items-center space-x-2">
+          <div className="flex flex-wrap items-center gap-2">
             {onBackToOverview && (
               <button
                 type="button"
@@ -190,6 +235,23 @@ export const LessonReader: FC<LessonReaderProps> = ({
                 Tổng quan lộ trình
               </button>
             )}
+            <button
+              type="button"
+              data-testid="toggle-save-lesson-btn"
+              onClick={handleToggleSaveLesson}
+              className={`inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg transition-colors font-semibold border ${
+                isCurrentDaySaved
+                  ? 'bg-amber-50 dark:bg-amber-950/50 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-800 hover:bg-amber-100 dark:hover:bg-amber-900/60'
+                  : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800'
+              }`}
+            >
+              {isCurrentDaySaved ? (
+                <BookmarkCheck className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+              ) : (
+                <Bookmark className="w-3.5 h-3.5" />
+              )}
+              <span>{isCurrentDaySaved ? 'Đã lưu' : 'Lưu bài học'}</span>
+            </button>
             <button
               type="button"
               onClick={() => setIsDaySelectorOpen(!isDaySelectorOpen)}
@@ -204,16 +266,17 @@ export const LessonReader: FC<LessonReaderProps> = ({
         {/* 30-Day Grid Drawer Selector with Gating Indicators */}
         {isDaySelectorOpen && (
           <div className="p-4 bg-slate-50 dark:bg-slate-800/80 rounded-xl border border-slate-200 dark:border-slate-700 space-y-3 animate-fade-in">
-            <div className="flex items-center justify-between text-xs font-bold text-slate-700 dark:text-slate-300">
+            <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-bold text-slate-700 dark:text-slate-300">
               <span>Danh mục 30 Ngày học Kế toán</span>
-              <span className="text-emerald-600">
-                Đã hoàn thành: {completedDays.length} / 30 ngày
+              <span className="text-emerald-600 dark:text-emerald-400">
+                Đã hoàn thành: {completedDays.length} / 30 ngày &bull; Đã lưu: {savedDays.length} bài
               </span>
             </div>
             <div className="grid grid-cols-5 sm:grid-cols-10 gap-1.5">
               {allLessons.map((l) => {
                 const isCurrent = l.day === currentDay;
                 const isDone = completedDays.includes(l.day);
+                const isSaved = savedDays.includes(l.day);
                 const isMilestone = l.isMilestoneDay;
                 const isUnlocked = canAccessDay(l.day, learnerProgress);
 
@@ -225,7 +288,7 @@ export const LessonReader: FC<LessonReaderProps> = ({
                     title={
                       !isUnlocked
                         ? `Ngày ${l.day} đang bị khóa. Hoàn thành Milestone Ngày ${getPrerequisiteMilestone(l.day)} (≥70%) để mở khóa!`
-                        : `Học Ngày ${l.day}`
+                        : `Học Ngày ${l.day}${isSaved ? ' (Đã lưu)' : ''}`
                     }
                     className={`p-2 rounded-lg text-xs font-bold transition-all relative flex flex-col items-center justify-center ${
                       isCurrent
@@ -237,6 +300,13 @@ export const LessonReader: FC<LessonReaderProps> = ({
                         : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-100'
                     }`}
                   >
+                    {isSaved && (
+                      <Bookmark
+                        className={`w-2.5 h-2.5 absolute top-1 right-1 ${
+                          isCurrent ? 'text-amber-200 fill-amber-200' : 'text-amber-500 fill-amber-500'
+                        }`}
+                      />
+                    )}
                     <span>N{l.day}</span>
                     {!isUnlocked ? (
                       <Lock className="w-3 h-3 text-slate-400 dark:text-slate-500 mt-0.5" />
@@ -289,6 +359,12 @@ export const LessonReader: FC<LessonReaderProps> = ({
                 <span>Đã hoàn thành</span>
               </span>
             )}
+            {isCurrentDaySaved && (
+              <span className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 dark:bg-amber-950/70 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+                <BookmarkCheck className="w-3.5 h-3.5" />
+                <span>Đã lưu ôn tập</span>
+              </span>
+            )}
           </div>
 
           <div className="flex flex-wrap items-center gap-4 text-xs text-slate-500 dark:text-slate-400 pt-1">
@@ -307,6 +383,45 @@ export const LessonReader: FC<LessonReaderProps> = ({
               </span>
             )}
           </div>
+
+          {/* Save & Cloud Sync Status Bar */}
+          <div
+            data-testid="lesson-save-status"
+            className="mt-2 pt-2.5 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2 text-[11px]"
+          >
+            <div className="flex items-center space-x-2 text-slate-500 dark:text-slate-400">
+              <Cloud className={`w-3.5 h-3.5 ${user ? 'text-emerald-600' : 'text-slate-400'}`} />
+              {user ? (
+                <span>
+                  Tiến độ &amp; bài học đã lưu đang đồng bộ với tài khoản{' '}
+                  <strong className="text-slate-700 dark:text-slate-200">{user.display_name || user.email}</strong>
+                  {syncStatus.status === 'syncing' ? ' (đang đồng bộ…)' : ''}
+                </span>
+              ) : (
+                <span>Tiến độ &amp; bài học đang tự động lưu trên trình duyệt của bạn.</span>
+              )}
+            </div>
+            {!user && (
+              <button
+                type="button"
+                data-testid="lesson-login-btn"
+                onClick={() => (onLogin ? onLogin() : void authService.login())}
+                className="inline-flex items-center space-x-1 text-emerald-600 dark:text-emerald-400 hover:underline font-semibold"
+              >
+                <LogIn className="w-3 h-3" />
+                <span>Đăng nhập để lưu đám mây</span>
+              </button>
+            )}
+          </div>
+
+          {saveNotice && (
+            <p
+              data-testid="lesson-save-notice"
+              className="text-xs font-medium text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/70 rounded-lg px-3 py-1.5"
+            >
+              {saveNotice}
+            </p>
+          )}
         </div>
 
         {/* Milestone Alert & Action Banner */}

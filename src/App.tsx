@@ -30,8 +30,10 @@ const CogsWorkbench = lazy(() =>
 );
 import { WebMcpProvider } from '@/components/layout/WebMcpProvider';
 import { AccountingRegime } from '@/types/coa';
+import type { AuthUser } from '@/types/auth';
 import { storageService } from '@/services/storage/storage-service';
-import { syncService } from '@/services/sync/sync-service';
+import { authService } from '@/services/auth/auth-service';
+import { syncService, type SyncStatusState } from '@/services/sync/sync-service';
 import { StreakEngine, CareerLevel } from '@/engine/streak-engine';
 
 export type AppNavTab = NavTab | 'financial-statements' | 'bctc' | 'cogs';
@@ -44,6 +46,9 @@ export function App() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [streakDays, setStreakDays] = useState(1);
   const [careerLevel, setCareerLevel] = useState<CareerLevel | undefined>();
+  const [user, setUser] = useState<AuthUser | null>(authService.getUser());
+  const [syncStatus, setSyncStatus] = useState<SyncStatusState>(syncService.getStatus());
+  const [openRegisterSignal, setOpenRegisterSignal] = useState(0);
 
   // Load preferred regime, streak, and career level on mount + refresh on remote sync
   useEffect(() => {
@@ -75,13 +80,33 @@ export function App() {
     };
   }, []);
 
-  // P1 multi-device sync: wire storage/focus/auth listeners once.
+  // P1 multi-device sync & auth UI state listeners.
   useEffect(() => {
     syncService.init();
+    const offAuth = authService.onAuthChange(({ user: u }) => setUser(u));
+    const offSyncStatus = syncService.onStatusChange(setSyncStatus);
     return () => {
-      /* keep the sync singleton alive for the whole app lifetime */
+      offAuth();
+      offSyncStatus();
     };
   }, []);
+
+  const handleLogin = () => {
+    void authService.login();
+  };
+
+  const handleLogout = () => {
+    void authService.logout();
+  };
+
+  const handleOpenAccount = () => {
+    setActiveTab('settings');
+  };
+
+  const handleOpenRegister = () => {
+    setOpenRegisterSignal((n) => n + 1);
+    setActiveTab('settings');
+  };
 
   const handleRegimeChange = (newRegime: AccountingRegime) => {
     setCurrentRegime(newRegime);
@@ -103,6 +128,12 @@ export function App() {
         onToggleMobileMenu={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         streakDays={streakDays}
         careerLevel={careerLevel}
+        user={user}
+        syncStatus={syncStatus}
+        onLogin={handleLogin}
+        onLogout={handleLogout}
+        onOpenAccount={handleOpenAccount}
+        onOpenRegister={handleOpenRegister}
       />
 
       {/* Main Layout Body */}
@@ -115,6 +146,11 @@ export function App() {
           onRegimeChange={handleRegimeChange}
           isOpenMobile={isMobileMenuOpen}
           onCloseMobile={() => setIsMobileMenuOpen(false)}
+          user={user}
+          syncStatus={syncStatus}
+          onLogin={handleLogin}
+          onLogout={handleLogout}
+          onOpenRegister={handleOpenRegister}
         />
 
         {/* Dynamic Main Workspace Content */}
@@ -198,6 +234,7 @@ export function App() {
               <CurriculumPreview
                 currentRegime={currentRegime}
                 onNavigateToCoa={() => setActiveTab('coa')}
+                onLogin={handleLogin}
               />
             </Suspense>
           )}
@@ -241,6 +278,7 @@ export function App() {
             <SettingsView
               currentRegime={currentRegime}
               onRegimeChange={handleRegimeChange}
+              openRegisterSignal={openRegisterSignal}
             />
           )}
         </main>
@@ -250,6 +288,11 @@ export function App() {
       <BackupModal
         isOpen={isBackupModalOpen}
         onClose={() => setIsBackupModalOpen(false)}
+        user={user}
+        syncStatus={syncStatus}
+        onLogin={handleLogin}
+        onOpenAccount={handleOpenAccount}
+        onSyncNow={() => void syncService.push()}
       />
 
       {/* P1: anonymous → account progress-merge prompt (first login only) */}

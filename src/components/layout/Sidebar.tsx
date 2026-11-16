@@ -4,12 +4,17 @@ import {
   GraduationCap,
   Scale,
   FileCheck2,
-  HardDrive,
+  UserRound,
   Info,
   Factory,
   Calculator,
+  LogIn,
+  LogOut,
+  UserPlus,
 } from 'lucide-react';
 import { AccountingRegime } from '@/types/coa';
+import type { AuthUser } from '@/types/auth';
+import type { SyncStatusState } from '@/services/sync/sync-service';
 
 export type NavTab = 'coa' | 'curriculum' | 'workbench' | 'cogs' | 'voucher' | 'tax' | 'settings';
 
@@ -20,6 +25,11 @@ interface SidebarProps {
   onRegimeChange: (regime: AccountingRegime) => void;
   isOpenMobile: boolean;
   onCloseMobile: () => void;
+  user?: AuthUser | null;
+  syncStatus?: SyncStatusState;
+  onLogin?: () => void;
+  onLogout?: () => void;
+  onOpenRegister?: () => void;
 }
 
 export const Sidebar: FC<SidebarProps> = ({
@@ -29,6 +39,11 @@ export const Sidebar: FC<SidebarProps> = ({
   onRegimeChange,
   isOpenMobile,
   onCloseMobile,
+  user = null,
+  syncStatus,
+  onLogin,
+  onLogout,
+  onOpenRegister,
 }) => {
   const navItems: {
     id: NavTab;
@@ -51,7 +66,7 @@ export const Sidebar: FC<SidebarProps> = ({
       labelVi: 'Lộ Trình 30 Ngày',
       subtextVi: '10 học phần & bài test định kỳ',
       icon: GraduationCap,
-      badge: 'M2 Sắp ra mắt',
+      badge: '30 Ngày',
       milestone: 'M2',
     },
     {
@@ -88,9 +103,9 @@ export const Sidebar: FC<SidebarProps> = ({
     },
     {
       id: 'settings',
-      labelVi: 'Sao Lưu & Dữ Liệu',
-      subtextVi: 'Xuất / nhập file JSON',
-      icon: HardDrive,
+      labelVi: 'Tài Khoản & Sao Lưu',
+      subtextVi: 'Đăng nhập, đồng bộ & JSON',
+      icon: UserRound,
       milestone: 'M1',
     },
   ];
@@ -223,8 +238,96 @@ export const Sidebar: FC<SidebarProps> = ({
           </nav>
         </div>
 
-        {/* Footer Info Box */}
-        <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+        {/* Account Card & Footer Info Box */}
+        <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 space-y-3">
+          <div
+            data-testid="sidebar-auth-card"
+            className="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/80 space-y-2.5 shadow-2xs"
+          >
+            {user ? (
+              <>
+                <div className="flex items-center space-x-2 min-w-0">
+                  <div className="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 flex items-center justify-center shrink-0">
+                    <UserRound className="w-4 h-4" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate">
+                      {user.display_name || user.email}
+                    </div>
+                    <div className="text-[11px] text-emerald-600 dark:text-emerald-400 truncate">
+                      {syncStatus?.status === 'syncing'
+                        ? 'Đang đồng bộ…'
+                        : syncStatus?.status === 'error'
+                          ? 'Đồng bộ tạm gián đoạn'
+                          : 'Đã đồng bộ tài khoản'}
+                    </div>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onSelectTab('settings');
+                      onCloseMobile();
+                    }}
+                    className="px-2 py-1.5 rounded-lg text-[11px] font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors"
+                  >
+                    Tài khoản
+                  </button>
+                  <button
+                    type="button"
+                    data-testid="sidebar-logout-btn"
+                    onClick={() => {
+                      onLogout?.();
+                      onCloseMobile();
+                    }}
+                    className="inline-flex items-center justify-center space-x-1 px-2 py-1.5 rounded-lg text-[11px] font-semibold bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/50 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800/70 transition-colors"
+                  >
+                    <LogOut className="w-3 h-3" />
+                    <span>Đăng xuất</span>
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
+                  <strong className="text-slate-700 dark:text-slate-200 block">Chế độ ẩn danh</strong>
+                  Lưu trên máy. Đăng nhập để đồng bộ bài học đa thiết bị.
+                </div>
+                <div className="grid grid-cols-2 gap-1.5">
+                  <button
+                    type="button"
+                    data-testid="sidebar-login-btn"
+                    onClick={() => {
+                      onLogin?.();
+                      onCloseMobile();
+                    }}
+                    className="inline-flex items-center justify-center space-x-1 px-2 py-1.5 rounded-lg text-[11px] font-bold bg-emerald-600 hover:bg-emerald-700 text-white transition-colors shadow-2xs"
+                  >
+                    <LogIn className="w-3 h-3" />
+                    <span>Đăng nhập</span>
+                  </button>
+                  <button
+                    type="button"
+                    data-testid="sidebar-register-btn"
+                    onClick={() => {
+                      if (onOpenRegister) {
+                        onOpenRegister();
+                      } else {
+                        onSelectTab('settings');
+                      }
+                      onCloseMobile();
+                    }}
+                    className="inline-flex items-center justify-center space-x-1 px-2 py-1.5 rounded-lg text-[11px] font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 transition-colors"
+                  >
+                    <UserPlus className="w-3 h-3" />
+                    <span>Đăng ký</span>
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+
           <div className="flex items-start space-x-2 text-xs text-slate-500 dark:text-slate-400">
             <Info className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
             <span>

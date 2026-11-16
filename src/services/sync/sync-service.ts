@@ -183,7 +183,12 @@ export class SyncService {
   async hasLocalLearningData(): Promise<boolean> {
     try {
       const progress = await this.storage.getLearnerProgress();
-      if (progress && ((progress.completedDays?.length ?? 0) > 0 || Object.keys(progress.milestoneScores ?? {}).length > 0)) {
+      if (
+        progress &&
+        ((progress.completedDays?.length ?? 0) > 0 ||
+          (progress.savedDays?.length ?? 0) > 0 ||
+          Object.keys(progress.milestoneScores ?? {}).length > 0)
+      ) {
         return true;
       }
       const journalizer = await this.storage.loadWorkbenchState();
@@ -378,6 +383,7 @@ export class SyncService {
   private async collectPushEntities(): Promise<{
     progress: {
       completed_days: number[];
+      saved_days: number[];
       milestone_scores: Record<string, number>;
       current_day: number;
       regime: string;
@@ -419,6 +425,7 @@ export class SyncService {
       const regime = await this.storage.getPreferredRegime();
       progressEntity = {
         completed_days: progress.completedDays ?? [],
+        saved_days: Array.from(new Set(progress.savedDays ?? [])).sort((a, b) => a - b),
         milestone_scores: Object.fromEntries(
           Object.entries(progress.milestoneScores ?? {}).map(([k, v]) => [k, Number(v)])
         ),
@@ -476,6 +483,7 @@ export class SyncService {
       device_id: getDeviceId(),
       progress: entities.progress ?? {
         completed_days: [],
+        saved_days: [],
         milestone_scores: {},
         current_day: 1,
         regime: 'CIRCULAR_200',
@@ -585,20 +593,33 @@ export class SyncService {
     this.applyingRemote = true;
     try {
       // 1) Progress: max/union merge into the local LearnerProgress.
+      // Saved lessons (bookmarks) union on initial anonymous merge, otherwise
+      // accept canonical server list when its revision is strictly newer.
       if (state.progress) {
         const local = (await this.storage.getLearnerProgress()) ?? {
           currentDay: 1,
           unlockedDays: [1, 2, 3],
           completedDays: [],
+          savedDays: [],
           milestoneScores: {},
           streakDays: 1,
           lastActiveDate: new Date().toISOString(),
         };
+        const knownRevision = preMeta?.progressRevision ?? 0;
+        const localSaved = local.savedDays ?? [];
+        const remoteSaved = state.progress.saved_days ?? [];
+        const nextSaved =
+          knownRevision === 0
+            ? Array.from(new Set([...localSaved, ...remoteSaved])).sort((a, b) => a - b)
+            : state.progress.revision > knownRevision
+              ? Array.from(new Set(remoteSaved)).sort((a, b) => a - b)
+              : Array.from(new Set(localSaved)).sort((a, b) => a - b);
         const merged: LearnerProgress = {
           ...local,
           completedDays: Array.from(
             new Set([...(local.completedDays ?? []), ...(state.progress.completed_days ?? [])])
           ).sort((a, b) => a - b),
+          savedDays: nextSaved,
           milestoneScores: { ...(local.milestoneScores ?? {}) },
           currentDay: Math.max(local.currentDay ?? 1, state.progress.current_day ?? 1),
         };

@@ -384,3 +384,39 @@ func TestSync_EnforcesScopeAndSessionValid(t *testing.T) {
 		t.Fatalf("pull with revoked session = %d, want 401", rec.Code)
 	}
 }
+
+func TestSync_SavedDaysBookmarkSync(t *testing.T) {
+	store := newMemStore()
+	h := newTestHandler(store)
+
+	// Revision 1 saves days [2, 5, 5, 99] -> normalized to [2, 5].
+	rec := doPush(h, `{"device_id":"d1","progress":{"completed_days":[1],"saved_days":[2,5,5,99],"milestone_scores":{},"current_day":2,"regime":"CIRCULAR_200","revision":1}}`)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("push rev 1 = %d %s", rec.Code, rec.Body.String())
+	}
+	out := mustUnmarshal(t, rec.Body.String())
+	prog := out["progress"].(map[string]any)
+	saved := prog["saved_days"].([]any)
+	if len(saved) != 2 || saved[0] != float64(2) || saved[1] != float64(5) {
+		t.Fatalf("saved_days after rev 1 = %v, want [2 5]", saved)
+	}
+
+	// Stale revision (1) cannot overwrite saved_days, while higher revision (2) un-saves day 2.
+	rec = doPush(h, `{"device_id":"d2","progress":{"completed_days":[1],"saved_days":[9],"milestone_scores":{},"current_day":2,"regime":"CIRCULAR_200","revision":1}}`)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("stale push = %d", rec.Code)
+	}
+	saved = mustUnmarshal(t, rec.Body.String())["progress"].(map[string]any)["saved_days"].([]any)
+	if len(saved) != 2 {
+		t.Fatalf("stale revision overwrote saved_days: %v", saved)
+	}
+
+	rec = doPush(h, `{"device_id":"d1","progress":{"completed_days":[1],"saved_days":[5,7],"milestone_scores":{},"current_day":2,"regime":"CIRCULAR_200","revision":2}}`)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("push rev 2 = %d", rec.Code)
+	}
+	saved = mustUnmarshal(t, rec.Body.String())["progress"].(map[string]any)["saved_days"].([]any)
+	if len(saved) != 2 || saved[0] != float64(5) || saved[1] != float64(7) {
+		t.Fatalf("saved_days after rev 2 = %v, want [5 7]", saved)
+	}
+}

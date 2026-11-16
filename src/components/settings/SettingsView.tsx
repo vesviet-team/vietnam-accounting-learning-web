@@ -16,11 +16,13 @@ import { AccountSection } from './AccountSection';
 interface SettingsViewProps {
   currentRegime: AccountingRegime;
   onRegimeChange: (regime: AccountingRegime) => void;
+  openRegisterSignal?: number;
 }
 
 export const SettingsView: FC<SettingsViewProps> = ({
   currentRegime,
   onRegimeChange,
+  openRegisterSignal,
 }) => {
   const { theme, setTheme } = useTheme();
   const [status, setStatus] = useState<{ type: 'success' | 'error'; text: string } | null>(
@@ -93,7 +95,7 @@ export const SettingsView: FC<SettingsViewProps> = ({
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-fade-in pb-12">
       {/* P1: Account & multi-device sync section */}
-      <AccountSection />
+      <AccountSection openRegisterSignal={openRegisterSignal} />
 
       <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-xs border border-slate-200 dark:border-slate-800 space-y-1">
         <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">

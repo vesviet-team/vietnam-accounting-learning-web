@@ -1,17 +1,39 @@
 import { useState, useRef, type FC, type ChangeEvent } from 'react';
-import { X, Download, Upload, CheckCircle2, AlertCircle, HardDrive } from 'lucide-react';
+import {
+  X,
+  Download,
+  Upload,
+  CheckCircle2,
+  AlertCircle,
+  HardDrive,
+  CloudUpload,
+  LogIn,
+  UserRound,
+} from 'lucide-react';
 import { storageService } from '@/services/storage/storage-service';
+import type { AuthUser } from '@/types/auth';
+import type { SyncStatusState } from '@/services/sync/sync-service';
 
 interface BackupModalProps {
   isOpen: boolean;
   onClose: () => void;
   onBackupRestored?: () => void;
+  user?: AuthUser | null;
+  syncStatus?: SyncStatusState;
+  onLogin?: () => void;
+  onOpenAccount?: () => void;
+  onSyncNow?: () => void;
 }
 
 export const BackupModal: FC<BackupModalProps> = ({
   isOpen,
   onClose,
   onBackupRestored,
+  user = null,
+  syncStatus,
+  onLogin,
+  onOpenAccount,
+  onSyncNow,
 }) => {
   const [statusMessage, setStatusMessage] = useState<{
     type: 'success' | 'error';
@@ -111,9 +133,76 @@ export const BackupModal: FC<BackupModalProps> = ({
         </div>
 
         {/* Content */}
-        <div className="p-6 space-y-6">
+        <div className="p-6 space-y-5">
+          {/* Cloud Account Sync Summary */}
+          <div className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 space-y-2.5">
+            {user ? (
+              <>
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center space-x-2 min-w-0">
+                    <UserRound className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <span className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
+                      {user.display_name || user.email}
+                    </span>
+                  </div>
+                  <span className="text-[11px] font-medium text-emerald-600 dark:text-emerald-400 shrink-0">
+                    {syncStatus?.status === 'syncing'
+                      ? 'Đang đồng bộ…'
+                      : syncStatus?.lastSyncAt
+                        ? `Đồng bộ lúc ${new Date(syncStatus.lastSyncAt).toLocaleTimeString('vi-VN')}`
+                        : 'Sẵn sàng đồng bộ'}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  {onSyncNow && (
+                    <button
+                      type="button"
+                      onClick={onSyncNow}
+                      className="flex-1 inline-flex items-center justify-center space-x-1.5 px-3 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition-colors"
+                    >
+                      <CloudUpload className="w-3.5 h-3.5" />
+                      <span>Đồng bộ ngay</span>
+                    </button>
+                  )}
+                  {onOpenAccount && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onOpenAccount();
+                        onClose();
+                      }}
+                      className="px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-semibold transition-colors"
+                    >
+                      Quản lý tài khoản
+                    </button>
+                  )}
+                </div>
+              </>
+            ) : (
+              <div className="flex items-center justify-between gap-3">
+                <div className="text-xs text-slate-600 dark:text-slate-300">
+                  <strong className="block text-slate-800 dark:text-slate-100">Đồng bộ đám mây</strong>
+                  Đăng nhập để tự động lưu tiến độ học và bài đã lưu.
+                </div>
+                {onLogin && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onLogin();
+                      onClose();
+                    }}
+                    className="inline-flex items-center space-x-1.5 px-3 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shrink-0 transition-colors"
+                  >
+                    <LogIn className="w-3.5 h-3.5" />
+                    <span>Đăng nhập</span>
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+
           <p className="text-sm text-slate-600 dark:text-slate-300">
-            Dữ liệu học tập (tiến độ 30 ngày, điểm bài test định kỳ, tùy chọn giao diện) được lưu trữ an toàn ngay trên trình duyệt của bạn (LocalStorage + IndexedDB). Bạn có thể xuất file JSON để lưu trữ hoặc chuyển sang máy khác.
+            Dữ liệu học tập (tiến độ 30 ngày, bài học đã lưu, điểm bài test định kỳ, tùy chọn giao diện) được lưu trữ an toàn ngay trên trình duyệt của bạn (LocalStorage + IndexedDB). Bạn có thể xuất file JSON để lưu trữ hoặc chuyển sang máy khác.
           </p>
 
           {/* Status Message */}

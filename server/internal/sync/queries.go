@@ -4,12 +4,31 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"sort"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 )
+
+// normalizeDaySlice returns sorted unique day numbers within [1..30].
+func normalizeDaySlice(days []int) []int {
+	if len(days) == 0 {
+		return []int{}
+	}
+	seen := make(map[int]bool, len(days))
+	out := make([]int, 0, len(days))
+	for _, d := range days {
+		if d < 1 || d > 30 || seen[d] {
+			continue
+		}
+		seen[d] = true
+		out = append(out, d)
+	}
+	sort.Ints(out)
+	return out
+}
 
 // execer is the minimal SQL surface used inside a transaction.
 type execer interface {
@@ -87,9 +106,9 @@ func (s *PGStore) loadProgress(ctx context.Context, userID uuid.UUID, minSeq int
 		seq       int64
 	)
 	err := s.pool.QueryRow(ctx, `
-		SELECT completed_days, milestone_scores, current_day, regime, revision, device_id, seq, updated_at
+		SELECT completed_days, saved_days, milestone_scores, current_day, regime, revision, device_id, seq, updated_at
 		FROM learning_progress WHERE user_id = $1`, userID,
-	).Scan(&p.CompletedDays, &scores, &p.CurrentDay, &p.Regime, &p.Revision, &p.DeviceID, &seq, &updatedAt)
+	).Scan(&p.CompletedDays, &p.SavedDays, &scores, &p.CurrentDay, &p.Regime, &p.Revision, &p.DeviceID, &seq, &updatedAt)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, 0, nil
 	}
@@ -107,6 +126,9 @@ func (s *PGStore) loadProgress(ctx context.Context, userID uuid.UUID, minSeq int
 	}
 	if p.CompletedDays == nil {
 		p.CompletedDays = []int{}
+	}
+	if p.SavedDays == nil {
+		p.SavedDays = []int{}
 	}
 	p.UpdatedAt = rfc3339(updatedAt)
 	return &p, seq, nil

@@ -13,6 +13,7 @@ import { getDeviceId } from './device';
 const VERIFIER_KEY = 'vnacc_pkce_verifier';
 const STATE_KEY = 'vnacc_oauth_state';
 const REFRESH_KEY = 'vnacc_rt';
+const SESSION_HINT_KEY = 'vnacc_session_hint';
 
 export interface AuthConfig {
   clientId: string;
@@ -113,13 +114,14 @@ export class AuthService {
 
   /**
    * Restores session on app boot: completes an OAuth redirect if present,
-   * otherwise attempts a silent refresh via the httpOnly cookie (or
-   * sessionStorage fallback) so reloads stay signed in.
+   * otherwise attempts a silent refresh only when this browser has an active
+   * session hint (so anonymous first-time visitors do not trigger a 400).
    */
   async init(): Promise<AuthUser | null> {
     const redirected = await this.handleRedirectIfPresent();
-    if (!redirected && !this.user) {
-      await this.getAccessToken();
+    if (!redirected && !this.user && this.hasSessionHint()) {
+      const tok = await this.getAccessToken();
+      if (!tok) this.setSessionHint(false);
     }
     return this.user;
   }
@@ -331,6 +333,7 @@ export class AuthService {
     this.accessToken = tokens.access_token ?? null;
     const ttl = Math.max(1, (tokens.expires_in ?? 900) - 30); // 30s clock skew
     this.accessExpiresAt = Date.now() + ttl * 1000;
+    this.setSessionHint(true);
     if (tokens.refresh_token) {
       try {
         sessionStorage.setItem(REFRESH_KEY, tokens.refresh_token);
@@ -343,8 +346,27 @@ export class AuthService {
   private clearTokens(): void {
     this.accessToken = null;
     this.accessExpiresAt = 0;
+    this.setSessionHint(false);
     try {
       sessionStorage.removeItem(REFRESH_KEY);
+    } catch {
+      /* ignore */
+    }
+  }
+
+  private hasSessionHint(): boolean {
+    if (this.readSession(REFRESH_KEY)) return true;
+    try {
+      return localStorage.getItem(SESSION_HINT_KEY) === '1';
+    } catch {
+      return false;
+    }
+  }
+
+  private setSessionHint(active: boolean): void {
+    try {
+      if (active) localStorage.setItem(SESSION_HINT_KEY, '1');
+      else localStorage.removeItem(SESSION_HINT_KEY);
     } catch {
       /* ignore */
     }

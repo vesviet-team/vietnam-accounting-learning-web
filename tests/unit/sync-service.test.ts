@@ -396,4 +396,84 @@ describe('SyncService (P1 per-entity sync)', () => {
     expect(localStorage.getItem('vnacc_sync_meta:user-b')).toBeTruthy();
     svc.dispose();
   });
+
+  it('syncs saved_days bookmarks: unions on initial pull, pushes saved_days, and honors remote removal on newer revision', async () => {
+    let remoteSavedDays = [5];
+    let remoteRev = 2;
+    const { svc, storage, calls } = makeService((url) => {
+      if (url.startsWith('/sync/pull')) {
+        return {
+          ok: true,
+          status: 200,
+          json: canonical({
+            cursor: remoteRev * 10,
+            progress: {
+              completed_days: [1],
+              saved_days: remoteSavedDays,
+              milestone_scores: {},
+              current_day: 2,
+              regime: 'CIRCULAR_200',
+              revision: remoteRev,
+            },
+          }),
+        };
+      }
+      return {
+        ok: true,
+        status: 200,
+        json: canonical({
+          cursor: 30,
+          progress: {
+            completed_days: [1],
+            saved_days: [2, 5],
+            milestone_scores: {},
+            current_day: 2,
+            regime: 'CIRCULAR_200',
+            revision: 3,
+          },
+        }),
+      };
+    });
+
+    await storage.saveLearnerProgress(
+      {
+        currentDay: 2,
+        unlockedDays: [1, 2, 3],
+        completedDays: [1],
+        savedDays: [2],
+        milestoneScores: {},
+        streakDays: 1,
+        lastActiveDate: '2026-11-16T10:00:00.000Z',
+      },
+      { silent: true }
+    );
+
+    // Initial pull on fresh device unions local [2] + remote [5] => [2, 5].
+    await svc.pull();
+    let local = await storage.getLearnerProgress();
+    expect(local?.savedDays).toEqual([2, 5]);
+
+    // Subsequent remote revision [5] (removed 2) overrides local [2, 5].
+    remoteSavedDays = [5];
+    remoteRev = 4;
+    await svc.pull();
+    local = await storage.getLearnerProgress();
+    expect(local?.savedDays).toEqual([5]);
+
+    // Local write pushes saved_days array to server.
+    svc.init();
+    await storage.saveLearnerProgress({
+      ...local!,
+      savedDays: [2, 5],
+    });
+    await sleep(100);
+    svc.dispose();
+
+    const pushCall = calls.find((c) => c.url.startsWith('/sync/push'));
+    expect(pushCall).toBeTruthy();
+    const pushBody = JSON.parse(pushCall!.init!.body as string) as {
+      progress: { saved_days: number[] };
+    };
+    expect(pushBody.progress.saved_days).toEqual([2, 5]);
+  });
 });
