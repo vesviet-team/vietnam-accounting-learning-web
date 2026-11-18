@@ -45,7 +45,7 @@ export const ScoreHistoryModal: FC<ScoreHistoryModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs animate-fade-in"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-fade-in"
       role="dialog"
       aria-modal="true"
     >
@@ -180,7 +180,7 @@ export const ScoreHistoryModal: FC<ScoreHistoryModalProps> = ({
                 onClose();
                 onRetake();
               }}
-              className="inline-flex items-center space-x-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-colors shadow-xs"
+              className="inline-flex items-center space-x-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-colors shadow-sm"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               <span>Làm lại bài kiểm tra này</span>

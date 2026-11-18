@@ -272,8 +272,9 @@ export const ManufacturingCostCalculator: FC<ManufacturingCostCalculatorProps> =
         regime,
       };
 
+      const currentWorkbench = await storageService.loadWorkbenchState();
       await storageService.saveWorkbenchState({
-        postedEntries: [newPostedEntry as any],
+        postedEntries: [...(currentWorkbench.postedEntries || []), newPostedEntry as never],
       });
     } catch (err) {
       console.warn('[ManufacturingCostCalculator] Failed to persist into storageService:', err);
@@ -288,7 +289,7 @@ export const ManufacturingCostCalculator: FC<ManufacturingCostCalculatorProps> =
       data-testid="manufacturing-cost-calculator"
     >
       {/* 1. Header & Regulatory Framing Banner */}
-      <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-xs border border-slate-200 dark:border-slate-800">
+      <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center space-x-2 text-xs font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wider">
@@ -319,7 +320,7 @@ export const ManufacturingCostCalculator: FC<ManufacturingCostCalculatorProps> =
               }}
               className={`px-3 py-2 text-xs sm:text-sm font-medium rounded-lg transition-all ${
                 regime === 'CIRCULAR_200' || regime === 'CIRCULAR_99'
-                  ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-xs font-semibold'
+                  ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm font-semibold'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
@@ -334,7 +335,7 @@ export const ManufacturingCostCalculator: FC<ManufacturingCostCalculatorProps> =
               }}
               className={`px-3 py-2 text-xs sm:text-sm font-medium rounded-lg transition-all ${
                 regime === 'CIRCULAR_133'
-                  ? 'bg-white dark:bg-slate-700 text-amber-600 dark:text-amber-400 shadow-xs font-semibold'
+                  ? 'bg-white dark:bg-slate-700 text-amber-600 dark:text-amber-400 shadow-sm font-semibold'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
@@ -489,7 +490,7 @@ export const ManufacturingCostCalculator: FC<ManufacturingCostCalculatorProps> =
         {/* Left Column: Interactive Input Panel (7 Cols) */}
         <div className="lg:col-span-7 space-y-6">
           {/* Card A: Chi Phí Sản Xuất Phát Sinh */}
-          <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-xs border border-slate-200 dark:border-slate-800 space-y-4">
+          <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
               <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-blue-500" />
@@ -506,7 +507,7 @@ export const ManufacturingCostCalculator: FC<ManufacturingCostCalculatorProps> =
                 htmlFor="input-beginning-wip"
                 className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1"
               >
-                Chi phí sản xuất dở dang đầu kỳ ($D_{'đk'}$)
+                Chi phí sản xuất dở dang đầu kỳ (D<sub>đk</sub>)
               </label>
               <div className="relative">
                 <input
@@ -517,7 +518,7 @@ export const ManufacturingCostCalculator: FC<ManufacturingCostCalculatorProps> =
                   step="100000"
                   value={beginningWip}
                   onChange={(e) => handleNumberChange(setBeginningWip, e.target.value)}
-                  className={`w-full px-3.5 py-2 text-sm font-mono rounded-lg border bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 ${
+                  className={`w-full px-3.5 py-2 text-sm font-mono rounded-lg border bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 ${
                     validationErrors.beginningWip
                       ? 'border-red-500 focus:ring-red-400'
                       : 'border-slate-300 dark:border-slate-700 focus:ring-blue-500'
@@ -556,7 +557,7 @@ export const ManufacturingCostCalculator: FC<ManufacturingCostCalculatorProps> =
                     step="100000"
                     value={actualDirectMaterial}
                     onChange={(e) => handleNumberChange(setActualDirectMaterial, e.target.value)}
-                    className="w-full px-3 py-1.5 text-sm font-mono rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-1.5 text-sm font-mono rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div>
@@ -574,7 +575,7 @@ export const ManufacturingCostCalculator: FC<ManufacturingCostCalculatorProps> =
                     step="100000"
                     value={normalDirectMaterial}
                     onChange={(e) => handleNumberChange(setNormalDirectMaterial, e.target.value)}
-                    className="w-full px-3 py-1.5 text-sm font-mono rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-1.5 text-sm font-mono rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
               </div>
@@ -608,7 +609,7 @@ export const ManufacturingCostCalculator: FC<ManufacturingCostCalculatorProps> =
                     step="100000"
                     value={actualDirectLabor}
                     onChange={(e) => handleNumberChange(setActualDirectLabor, e.target.value)}
-                    className="w-full px-3 py-1.5 text-sm font-mono rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-1.5 text-sm font-mono rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div>
@@ -626,7 +627,7 @@ export const ManufacturingCostCalculator: FC<ManufacturingCostCalculatorProps> =
                     step="100000"
                     value={normalDirectLabor}
                     onChange={(e) => handleNumberChange(setNormalDirectLabor, e.target.value)}
-                    className="w-full px-3 py-1.5 text-sm font-mono rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-1.5 text-sm font-mono rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
               </div>
@@ -649,7 +650,7 @@ export const ManufacturingCostCalculator: FC<ManufacturingCostCalculatorProps> =
                   step="100000"
                   value={actualOverhead}
                   onChange={(e) => handleNumberChange(setActualOverhead, e.target.value)}
-                  className="w-full px-3.5 py-2 text-sm font-mono rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3.5 py-2 text-sm font-mono rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 <span className="absolute right-3 top-2 text-xs text-slate-400">đ</span>
               </div>
@@ -657,7 +658,7 @@ export const ManufacturingCostCalculator: FC<ManufacturingCostCalculatorProps> =
           </div>
 
           {/* Card B: Sản Lượng & Đánh Giá Dở Dang */}
-          <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-xs border border-slate-200 dark:border-slate-800 space-y-4">
+          <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
               <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
@@ -674,7 +675,7 @@ export const ManufacturingCostCalculator: FC<ManufacturingCostCalculatorProps> =
                   htmlFor="input-finished-units"
                   className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1"
                 >
-                  Số lượng thành phẩm hoàn thành ($Q_{'tp'}$)
+                  Số lượng thành phẩm hoàn thành (Q<sub>tp</sub>)
                 </label>
                 <div className="relative">
                   <input
@@ -685,7 +686,7 @@ export const ManufacturingCostCalculator: FC<ManufacturingCostCalculatorProps> =
                     step="1"
                     value={finishedUnits}
                     onChange={(e) => handleNumberChange(setFinishedUnits, e.target.value)}
-                    className="w-full px-3.5 py-2 text-sm font-mono rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-emerald-500"
+                    className="w-full px-3.5 py-2 text-sm font-mono rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   />
                   <span className="absolute right-3 top-2 text-xs text-slate-400">sp</span>
                 </div>
@@ -696,7 +697,7 @@ export const ManufacturingCostCalculator: FC<ManufacturingCostCalculatorProps> =
                   htmlFor="input-ending-wip-units"
                   className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1"
                 >
-                  Số lượng sản phẩm dở dang cuối kỳ ($Q_{'dd'}$)
+                  Số lượng sản phẩm dở dang cuối kỳ (Q<sub>dd</sub>)
                 </label>
                 <div className="relative">
                   <input
@@ -707,7 +708,7 @@ export const ManufacturingCostCalculator: FC<ManufacturingCostCalculatorProps> =
                     step="1"
                     value={endingWipUnits}
                     onChange={(e) => handleNumberChange(setEndingWipUnits, e.target.value)}
-                    className="w-full px-3.5 py-2 text-sm font-mono rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-emerald-500"
+                    className="w-full px-3.5 py-2 text-sm font-mono rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   />
                   <span className="absolute right-3 top-2 text-xs text-slate-400">sp</span>
                 </div>
@@ -737,7 +738,7 @@ export const ManufacturingCostCalculator: FC<ManufacturingCostCalculatorProps> =
                     )}
                   </div>
                   <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 leading-snug">
-                    $D_{'ck'}$ chỉ tính chi phí NVL trực tiếp. Chi phí chế biến tính 100% vào thành phẩm.
+                    D<sub>ck</sub> chỉ tính chi phí NVL trực tiếp. Chi phí chế biến tính 100% vào thành phẩm.
                   </p>
                 </button>
 
@@ -758,7 +759,7 @@ export const ManufacturingCostCalculator: FC<ManufacturingCostCalculatorProps> =
                     )}
                   </div>
                   <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 leading-snug">
-                    Phân bổ cả chi phí chế biến (nhân công, SXC) theo mức độ hoàn thành ($h\%$).
+                    Phân bổ cả chi phí chế biến (nhân công, SXC) theo mức độ hoàn thành (h%).
                   </p>
                 </button>
               </div>
@@ -773,7 +774,7 @@ export const ManufacturingCostCalculator: FC<ManufacturingCostCalculatorProps> =
                     className="text-xs font-semibold text-emerald-900 dark:text-emerald-200 flex items-center gap-1.5"
                   >
                     <Percent className="w-3.5 h-3.5" />
-                    Tỷ lệ hoàn thành sản phẩm dở dang ($h\%$):
+                    Tỷ lệ hoàn thành sản phẩm dở dang (h%):
                   </label>
                   <span className="text-xs font-bold text-emerald-700 dark:text-emerald-300 font-mono">
                     {completionPercentage}%
@@ -801,8 +802,8 @@ export const ManufacturingCostCalculator: FC<ManufacturingCostCalculatorProps> =
                   />
                 </div>
                 <p className="text-[11px] text-emerald-700 dark:text-emerald-300 italic">
-                  Sản lượng tương đương quy đổi: $Q_{'dd'}^{'tđ'} = {endingWipUnits} \times{' '}
-                  {completionPercentage}\% = {Math.round(endingWipUnits * (completionPercentage / 100))} sp$
+                  Sản lượng tương đương quy đổi: Q<sub>dd</sub><sup>tđ</sup> = {endingWipUnits} ×{' '}
+                  {completionPercentage}% = {Math.round(endingWipUnits * (completionPercentage / 100))} sp
                 </p>
               </div>
             )}
@@ -812,7 +813,7 @@ export const ManufacturingCostCalculator: FC<ManufacturingCostCalculatorProps> =
         {/* Right Column: Costing Outputs, Tax Impact, & Journal Entries (5 Cols) */}
         <div className="lg:col-span-5 space-y-6">
           {/* Card C: Bảng Tính Tổng Giá Thành Z & Đơn Giá z */}
-          <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-xs border border-slate-200 dark:border-slate-800 space-y-4">
+          <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
               <div className="flex items-center gap-2">
                 <TrendingUp className="w-4 h-4 text-emerald-600" />
@@ -829,7 +830,7 @@ export const ManufacturingCostCalculator: FC<ManufacturingCostCalculatorProps> =
             <div className="grid grid-cols-2 gap-3">
               <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
                 <span className="text-[11px] text-slate-500 dark:text-slate-400 block mb-0.5">
-                  Chi phí dở dang đầu kỳ ($D_{'đk'}$)
+                  Chi phí dở dang đầu kỳ (D<sub>đk</sub>)
                 </span>
                 <span
                   data-testid="kpi-beginning-wip"
@@ -853,7 +854,7 @@ export const ManufacturingCostCalculator: FC<ManufacturingCostCalculatorProps> =
 
               <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
                 <span className="text-[11px] text-slate-500 dark:text-slate-400 block mb-0.5">
-                  Chi phí dở dang cuối kỳ ($D_{'ck'}$)
+                  Chi phí dở dang cuối kỳ (D<sub>ck</sub>)
                 </span>
                 <span
                   data-testid="kpi-ending-wip-cost"
@@ -881,11 +882,11 @@ export const ManufacturingCostCalculator: FC<ManufacturingCostCalculatorProps> =
             </div>
 
             {/* Total Cost Z & Unit Cost z Highlight Box */}
-            <div className="p-4 rounded-xl bg-linear-to-r from-emerald-500/10 via-emerald-500/5 to-transparent border border-emerald-500/30 space-y-3">
+            <div className="p-4 rounded-xl bg-gradient-to-r from-emerald-500/10 via-emerald-500/5 to-transparent border border-emerald-500/30 space-y-3">
               <div className="flex items-center justify-between">
                 <div>
                   <span className="text-xs text-emerald-800 dark:text-emerald-300 font-semibold uppercase tracking-wide">
-                    Tổng Giá Thành Sản Xuất ($Z$)
+                    Tổng Giá Thành Sản Xuất (Z)
                   </span>
                   <div
                     data-testid="kpi-total-cost-z"
@@ -896,7 +897,7 @@ export const ManufacturingCostCalculator: FC<ManufacturingCostCalculatorProps> =
                 </div>
                 <div className="text-right">
                   <span className="text-xs text-slate-500 dark:text-slate-400 font-medium block">
-                    Đơn giá thành phẩm ($z$)
+                    Đơn giá thành phẩm (z)
                   </span>
                   <div
                     data-testid="kpi-unit-cost-z"
@@ -908,9 +909,9 @@ export const ManufacturingCostCalculator: FC<ManufacturingCostCalculatorProps> =
               </div>
 
               <div className="text-[11px] text-slate-600 dark:text-slate-400 border-t border-emerald-500/20 pt-2 font-mono">
-                Công thức: $Z = D_{'đk'} + C_{'hợp lý'} - D_{'ck'} ={' '}
-                {formatVnd(currentInput.beginningWip)} + {formatVnd(calculationOutput.totalEligibleCost)} -{' '}
-                {formatVnd(calculationOutput.endingWipCost)}$
+                Công thức: Z = D<sub>đk</sub> + C<sub>hợp lý</sub> − D<sub>ck</sub> ={' '}
+                {formatVnd(currentInput.beginningWip)} + {formatVnd(calculationOutput.totalEligibleCost)} −{' '}
+                {formatVnd(calculationOutput.endingWipCost)}
               </div>
             </div>
           </div>
@@ -920,7 +921,7 @@ export const ManufacturingCostCalculator: FC<ManufacturingCostCalculatorProps> =
             data-testid="cit-tax-card"
             className={`p-4 rounded-2xl border transition-all ${
               calculationOutput.scheduleB4Amount > 0
-                ? 'bg-rose-50/80 dark:bg-rose-950/30 border-rose-300 dark:border-rose-800 text-rose-950 dark:text-rose-100 shadow-xs'
+                ? 'bg-rose-50/80 dark:bg-rose-950/30 border-rose-300 dark:border-rose-800 text-rose-950 dark:text-rose-100 shadow-sm'
                 : 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300'
             }`}
           >
@@ -986,7 +987,7 @@ export const ManufacturingCostCalculator: FC<ManufacturingCostCalculatorProps> =
           </div>
 
           {/* Card E: Sơ Đồ Bút Toán Định Khoản & 1-Click Export */}
-          <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-xs border border-slate-200 dark:border-slate-800 space-y-4">
+          <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
               <div className="flex items-center gap-2">
                 <FileCheck className="w-4 h-4 text-blue-600" />
@@ -1060,7 +1061,7 @@ export const ManufacturingCostCalculator: FC<ManufacturingCostCalculatorProps> =
                 data-testid="export-journalizer-btn"
                 onClick={handleExportToJournalizer}
                 disabled={calculationOutput.journalEntries.length === 0}
-                className="w-full py-2.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all shadow-xs hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                className="w-full py-2.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
                 <Send className="w-4 h-4" />
                 1-Click Kết Chuyển Sang Bàn Định Khoản

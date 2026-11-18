@@ -1,14 +1,16 @@
 # Auth.md
 
-Vietnam Accounting 30-Day Interactive Learning Platform (Thông tư 99/2025/TT-BTC, Thông tư 200/2014/TT-BTC & Thông tư 133/2016/TT-BTC).
-This service supports **agentic registration** for autonomous AI agents, orchestrators, and tool runners: discover → register → (claim if needed) → exchange for an access_token → call API → handle revocation.
+Vietnam Accounting 30-Day Interactive Learning Platform (Thông tư 99/2025/TT-BTC, Thông tư 58/2026/TT-BTC, Thông tư 200/2014/TT-BTC & Thông tư 133/2016/TT-BTC).
+This service supports **agentic registration** and OAuth 2.1 + PKCE (S256) authentication for users, orchestrators, and tool runners: discover → register → authorize → exchange for an access_token → call API → revoke.
 
 ## Registration
 
-- `POST /agent/identity` — Register a new agent identity
-- `POST /agent/identity/callback` — Handle OAuth 2.1 + PKCE callback for agent sessions
-- `register_uri`: https://hoa.tanhdev.com/oauth2/register
-- `claim_uri`: https://hoa.tanhdev.com/oauth2/claim
+- `POST /auth/register` — Register an account (`{"email", "password", "display_name"}`)
+- `GET /oauth2/auth` — OAuth 2.1 + PKCE S256 authorization & consent form
+- `POST /oauth2/token` — Exchange authorization code or refresh token for an access token
+- `POST /oauth2/revoke` — Revoke an active refresh token / session
+- `register_uri`: https://hoa.tanhdev.com/auth/register
+- `authorization_endpoint`: https://hoa.tanhdev.com/oauth2/auth
 - `token_endpoint`: https://hoa.tanhdev.com/oauth2/token
 - `identity_types_supported`:
   - `anonymous`

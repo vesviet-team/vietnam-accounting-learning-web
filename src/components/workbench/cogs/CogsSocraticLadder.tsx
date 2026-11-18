@@ -76,12 +76,12 @@ export const CogsSocraticLadder: FC<CogsSocraticLadderProps> = ({
   return (
     <div
       data-testid="cogs-socratic-ladder"
-      className={`rounded-2xl border border-amber-200 dark:border-amber-900/60 bg-linear-to-b from-amber-50/70 via-white to-amber-50/30 dark:from-amber-950/20 dark:via-slate-900 dark:to-slate-900 shadow-sm transition-all overflow-hidden ${className}`}
+      className={`rounded-2xl border border-amber-200 dark:border-amber-900/60 bg-gradient-to-b from-amber-50/70 via-white to-amber-50/30 dark:from-amber-950/20 dark:via-slate-900 dark:to-slate-900 shadow-sm transition-all overflow-hidden ${className}`}
     >
       {/* Header Bar */}
       <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3.5 border-b border-amber-200 dark:border-amber-900/40 bg-amber-100/60 dark:bg-amber-950/40">
         <div className="flex items-center gap-2.5">
-          <div className="p-1.5 rounded-lg bg-amber-500 text-white shadow-xs">
+          <div className="p-1.5 rounded-lg bg-amber-500 text-white shadow-sm">
             <Sparkles className="w-4 h-4" />
           </div>
           <div>
@@ -394,7 +394,7 @@ export const CogsSocraticLadder: FC<CogsSocraticLadderProps> = ({
                     type="button"
                     data-testid="unlock-level-2-btn"
                     onClick={handleUnlockNext}
-                    className="px-3.5 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold transition-all shadow-xs flex items-center gap-1.5"
+                    className="px-3.5 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold transition-all shadow-sm flex items-center gap-1.5"
                   >
                     <span>🔓 Mở Khóa Nấc 2: Cơ Sở Pháp Lý</span>
                     <ArrowRight className="w-3.5 h-3.5" />
@@ -406,7 +406,7 @@ export const CogsSocraticLadder: FC<CogsSocraticLadderProps> = ({
                     type="button"
                     data-testid="unlock-level-3-btn"
                     onClick={handleUnlockNext}
-                    className="px-3.5 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold transition-all shadow-xs flex items-center gap-1.5"
+                    className="px-3.5 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold transition-all shadow-sm flex items-center gap-1.5"
                   >
                     <span>🔓 Mở Khóa Nấc 3: Mẫu Định Khoản & Đáp Án</span>
                     <ArrowRight className="w-3.5 h-3.5" />

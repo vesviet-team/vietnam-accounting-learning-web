@@ -20,13 +20,27 @@ function randomUUID(): string {
   return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
 }
 
-/** Stable uuid v4 for this device (localStorage-persisted). */
+/** Stable uuid v4 for this device (localStorage-persisted, JSON-safe). */
 export function getDeviceId(): string {
   try {
     const existing = localStorage.getItem(DEVICE_ID_KEY);
-    if (existing) return existing;
+    if (existing) {
+      if (existing.startsWith('"')) {
+        try {
+          const parsed = JSON.parse(existing);
+          if (typeof parsed === 'string' && parsed.length > 0) {
+            return parsed;
+          }
+        } catch {
+          // Fall through and use legacy raw value or regenerate below.
+        }
+      } else {
+        localStorage.setItem(DEVICE_ID_KEY, JSON.stringify(existing));
+        return existing;
+      }
+    }
     const id = randomUUID();
-    localStorage.setItem(DEVICE_ID_KEY, id);
+    localStorage.setItem(DEVICE_ID_KEY, JSON.stringify(id));
     return id;
   } catch {
     // Storage unavailable: ephemeral id (still usable for one session).

@@ -11,7 +11,13 @@ import {
   X,
 } from 'lucide-react';
 import { AccountItem, AccountingRegime, AccountCategory, CATEGORY_METADATA } from '@/types/coa';
-import { getAccountsByRegime, ensureAccountsLoaded, getCircular99Highlights } from '@/data/coa-service';
+import {
+  getAccountsByRegime,
+  hasAccountsLoaded,
+  ensureAccountsLoaded,
+  getCircular99Highlights,
+  getCircular58Highlights,
+} from '@/data/coa-service';
 import { getProhibitionRule, getProhibitedAccounts133, ProhibitedAccountRule } from '@/data/prohibited-accounts';
 import { CoaDetailModal } from './CoaDetailModal';
 
@@ -79,7 +85,7 @@ const AccountCard = memo<AccountCardProps>(({ account, currentRegime, onSelect }
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center space-x-2">
           <span
-            className={`px-2.5 py-1 rounded-lg font-mono font-bold text-sm tracking-wide shadow-2xs ${
+            className={`px-2.5 py-1 rounded-lg font-mono font-bold text-sm tracking-wide shadow-sm ${
               isProhibited
                 ? 'bg-amber-600 text-white'
                 : 'bg-emerald-50 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
@@ -136,10 +142,18 @@ const AccountCard = memo<AccountCardProps>(({ account, currentRegime, onSelect }
           </span>
         </div>
 
-        <span className="inline-flex items-center space-x-1 text-emerald-600 dark:text-emerald-400 font-semibold text-[11px] group-hover:translate-x-0.5 transition-transform">
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onSelect(account);
+          }}
+          aria-label={`Xem chi tiết TK ${account.code}`}
+          className="inline-flex items-center space-x-1 text-emerald-600 dark:text-emerald-400 font-semibold text-[11px] group-hover:translate-x-0.5 transition-transform focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 rounded"
+        >
           <span>Chi tiết</span>
           <ChevronRight className="w-3.5 h-3.5" />
-        </span>
+        </button>
       </div>
     </div>
   );
@@ -171,17 +185,19 @@ export const CoaExplorer: FC<CoaExplorerProps> = ({
   // Dataset theo regime: khởi tạo đồng bộ từ cache (TT 200 load tĩnh như cũ; các
   // regime khác đã có cache thì dùng ngay), rồi dynamic-import nếu chưa có.
   const [regimeAccounts, setRegimeAccounts] = useState<AccountWithTokens[]>(() =>
-    getAccountsByRegime(currentRegime).map(buildAccountTokens)
+    hasAccountsLoaded(currentRegime)
+      ? getAccountsByRegime(currentRegime).map(buildAccountTokens)
+      : []
   );
   const [circular99Highlights, setCircular99Highlights] = useState(() => getCircular99Highlights());
+  const [circular58Highlights, setCircular58Highlights] = useState(() => getCircular58Highlights());
 
   useEffect(() => {
     let alive = true;
-    // Cache hit (TT 200 mặc định hoặc regime đã tải trước đó): cập nhật đồng bộ.
-    const cached = getAccountsByRegime(currentRegime);
-    if (cached.length > 0) {
-      setRegimeAccounts(cached.map(buildAccountTokens));
+    if (hasAccountsLoaded(currentRegime)) {
+      setRegimeAccounts(getAccountsByRegime(currentRegime).map(buildAccountTokens));
       if (currentRegime === 'CIRCULAR_99') setCircular99Highlights(getCircular99Highlights());
+      if (currentRegime === 'CIRCULAR_58') setCircular58Highlights(getCircular58Highlights());
       return () => { alive = false; };
     }
     setRegimeAccounts([]);
@@ -190,6 +206,7 @@ export const CoaExplorer: FC<CoaExplorerProps> = ({
         if (!alive) return;
         setRegimeAccounts(accounts.map(buildAccountTokens));
         if (currentRegime === 'CIRCULAR_99') setCircular99Highlights(getCircular99Highlights());
+        if (currentRegime === 'CIRCULAR_58') setCircular58Highlights(getCircular58Highlights());
       })
       .catch((err) => {
         console.error('[CoaExplorer] Failed to load COA dataset for', currentRegime, err);
@@ -281,7 +298,7 @@ export const CoaExplorer: FC<CoaExplorerProps> = ({
   return (
     <div className="space-y-6 animate-fade-in pb-12">
       {/* Title & Regime Switcher Bar */}
-      <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-xs border border-slate-200 dark:border-slate-800 space-y-4">
+      <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 space-y-4">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div>
             <div className="flex items-center space-x-2 text-xs font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
@@ -309,11 +326,11 @@ export const CoaExplorer: FC<CoaExplorerProps> = ({
           </div>
 
           {/* Regime Switcher Toggle */}
-          <div className="flex items-center space-x-1.5 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shrink-0 self-start lg:self-center">
+          <div className="flex flex-wrap items-center gap-1.5 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shrink-0 self-start lg:self-center">
             <button
               type="button"
               onClick={() => onRegimeChange('CIRCULAR_200')}
-              className={`flex items-center space-x-2 px-3.5 py-2 rounded-lg text-xs font-bold transition-all ${
+              className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-xs font-bold transition-all ${
                 currentRegime === 'CIRCULAR_200'
                   ? 'bg-emerald-600 text-white shadow-md'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
@@ -325,7 +342,7 @@ export const CoaExplorer: FC<CoaExplorerProps> = ({
             <button
               type="button"
               onClick={() => onRegimeChange('CIRCULAR_133')}
-              className={`flex items-center space-x-2 px-3.5 py-2 rounded-lg text-xs font-bold transition-all ${
+              className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-xs font-bold transition-all ${
                 currentRegime === 'CIRCULAR_133'
                   ? 'bg-blue-600 text-white shadow-md'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
@@ -337,7 +354,7 @@ export const CoaExplorer: FC<CoaExplorerProps> = ({
             <button
               type="button"
               onClick={() => onRegimeChange('CIRCULAR_99')}
-              className={`flex items-center space-x-2 px-3.5 py-2 rounded-lg text-xs font-bold transition-all ${
+              className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-xs font-bold transition-all ${
                 currentRegime === 'CIRCULAR_99'
                   ? 'bg-purple-600 text-white shadow-md'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
@@ -345,6 +362,18 @@ export const CoaExplorer: FC<CoaExplorerProps> = ({
             >
               <ShieldCheck className="w-4 h-4" />
               <span>TT 99/2025</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => onRegimeChange('CIRCULAR_58')}
+              className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-xs font-bold transition-all ${
+                currentRegime === 'CIRCULAR_58'
+                  ? 'bg-amber-600 text-white shadow-md'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
+              }`}
+            >
+              <ShieldCheck className="w-4 h-4" />
+              <span>TT 58/2026</span>
             </button>
           </div>
         </div>
@@ -370,6 +399,34 @@ export const CoaExplorer: FC<CoaExplorerProps> = ({
                   className="p-3 rounded-lg bg-white/90 dark:bg-slate-900/80 border border-purple-100 dark:border-purple-900/60 text-xs space-y-1"
                 >
                   <div className="font-bold text-purple-900 dark:text-purple-200">{item.titleVi}</div>
+                  <p className="text-slate-600 dark:text-slate-300 leading-relaxed">{item.summaryVi}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Circular 58/2026 Highlights Banner */}
+        {currentRegime === 'CIRCULAR_58' && circular58Highlights.length > 0 && (
+          <div
+            data-testid="circular-58-highlights"
+            className="p-4 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/80 space-y-3"
+          >
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <span className="text-xs font-bold text-amber-900 dark:text-amber-200 uppercase tracking-wider">
+                Điểm Mới Thông Tư 58/2026/TT-BTC (Doanh Nghiệp Siêu Nhỏ — Từ 01/07/2026)
+              </span>
+              <span className="text-[11px] font-mono px-2 py-0.5 rounded-md bg-amber-100 dark:bg-amber-900/70 text-amber-800 dark:text-amber-200">
+                Thay thế TT 132/2018 &bull; 11 mẫu sổ S1–S4d-DNSN
+              </span>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+              {circular58Highlights.map((item) => (
+                <div
+                  key={item.id}
+                  className="p-3 rounded-lg bg-white/90 dark:bg-slate-900/80 border border-amber-100 dark:border-amber-900/60 text-xs space-y-1"
+                >
+                  <div className="font-bold text-amber-900 dark:text-amber-200">{item.titleVi}</div>
                   <p className="text-slate-600 dark:text-slate-300 leading-relaxed">{item.summaryVi}</p>
                 </div>
               ))}
@@ -409,7 +466,7 @@ export const CoaExplorer: FC<CoaExplorerProps> = ({
       </div>
 
       {/* Search & Category Filter Bar */}
-      <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-xs border border-slate-200 dark:border-slate-800 space-y-4">
+      <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 space-y-4">
         <div className="flex flex-col sm:flex-row items-center gap-3">
           {/* Search Box */}
           <div className="relative flex-1 w-full">
@@ -447,7 +504,7 @@ export const CoaExplorer: FC<CoaExplorerProps> = ({
               onClick={() => setSelectedCategory(cat.key)}
               className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
                 selectedCategory === cat.key
-                  ? 'bg-slate-900 text-white dark:bg-emerald-500 dark:text-slate-950 shadow-xs'
+                  ? 'bg-slate-900 text-white dark:bg-emerald-500 dark:text-slate-950 shadow-sm'
                   : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-slate-100'
               }`}
             >
@@ -498,7 +555,7 @@ export const CoaExplorer: FC<CoaExplorerProps> = ({
               <button
                 type="button"
                 onClick={handleLoadMore}
-                className="px-6 py-2.5 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-xs transition-all flex items-center space-x-2 cursor-pointer"
+                className="px-6 py-2.5 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-sm transition-all flex items-center space-x-2 cursor-pointer"
               >
                 <span>Xem thêm ({Math.min(PAGE_SIZE, filteredAccounts.length - visibleCount)} tài khoản)</span>
               </button>

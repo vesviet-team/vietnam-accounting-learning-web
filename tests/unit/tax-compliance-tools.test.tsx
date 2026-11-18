@@ -44,7 +44,7 @@ describe('TAX COMPLIANCE TOOLS UI WRAPPER', () => {
     render(<TaxComplianceTools />);
 
     fireEvent.click(screen.getByTestId('seller-type-enterprise'));
-    typeAmount(getAmountInputByLabel(/Doanh thu gộm trên sàn/i), '5000000000');
+    typeAmount(getAmountInputByLabel(/Doanh thu gộp trên sàn/i), '5000000000');
     typeAmount(getAmountInputByLabel(/Thu nhập chịu thuế TNDN/i), String(taxableIncome));
 
     const citEl = screen.getByTestId('ecom-cit-self-declared');
@@ -81,7 +81,7 @@ describe('TAX COMPLIANCE TOOLS UI WRAPPER', () => {
     render(<TaxComplianceTools />);
 
     // Hộ KD doanh thu > 1 tỷ
-    typeAmount(getAmountInputByLabel(/Doanh thu gộm trên sàn/i), '1200000000');
+    typeAmount(getAmountInputByLabel(/Doanh thu gộp trên sàn/i), '1200000000');
     expect(screen.getByTestId('ecom-threshold-warning')).toBeInTheDocument();
     expect(screen.getByTestId('ecom-basis-nd141')).toHaveTextContent(/141\/2026\/NĐ-CP/);
 
@@ -131,7 +131,7 @@ describe('TAX COMPLIANCE TOOLS UI WRAPPER', () => {
   it('shows error state for invalid (negative) input in both tools', () => {
     render(<TaxComplianceTools />);
 
-    typeAmount(getAmountInputByLabel(/Doanh thu gộm trên sàn/i), '-5');
+    typeAmount(getAmountInputByLabel(/Doanh thu gộp trên sàn/i), '-5');
     expect(screen.getByTestId('ecommerce-error-state')).toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId('tool-tab-rd'));

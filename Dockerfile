@@ -21,10 +21,13 @@ FROM nginx:alpine AS runner
 # Remove default nginx static assets
 RUN rm -rf /usr/share/nginx/html/*
 
-# Copy built assets from builder stage
+# Copy built assets from builder stage and strip Cloudflare-only _headers file
 COPY --from=builder /app/dist /usr/share/nginx/html
+RUN rm -f /usr/share/nginx/html/_headers
 
-# Copy custom nginx configuration
+# Copy custom nginx configuration and shared security header snippet
+RUN mkdir -p /etc/nginx/snippets
+COPY nginx-security-headers.conf /etc/nginx/snippets/security-headers.conf
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Expose HTTP port

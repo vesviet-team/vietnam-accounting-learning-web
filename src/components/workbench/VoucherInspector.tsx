@@ -23,6 +23,7 @@ import {
   NonCashCheckResult,
   VendorTaxStatusCheckResult,
 } from '@/services/tax/tax-guardrails';
+import { getRegimeDisplayMeta } from '@/data/regime-meta';
 
 export interface VoucherInspectorProps {
   currentRegime: AccountingRegime;
@@ -63,6 +64,16 @@ export const VoucherInspector: FC<VoucherInspectorProps> = ({ currentRegime }) =
   const [auditResult, setAuditResult] = useState<AuditResult | null>(null);
   const [completedCases, setCompletedCases] = useState<Record<string, number>>({});
   const [taxLookupModalOpen, setTaxLookupModalOpen] = useState(false);
+  const [validationError, setValidationError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!taxLookupModalOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setTaxLookupModalOpen(false);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [taxLookupModalOpen]);
 
   // Restore persisted completed cases from storageService on mount
   useEffect(() => {
@@ -119,6 +130,7 @@ export const VoucherInspector: FC<VoucherInspectorProps> = ({ currentRegime }) =
       overallDecision: null,
     });
     setAuditResult(null);
+    setValidationError(null);
   };
 
   // Reset current case checklist
@@ -131,6 +143,7 @@ export const VoucherInspector: FC<VoucherInspectorProps> = ({ currentRegime }) =
       overallDecision: null,
     });
     setAuditResult(null);
+    setValidationError(null);
   };
 
   // Reset current case checklist and score
@@ -163,9 +176,10 @@ export const VoucherInspector: FC<VoucherInspectorProps> = ({ currentRegime }) =
   // Submit Audit Inspection
   const handleSubmitAudit = () => {
     if (submission.overallDecision === null) {
-      alert('Vui lòng đưa ra Kết luận kiểm toán (Chứng từ Đạt hay Không Đạt).');
+      setValidationError('Vui lòng đưa ra Kết luận kiểm toán (Chứng từ Đạt hay Không Đạt).');
       return;
     }
+    setValidationError(null);
 
     const actualHasTaxCodeIssue = currentCase.hasTaxCodeIssue;
     const actualViolates20M = currentCase.violates20mCashRule;
@@ -231,14 +245,18 @@ export const VoucherInspector: FC<VoucherInspectorProps> = ({ currentRegime }) =
   return (
     <div className="max-w-6xl mx-auto space-y-6 animate-fade-in pb-16">
       {/* Header Banner */}
-      <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-xs border border-slate-200 dark:border-slate-800 space-y-3">
+      <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center space-x-2 text-xs font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
             <FileCheck2 className="w-4 h-4" />
             <span>Phòng Kiểm Tra & Soát Xét Chứng Từ Kế Toán (Voucher Inspection Room)</span>
           </div>
-          <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
-            Chế độ: {currentRegime === 'CIRCULAR_200' ? 'Thông tư 200' : 'Thông tư 133'}
+          <span
+            className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${
+              getRegimeDisplayMeta(currentRegime).badgeClass
+            }`}
+          >
+            Chế độ: {getRegimeDisplayMeta(currentRegime).fullLabel}
           </span>
         </div>
 
@@ -287,7 +305,7 @@ export const VoucherInspector: FC<VoucherInspectorProps> = ({ currentRegime }) =
                 onClick={() => handleSelectCase(c.id)}
                 className={`p-3 rounded-xl text-left border transition-all flex flex-col justify-between ${
                   isSelected
-                    ? 'bg-white dark:bg-slate-800 border-emerald-500 ring-2 ring-emerald-500/20 shadow-xs'
+                    ? 'bg-white dark:bg-slate-800 border-emerald-500 ring-2 ring-emerald-500/20 shadow-sm'
                     : 'bg-white/60 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700/80 hover:border-slate-300 dark:hover:border-slate-600'
                 }`}
               >
@@ -592,7 +610,7 @@ export const VoucherInspector: FC<VoucherInspectorProps> = ({ currentRegime }) =
 
         {/* Right Column (5 cols): Interactive Audit Checklist & Statutory Assessment */}
         <div className="lg:col-span-5 space-y-4">
-          <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-xs border border-slate-200 dark:border-slate-800 space-y-4">
+          <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 space-y-4">
             <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
               <div className="flex items-center space-x-1.5 font-bold text-sm text-slate-900 dark:text-slate-100">
                 <FileCheck2 className="w-4 h-4 text-emerald-600" />
@@ -706,7 +724,7 @@ export const VoucherInspector: FC<VoucherInspectorProps> = ({ currentRegime }) =
                   }
                   className={`p-2.5 rounded-xl border text-xs font-bold transition-all flex items-center justify-center space-x-1.5 ${
                     submission.overallDecision === 'VALID'
-                      ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
+                      ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
                       : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-emerald-400'
                   }`}
                 >
@@ -721,7 +739,7 @@ export const VoucherInspector: FC<VoucherInspectorProps> = ({ currentRegime }) =
                   }
                   className={`p-2.5 rounded-xl border text-xs font-bold transition-all flex items-center justify-center space-x-1.5 ${
                     submission.overallDecision === 'INVALID'
-                      ? 'bg-rose-600 text-white border-rose-600 shadow-xs'
+                      ? 'bg-rose-600 text-white border-rose-600 shadow-sm'
                       : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-rose-400'
                   }`}
                 >
@@ -730,6 +748,16 @@ export const VoucherInspector: FC<VoucherInspectorProps> = ({ currentRegime }) =
                 </button>
               </div>
             </div>
+
+            {validationError && (
+              <div
+                role="alert"
+                className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 text-xs font-medium text-amber-800 dark:text-amber-200 flex items-center space-x-2"
+              >
+                <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                <span>{validationError}</span>
+              </div>
+            )}
 
             {/* Submit Button */}
             <button
@@ -760,7 +788,7 @@ export const VoucherInspector: FC<VoucherInspectorProps> = ({ currentRegime }) =
                   )}
                   <span className="font-bold text-sm">Kết Quả Chấm Điểm Soát Xét</span>
                 </div>
-                <span className="text-base font-extrabold font-mono px-2.5 py-0.5 rounded-full bg-white/80 dark:bg-slate-800 shadow-xs">
+                <span className="text-base font-extrabold font-mono px-2.5 py-0.5 rounded-full bg-white/80 dark:bg-slate-800 shadow-sm">
                   {auditResult.score}/100 ĐIỂM
                 </span>
               </div>
@@ -872,7 +900,12 @@ export const VoucherInspector: FC<VoucherInspectorProps> = ({ currentRegime }) =
 
       {/* Tax Code GDT Portal Lookup Modal Simulation */}
       {taxLookupModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in">
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Cổng Thông Tin Tổng Cục Thuế — Tra Cứu Người Nộp Thuế"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in"
+        >
           <div className="bg-white dark:bg-slate-900 rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
               <div className="flex items-center space-x-2">

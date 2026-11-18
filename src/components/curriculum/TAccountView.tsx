@@ -182,12 +182,12 @@ export const TAccountView: FC<TAccountViewProps> = ({
   };
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden">
+    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
       {/* Top Header Card */}
       <div className="p-4 sm:p-5 bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <div className="flex items-center space-x-2">
-            <span className="px-2.5 py-1 bg-emerald-600 text-white font-mono font-bold text-xs rounded-lg shadow-2xs">
+            <span className="px-2.5 py-1 bg-emerald-600 text-white font-mono font-bold text-xs rounded-lg shadow-sm">
               TK {initialData.accountCode}
             </span>
             <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
@@ -215,7 +215,7 @@ export const TAccountView: FC<TAccountViewProps> = ({
             <button
               type="button"
               onClick={() => setShowAddForm(!showAddForm)}
-              className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold transition-colors shadow-2xs"
+              className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold transition-colors shadow-sm"
             >
               <PlusCircle className="w-3.5 h-3.5" />
               <span>{showAddForm ? 'Đóng form' : 'Thêm bút toán'}</span>
@@ -283,7 +283,7 @@ export const TAccountView: FC<TAccountViewProps> = ({
             </div>
             <button
               type="submit"
-              className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold shadow-xs transition-colors shrink-0"
+              className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold shadow-sm transition-colors shrink-0"
             >
               Ghi sổ
             </button>

@@ -165,6 +165,18 @@ export const StockCardSimulator: FC<StockCardSimulatorProps> = ({
   // LIFO Modal State
   const [showLifoModal, setShowLifoModal] = useState(false);
 
+  React.useEffect(() => {
+    if (!isModalOpen && !showLifoModal) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsModalOpen(false);
+        setShowLifoModal(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isModalOpen, showLifoModal]);
+
   // Instant reactive recalculation via pure calculation engine in <2ms
   const result: StockCardResult = useMemo(() => {
     return calculateStockCard(method, currentLots, transactions, { strict: false });
@@ -292,7 +304,7 @@ export const StockCardSimulator: FC<StockCardSimulatorProps> = ({
 
   return (
     <div
-      className={`bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden font-sans text-slate-800 ${className}`}
+      className={`bg-white dark:bg-slate-900 rounded-xl shadow-lg border border-slate-200 dark:border-slate-800 overflow-hidden font-sans text-slate-800 dark:text-slate-200 ${className}`}
       data-testid="stock-card-simulator-container"
     >
       {/* 1. Header & Regulatory Reference Banner */}
@@ -351,10 +363,10 @@ export const StockCardSimulator: FC<StockCardSimulatorProps> = ({
       </div>
 
       {/* 2. Method Selector & Controls Toolbar */}
-      <div className="p-4 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-4">
+      <div className="p-4 bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-xs font-semibold text-slate-600 uppercase tracking-wider mr-1 flex items-center gap-1">
-            <Layers className="w-3.5 h-3.5 text-slate-500" />
+          <span className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mr-1 flex items-center gap-1">
+            <Layers className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
             Phương pháp xuất kho:
           </span>
 
@@ -364,7 +376,7 @@ export const StockCardSimulator: FC<StockCardSimulatorProps> = ({
             className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-all ${
               method === 'FIFO'
                 ? 'bg-blue-600 text-white border-blue-700 shadow-sm'
-                : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100'
+                : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700'
             }`}
             data-testid="method-btn-FIFO"
           >
@@ -377,7 +389,7 @@ export const StockCardSimulator: FC<StockCardSimulatorProps> = ({
             className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-all ${
               method === 'PERIODIC_WEIGHTED_AVERAGE'
                 ? 'bg-blue-600 text-white border-blue-700 shadow-sm'
-                : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100'
+                : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700'
             }`}
             data-testid="method-btn-PERIODIC_WEIGHTED_AVERAGE"
           >
@@ -390,7 +402,7 @@ export const StockCardSimulator: FC<StockCardSimulatorProps> = ({
             className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-all ${
               method === 'MOVING_WEIGHTED_AVERAGE'
                 ? 'bg-blue-600 text-white border-blue-700 shadow-sm'
-                : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100'
+                : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700'
             }`}
             data-testid="method-btn-MOVING_WEIGHTED_AVERAGE"
           >
@@ -403,7 +415,7 @@ export const StockCardSimulator: FC<StockCardSimulatorProps> = ({
             className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-all flex items-center gap-1.5 ${
               method === 'LIFO'
                 ? 'bg-amber-600 text-white border-amber-700 shadow-sm'
-                : 'bg-white text-amber-800 border-amber-300 hover:bg-amber-50'
+                : 'bg-white dark:bg-slate-900 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950/40'
             }`}
             data-testid="method-btn-LIFO"
           >
@@ -414,7 +426,7 @@ export const StockCardSimulator: FC<StockCardSimulatorProps> = ({
           <button
             type="button"
             onClick={() => setShowLifoModal(true)}
-            className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+            className="p-1.5 text-slate-500 dark:text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/40 rounded-md transition-colors"
             title="Tra cứu quy định bãi bỏ LIFO theo VAS 02, IAS 2, TT 200/133/99"
             data-testid="lifo-info-btn"
           >
@@ -438,17 +450,17 @@ export const StockCardSimulator: FC<StockCardSimulatorProps> = ({
       {/* 3. Negative Stock Violation Guardrail Banner */}
       {result.hasNegativeStock && (
         <div
-          className="mx-4 mt-4 p-4 bg-red-50 border-l-4 border-red-500 text-red-800 rounded-r-lg shadow-sm"
+          className="mx-4 mt-4 p-4 bg-red-50 dark:bg-red-950/30 border-l-4 border-red-500 text-red-800 dark:text-red-300 rounded-r-lg shadow-sm"
           role="alert"
           data-testid="negative-stock-warning"
         >
           <div className="flex items-start gap-3">
             <AlertTriangle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
             <div>
-              <h4 className="text-sm font-bold text-red-900 uppercase tracking-wide">
+              <h4 className="text-sm font-bold text-red-900 dark:text-red-200 uppercase tracking-wide">
                 Cảnh báo vi phạm: Xuất âm kho! Số lượng tồn kho không được phép nhỏ hơn 0 tại thời điểm xuất
               </h4>
-              <p className="text-xs text-red-700 mt-1 leading-relaxed">
+              <p className="text-xs text-red-700 dark:text-red-300 mt-1 leading-relaxed">
                 Rào chắn kiểm soát nội bộ & Chuẩn mực Kế toán VAS 02: Doanh nghiệp không thể xuất kho vượt quá số lượng hàng thực tế đang có sẵn tại thời điểm ghi sổ. Vui lòng kiểm tra lại thứ tự ngày ghi sổ hoặc bổ sung chứng từ Nhập kho (PNK) trước thời điểm xuất hàng.
               </p>
             </div>
@@ -459,33 +471,33 @@ export const StockCardSimulator: FC<StockCardSimulatorProps> = ({
       {/* 4. Statutory LIFO Warning Banner (when LIFO selected) */}
       {method === 'LIFO' && (
         <div
-          className="mx-4 mt-4 p-4 bg-amber-50 border-l-4 border-amber-500 text-amber-900 rounded-r-lg shadow-sm"
+          className="mx-4 mt-4 p-4 bg-amber-50 dark:bg-amber-950/30 border-l-4 border-amber-500 text-amber-900 dark:text-amber-200 rounded-r-lg shadow-sm"
           role="alert"
           data-testid="lifo-statutory-warning"
         >
           <div className="flex items-start gap-3">
             <ShieldAlert className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
             <div>
-              <h4 className="text-sm font-bold text-amber-900 uppercase tracking-wide">
+              <h4 className="text-sm font-bold text-amber-900 dark:text-amber-200 uppercase tracking-wide">
                 Cảnh báo chuẩn mực: Phương pháp LIFO đã bị bãi bỏ tại Việt Nam
               </h4>
-              <p className="text-xs text-amber-800 mt-1 leading-relaxed">
+              <p className="text-xs text-amber-800 dark:text-amber-300 mt-1 leading-relaxed">
                 {LIFO_PROHIBITED_EXPLANATION_VI}
               </p>
               <div className="mt-2 flex flex-wrap gap-2 text-[11px] font-medium text-amber-700">
-                <span className="px-2 py-0.5 bg-amber-100 rounded border border-amber-200">
+                <span className="px-2 py-0.5 bg-amber-100 dark:bg-amber-950/50 rounded border border-amber-200 dark:border-amber-800">
                   Chuẩn mực VAS 02
                 </span>
-                <span className="px-2 py-0.5 bg-amber-100 rounded border border-amber-200">
+                <span className="px-2 py-0.5 bg-amber-100 dark:bg-amber-950/50 rounded border border-amber-200 dark:border-amber-800">
                   Chuẩn mực IAS 2
                 </span>
-                <span className="px-2 py-0.5 bg-amber-100 rounded border border-amber-200">
+                <span className="px-2 py-0.5 bg-amber-100 dark:bg-amber-950/50 rounded border border-amber-200 dark:border-amber-800">
                   Thông tư 200/2014/TT-BTC
                 </span>
-                <span className="px-2 py-0.5 bg-amber-100 rounded border border-amber-200">
+                <span className="px-2 py-0.5 bg-amber-100 dark:bg-amber-950/50 rounded border border-amber-200 dark:border-amber-800">
                   Thông tư 133/2016/TT-BTC
                 </span>
-                <span className="px-2 py-0.5 bg-amber-100 rounded border border-amber-200">
+                <span className="px-2 py-0.5 bg-amber-100 dark:bg-amber-950/50 rounded border border-amber-200 dark:border-amber-800">
                   Thông tư 99/2025/TT-BTC
                 </span>
               </div>
@@ -495,44 +507,44 @@ export const StockCardSimulator: FC<StockCardSimulatorProps> = ({
       )}
 
       {/* 5. Summary KPI Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 p-4 bg-slate-100/70 border-b border-slate-200">
-        <div className="bg-white p-3 rounded-lg border border-slate-200 shadow-xs">
-          <div className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 p-4 bg-slate-100/70 dark:bg-slate-800/70 border-b border-slate-200 dark:border-slate-800">
+        <div className="bg-white dark:bg-slate-900 p-3 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm">
+          <div className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
             Tồn đầu kỳ
           </div>
-          <div className="text-base font-bold text-slate-800 mt-1" data-testid="kpi-initial-qty">
-            {formatQty(initialQtyTotal)} <span className="text-xs font-normal text-slate-500">tấn</span>
+          <div className="text-base font-bold text-slate-800 dark:text-slate-200 mt-1" data-testid="kpi-initial-qty">
+            {formatQty(initialQtyTotal)} <span className="text-xs font-normal text-slate-500 dark:text-slate-400">tấn</span>
           </div>
-          <div className="text-xs text-slate-500 mt-0.5">{formatVnd(initialAmountTotal)}</div>
+          <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{formatVnd(initialAmountTotal)}</div>
         </div>
 
-        <div className="bg-white p-3 rounded-lg border border-slate-200 shadow-xs">
+        <div className="bg-white dark:bg-slate-900 p-3 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm">
           <div className="text-[11px] font-semibold text-emerald-600 uppercase tracking-wider flex items-center gap-1">
             <ArrowDownLeft className="w-3.5 h-3.5 text-emerald-500" />
             Tổng Nhập trong kỳ
           </div>
           <div className="text-base font-bold text-emerald-700 mt-1" data-testid="kpi-total-in-qty">
-            {formatQty(result.totalInQty)} <span className="text-xs font-normal text-slate-500">tấn</span>
+            {formatQty(result.totalInQty)} <span className="text-xs font-normal text-slate-500 dark:text-slate-400">tấn</span>
           </div>
           <div className="text-xs text-emerald-600 font-medium mt-0.5">
             {formatVnd(result.totalInAmount)}
           </div>
         </div>
 
-        <div className="bg-white p-3 rounded-lg border border-slate-200 shadow-xs">
+        <div className="bg-white dark:bg-slate-900 p-3 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm">
           <div className="text-[11px] font-semibold text-blue-600 uppercase tracking-wider flex items-center gap-1">
             <ArrowUpRight className="w-3.5 h-3.5 text-blue-500" />
             Tổng Xuất trong kỳ
           </div>
           <div className="text-base font-bold text-blue-700 mt-1" data-testid="kpi-total-out-qty">
-            {formatQty(result.totalOutQty)} <span className="text-xs font-normal text-slate-500">tấn</span>
+            {formatQty(result.totalOutQty)} <span className="text-xs font-normal text-slate-500 dark:text-slate-400">tấn</span>
           </div>
           <div className="text-xs text-blue-600 font-medium mt-0.5">
             {formatVnd(result.totalOutAmount)}
           </div>
         </div>
 
-        <div className="bg-white p-3 rounded-lg border border-slate-200 shadow-xs">
+        <div className="bg-white dark:bg-slate-900 p-3 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm">
           <div className="text-[11px] font-semibold text-indigo-600 uppercase tracking-wider">
             Giá vốn xuất bán (TK 632)
           </div>
@@ -544,13 +556,13 @@ export const StockCardSimulator: FC<StockCardSimulatorProps> = ({
           </div>
         </div>
 
-        <div className="bg-white p-3 rounded-lg border border-slate-200 shadow-xs col-span-2 md:col-span-1">
+        <div className="bg-white dark:bg-slate-900 p-3 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm col-span-2 md:col-span-1">
           <div className="text-[11px] font-semibold text-purple-600 uppercase tracking-wider flex items-center gap-1">
             <Package className="w-3.5 h-3.5 text-purple-500" />
             Tồn cuối kỳ (TK 156)
           </div>
           <div className="text-base font-bold text-purple-700 mt-1" data-testid="kpi-ending-qty">
-            {formatQty(result.endingBalanceQty)} <span className="text-xs font-normal text-slate-500">tấn</span>
+            {formatQty(result.endingBalanceQty)} <span className="text-xs font-normal text-slate-500 dark:text-slate-400">tấn</span>
           </div>
           <div className="text-xs text-purple-600 font-medium mt-0.5">
             {formatVnd(result.endingBalanceAmount)}
@@ -566,52 +578,52 @@ export const StockCardSimulator: FC<StockCardSimulatorProps> = ({
         >
           <thead>
             {/* Top Multi-column Header Row */}
-            <tr className="bg-slate-100 text-slate-700 border-b border-slate-300 font-semibold">
+            <tr className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-b border-slate-300 dark:border-slate-700 font-semibold">
               <th
                 rowSpan={2}
-                className="p-3 border-r border-slate-300 text-center min-w-[95px] align-middle"
+                className="p-3 border-r border-slate-300 dark:border-slate-700 text-center min-w-[95px] align-middle"
               >
                 Ngày ghi sổ / chứng từ
               </th>
               <th
                 colSpan={2}
-                className="p-2 border-r border-slate-300 text-center align-middle"
+                className="p-2 border-r border-slate-300 dark:border-slate-700 text-center align-middle"
               >
                 Chứng từ
               </th>
               <th
                 rowSpan={2}
-                className="p-3 border-r border-slate-300 min-w-[200px] align-middle"
+                className="p-3 border-r border-slate-300 dark:border-slate-700 min-w-[200px] align-middle"
               >
                 Diễn giải nội dung kinh tế
               </th>
               <th
                 rowSpan={2}
-                className="p-3 border-r border-slate-300 text-center min-w-[130px] align-middle"
+                className="p-3 border-r border-slate-300 dark:border-slate-700 text-center min-w-[130px] align-middle"
               >
                 TK đối ứng
               </th>
               <th
                 rowSpan={2}
-                className="p-3 border-r border-slate-300 text-right min-w-[100px] align-middle"
+                className="p-3 border-r border-slate-300 dark:border-slate-700 text-right min-w-[100px] align-middle"
               >
                 Đơn giá xuất kho
               </th>
               <th
                 colSpan={2}
-                className="p-2 border-r border-slate-300 text-center bg-emerald-50 text-emerald-900"
+                className="p-2 border-r border-slate-300 dark:border-slate-700 text-center bg-emerald-50 dark:bg-emerald-950/30 text-emerald-900 dark:text-emerald-200"
               >
                 Nhập kho
               </th>
               <th
                 colSpan={2}
-                className="p-2 border-r border-slate-300 text-center bg-blue-50 text-blue-900"
+                className="p-2 border-r border-slate-300 dark:border-slate-700 text-center bg-blue-50 dark:bg-blue-950/30 text-blue-900 dark:text-blue-200"
               >
                 Xuất kho
               </th>
               <th
                 colSpan={2}
-                className="p-2 border-r border-slate-300 text-center bg-purple-50 text-purple-900"
+                className="p-2 border-r border-slate-300 dark:border-slate-700 text-center bg-purple-50 dark:bg-purple-950/30 text-purple-900 dark:text-purple-200"
               >
                 Tồn kho
               </th>
@@ -624,59 +636,59 @@ export const StockCardSimulator: FC<StockCardSimulatorProps> = ({
             </tr>
 
             {/* Sub-column Header Row */}
-            <tr className="bg-slate-50 text-slate-600 border-b border-slate-300 text-xs">
-              <th className="p-2 border-r border-slate-300 text-center min-w-[90px]">
+            <tr className="bg-slate-50 dark:bg-slate-800/60 text-slate-600 dark:text-slate-400 border-b border-slate-300 dark:border-slate-700 text-xs">
+              <th className="p-2 border-r border-slate-300 dark:border-slate-700 text-center min-w-[90px]">
                 Số hiệu
               </th>
-              <th className="p-2 border-r border-slate-300 text-center min-w-[120px]">
+              <th className="p-2 border-r border-slate-300 dark:border-slate-700 text-center min-w-[120px]">
                 Loại chứng từ
               </th>
               {/* Nhập */}
-              <th className="p-2 border-r border-slate-300 text-right bg-emerald-50/50 min-w-[75px]">
+              <th className="p-2 border-r border-slate-300 dark:border-slate-700 text-right bg-emerald-50/50 dark:bg-emerald-950/30 min-w-[75px]">
                 Số lượng
               </th>
-              <th className="p-2 border-r border-slate-300 text-right bg-emerald-50/50 min-w-[105px]">
+              <th className="p-2 border-r border-slate-300 dark:border-slate-700 text-right bg-emerald-50/50 dark:bg-emerald-950/30 min-w-[105px]">
                 Thành tiền
               </th>
               {/* Xuất */}
-              <th className="p-2 border-r border-slate-300 text-right bg-blue-50/50 min-w-[75px]">
+              <th className="p-2 border-r border-slate-300 dark:border-slate-700 text-right bg-blue-50/50 dark:bg-blue-950/30 min-w-[75px]">
                 Số lượng
               </th>
-              <th className="p-2 border-r border-slate-300 text-right bg-blue-50/50 min-w-[105px]">
+              <th className="p-2 border-r border-slate-300 dark:border-slate-700 text-right bg-blue-50/50 dark:bg-blue-950/30 min-w-[105px]">
                 Thành tiền
               </th>
               {/* Tồn */}
-              <th className="p-2 border-r border-slate-300 text-right bg-purple-50/50 min-w-[75px]">
+              <th className="p-2 border-r border-slate-300 dark:border-slate-700 text-right bg-purple-50/50 dark:bg-purple-950/30 min-w-[75px]">
                 Số lượng
               </th>
-              <th className="p-2 border-r border-slate-300 text-right bg-purple-50/50 min-w-[105px]">
+              <th className="p-2 border-r border-slate-300 dark:border-slate-700 text-right bg-purple-50/50 dark:bg-purple-950/30 min-w-[105px]">
                 Thành tiền
               </th>
             </tr>
           </thead>
 
-          <tbody className="divide-y divide-slate-200">
+          <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
             {/* Initial Stock Balance Row */}
             <tr
-              className="bg-slate-50/60 font-medium text-slate-700 hover:bg-slate-100/60 transition-colors"
+              className="bg-slate-50/60 dark:bg-slate-800/40 font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100/60 dark:hover:bg-slate-800/60 transition-colors"
               data-testid="initial-stock-row"
             >
-              <td className="p-2.5 text-center text-slate-500">
+              <td className="p-2.5 text-center text-slate-500 dark:text-slate-400">
                 {formatDateVi(currentLots[0]?.date ?? '2026-01-01')}
               </td>
-              <td className="p-2.5 text-center font-mono text-xs text-slate-600">
+              <td className="p-2.5 text-center font-mono text-xs text-slate-600 dark:text-slate-400">
                 {currentLots[0]?.voucherCode ?? 'SDDK'}
               </td>
               <td className="p-2.5 text-center">
-                <span className="px-2 py-0.5 text-[11px] font-medium bg-slate-200 text-slate-700 rounded">
+                <span className="px-2 py-0.5 text-[11px] font-medium bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded">
                   Số dư ĐK
                 </span>
               </td>
-              <td className="p-2.5 font-medium text-slate-800">
+              <td className="p-2.5 font-medium text-slate-800 dark:text-slate-200">
                 Số dư tồn đầu kỳ
               </td>
               <td className="p-2.5 text-center text-slate-400 font-mono text-xs">-</td>
-              <td className="p-2.5 text-right font-mono text-xs text-slate-600">
+              <td className="p-2.5 text-right font-mono text-xs text-slate-600 dark:text-slate-400">
                 {formatPrice(initialUnitPrice)}
               </td>
               {/* Nhập */}
@@ -686,10 +698,10 @@ export const StockCardSimulator: FC<StockCardSimulatorProps> = ({
               <td className="p-2.5 text-right text-slate-400">-</td>
               <td className="p-2.5 text-right text-slate-400">-</td>
               {/* Tồn */}
-              <td className="p-2.5 text-right font-semibold text-purple-900 bg-purple-50/30 font-mono">
+              <td className="p-2.5 text-right font-semibold text-purple-900 dark:text-purple-200 bg-purple-50/30 dark:bg-purple-950/20 font-mono">
                 {formatQty(initialQtyTotal)}
               </td>
-              <td className="p-2.5 text-right font-semibold text-purple-900 bg-purple-50/30 font-mono">
+              <td className="p-2.5 text-right font-semibold text-purple-900 dark:text-purple-200 bg-purple-50/30 dark:bg-purple-950/20 font-mono">
                 {formatVnd(initialAmountTotal)}
               </td>
               <td className="p-2.5 text-center text-slate-400 text-xs">Mặc định</td>
@@ -706,8 +718,8 @@ export const StockCardSimulator: FC<StockCardSimulatorProps> = ({
                   data-testid={`stock-row-${row.id}`}
                   className={`transition-colors ${
                     isNegative
-                      ? 'bg-red-50 text-red-950 font-medium hover:bg-red-100/70 border-l-4 border-red-500'
-                      : 'hover:bg-slate-50/80 text-slate-800'
+                      ? 'bg-red-50 dark:bg-red-950/30 text-red-950 dark:text-red-100 font-medium hover:bg-red-100/70 dark:hover:bg-red-950/40 border-l-4 border-red-500'
+                      : 'hover:bg-slate-50/80 dark:hover:bg-slate-800/40 text-slate-800 dark:text-slate-200'
                   }`}
                 >
                   {/* Ngày */}
@@ -723,19 +735,19 @@ export const StockCardSimulator: FC<StockCardSimulatorProps> = ({
                   {/* Loại chứng từ */}
                   <td className="p-2.5 text-center">
                     {row.voucherType === 'PNK' && (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-semibold bg-emerald-100 text-emerald-800 rounded border border-emerald-300">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-semibold bg-emerald-100 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-300 rounded border border-emerald-300 dark:border-emerald-700">
                         <ArrowDownLeft className="w-3 h-3 text-emerald-600" />
                         PNK (Nhập kho)
                       </span>
                     )}
                     {row.voucherType === 'PXK' && (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-semibold bg-blue-100 text-blue-800 rounded border border-blue-300">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-semibold bg-blue-100 dark:bg-blue-950/50 text-blue-800 dark:text-blue-300 rounded border border-blue-300 dark:border-blue-700">
                         <ArrowUpRight className="w-3 h-3 text-blue-600" />
                         PXK (Xuất bán)
                       </span>
                     )}
                     {row.voucherType === 'XKNB_03' && (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-semibold bg-purple-100 text-purple-800 rounded border border-purple-300">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-semibold bg-purple-100 dark:bg-purple-950/50 text-purple-800 dark:text-purple-300 rounded border border-purple-300 dark:border-purple-700">
                         <Truck className="w-3 h-3 text-purple-600" />
                         XKNB Mẫu 03
                       </span>
@@ -746,7 +758,7 @@ export const StockCardSimulator: FC<StockCardSimulatorProps> = ({
                   <td className="p-2.5">
                     <div className="font-medium text-xs md:text-sm">{row.description}</div>
                     {row.explanationVi && (
-                      <div className="text-[11px] text-slate-500 italic mt-0.5">
+                      <div className="text-[11px] text-slate-500 dark:text-slate-400 italic mt-0.5">
                         {row.explanationVi}
                       </div>
                     )}
@@ -763,10 +775,10 @@ export const StockCardSimulator: FC<StockCardSimulatorProps> = ({
                     <span
                       className={`px-2 py-0.5 rounded border ${
                         row.voucherType === 'PXK'
-                          ? 'bg-blue-50 text-blue-800 border-blue-200'
+                          ? 'bg-blue-50 dark:bg-blue-950/30 text-blue-800 dark:text-blue-300 border-blue-200 dark:border-blue-800'
                           : row.voucherType === 'XKNB_03'
-                          ? 'bg-purple-50 text-purple-800 border-purple-200'
-                          : 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                          ? 'bg-purple-50 dark:bg-purple-950/30 text-purple-800 dark:text-purple-300 border-purple-200 dark:border-purple-800'
+                          : 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
                       }`}
                       data-testid={`target-account-${row.id}`}
                     >
@@ -775,38 +787,38 @@ export const StockCardSimulator: FC<StockCardSimulatorProps> = ({
                   </td>
 
                   {/* Đơn giá xuất kho */}
-                  <td className="p-2.5 text-right font-mono text-xs text-slate-700">
+                  <td className="p-2.5 text-right font-mono text-xs text-slate-700 dark:text-slate-300">
                     {row.outPrice > 0 ? formatPrice(row.outPrice) : '-'}
                   </td>
 
                   {/* Nhập - Số lượng */}
-                  <td className="p-2.5 text-right font-mono text-xs bg-emerald-50/30 text-emerald-800 font-semibold">
+                  <td className="p-2.5 text-right font-mono text-xs bg-emerald-50/30 dark:bg-emerald-950/20 text-emerald-800 dark:text-emerald-300 font-semibold">
                     {row.inQty > 0 ? formatQty(row.inQty) : '-'}
                   </td>
 
                   {/* Nhập - Thành tiền */}
-                  <td className="p-2.5 text-right font-mono text-xs bg-emerald-50/30 text-emerald-900 font-semibold">
+                  <td className="p-2.5 text-right font-mono text-xs bg-emerald-50/30 dark:bg-emerald-950/20 text-emerald-900 dark:text-emerald-200 font-semibold">
                     {row.inAmount > 0 ? formatVnd(row.inAmount) : '-'}
                   </td>
 
                   {/* Xuất - Số lượng */}
                   <td
-                    className={`p-2.5 text-right font-mono text-xs bg-blue-50/30 font-semibold ${
-                      isNegative ? 'text-red-700 font-bold underline' : 'text-blue-800'
+                    className={`p-2.5 text-right font-mono text-xs bg-blue-50/30 dark:bg-blue-950/20 font-semibold ${
+                      isNegative ? 'text-red-700 dark:text-red-300 font-bold underline' : 'text-blue-800 dark:text-blue-300'
                     }`}
                   >
                     {row.outQty > 0 ? formatQty(row.outQty) : '-'}
                   </td>
 
                   {/* Xuất - Thành tiền */}
-                  <td className="p-2.5 text-right font-mono text-xs bg-blue-50/30 text-blue-900 font-semibold">
+                  <td className="p-2.5 text-right font-mono text-xs bg-blue-50/30 dark:bg-blue-950/20 text-blue-900 dark:text-blue-200 font-semibold">
                     {row.outAmount > 0 ? formatVnd(row.outAmount) : '-'}
                   </td>
 
                   {/* Tồn - Số lượng */}
                   <td
-                    className={`p-2.5 text-right font-mono text-xs font-bold bg-purple-50/30 ${
-                      row.balanceQty < 0 ? 'text-red-600' : 'text-purple-900'
+                    className={`p-2.5 text-right font-mono text-xs font-bold bg-purple-50/30 dark:bg-purple-950/20 ${
+                      row.balanceQty < 0 ? 'text-red-600' : 'text-purple-900 dark:text-purple-200'
                     }`}
                   >
                     {formatQty(row.balanceQty)}
@@ -814,8 +826,8 @@ export const StockCardSimulator: FC<StockCardSimulatorProps> = ({
 
                   {/* Tồn - Thành tiền */}
                   <td
-                    className={`p-2.5 text-right font-mono text-xs font-bold bg-purple-50/30 ${
-                      row.balanceAmount < 0 ? 'text-red-600' : 'text-purple-900'
+                    className={`p-2.5 text-right font-mono text-xs font-bold bg-purple-50/30 dark:bg-purple-950/20 ${
+                      row.balanceAmount < 0 ? 'text-red-600' : 'text-purple-900 dark:text-purple-200'
                     }`}
                   >
                     {formatVnd(row.balanceAmount)}
@@ -828,7 +840,7 @@ export const StockCardSimulator: FC<StockCardSimulatorProps> = ({
                         <button
                           type="button"
                           onClick={() => handleOpenEditModal(originalTx)}
-                          className="p-1 text-slate-500 hover:text-blue-600 hover:bg-blue-100 rounded transition-colors"
+                          className="p-1 text-slate-500 dark:text-slate-400 hover:text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded transition-colors"
                           title="Chỉnh sửa dòng chứng từ"
                           data-testid={`edit-btn-${row.id}`}
                         >
@@ -838,7 +850,7 @@ export const StockCardSimulator: FC<StockCardSimulatorProps> = ({
                       <button
                         type="button"
                         onClick={() => handleDeleteTransaction(row.id)}
-                        className="p-1 text-slate-500 hover:text-red-600 hover:bg-red-100 rounded transition-colors"
+                        className="p-1 text-slate-500 dark:text-slate-400 hover:text-red-600 hover:bg-red-100 dark:hover:bg-red-950/50 rounded transition-colors"
                         title="Xóa dòng chứng từ"
                         data-testid={`delete-btn-${row.id}`}
                       >
@@ -852,30 +864,30 @@ export const StockCardSimulator: FC<StockCardSimulatorProps> = ({
           </tbody>
 
           {/* Table Footer: Totals */}
-          <tfoot className="bg-slate-100 text-slate-900 font-bold border-t-2 border-slate-300 text-xs md:text-sm">
+          <tfoot className="bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 font-bold border-t-2 border-slate-300 dark:border-slate-700 text-xs md:text-sm">
             <tr>
-              <td colSpan={6} className="p-3 text-right uppercase tracking-wider text-slate-600">
+              <td colSpan={6} className="p-3 text-right uppercase tracking-wider text-slate-600 dark:text-slate-400">
                 Tổng cộng số phát sinh trong kỳ:
               </td>
               {/* Tổng Nhập */}
-              <td className="p-3 text-right font-mono text-emerald-900 bg-emerald-100/60 font-bold">
+              <td className="p-3 text-right font-mono text-emerald-900 dark:text-emerald-200 bg-emerald-100/60 dark:bg-emerald-950/40 font-bold">
                 {formatQty(result.totalInQty)}
               </td>
-              <td className="p-3 text-right font-mono text-emerald-900 bg-emerald-100/60 font-bold">
+              <td className="p-3 text-right font-mono text-emerald-900 dark:text-emerald-200 bg-emerald-100/60 dark:bg-emerald-950/40 font-bold">
                 {formatVnd(result.totalInAmount)}
               </td>
               {/* Tổng Xuất */}
-              <td className="p-3 text-right font-mono text-blue-900 bg-blue-100/60 font-bold">
+              <td className="p-3 text-right font-mono text-blue-900 dark:text-blue-200 bg-blue-100/60 dark:bg-blue-950/40 font-bold">
                 {formatQty(result.totalOutQty)}
               </td>
-              <td className="p-3 text-right font-mono text-blue-900 bg-blue-100/60 font-bold">
+              <td className="p-3 text-right font-mono text-blue-900 dark:text-blue-200 bg-blue-100/60 dark:bg-blue-950/40 font-bold">
                 {formatVnd(result.totalOutAmount)}
               </td>
               {/* Tồn Cuối Kỳ */}
-              <td className="p-3 text-right font-mono text-purple-900 bg-purple-100/60 font-bold">
+              <td className="p-3 text-right font-mono text-purple-900 dark:text-purple-200 bg-purple-100/60 dark:bg-purple-950/40 font-bold">
                 {formatQty(result.endingBalanceQty)}
               </td>
-              <td className="p-3 text-right font-mono text-purple-900 bg-purple-100/60 font-bold">
+              <td className="p-3 text-right font-mono text-purple-900 dark:text-purple-200 bg-purple-100/60 dark:bg-purple-950/40 font-bold">
                 {formatVnd(result.endingBalanceAmount)}
               </td>
               <td className="p-3 text-center text-slate-400">-</td>
@@ -885,23 +897,23 @@ export const StockCardSimulator: FC<StockCardSimulatorProps> = ({
       </div>
 
       {/* 7. Pedagogical & Regulatory Method Explainer Box */}
-      <div className="p-4 bg-slate-50 border-t border-slate-200 text-xs text-slate-600">
+      <div className="p-4 bg-slate-50 dark:bg-slate-800/60 border-t border-slate-200 dark:border-slate-800 text-xs text-slate-600 dark:text-slate-400">
         <div className="flex items-start gap-2">
-          <FileText className="w-4 h-4 text-slate-500 mt-0.5 flex-shrink-0" />
+          <FileText className="w-4 h-4 text-slate-500 dark:text-slate-400 mt-0.5 flex-shrink-0" />
           <div className="space-y-1">
-            <div className="font-semibold text-slate-800">
+            <div className="font-semibold text-slate-800 dark:text-slate-200">
               Cơ chế phản ánh hạch toán theo Chuẩn mực & Thông tư 99/2025/TT-BTC:
             </div>
             <p>
               • <strong>Xuất bán thương mại (PXK Form 02-VT)</strong>: Ghi nhận giá vốn trực tiếp vào{' '}
-              <span className="font-mono font-semibold text-blue-700 bg-blue-50 px-1 py-0.5 rounded border border-blue-200">
+              <span className="font-mono font-semibold text-blue-700 bg-blue-50 dark:bg-blue-950/30 px-1 py-0.5 rounded border border-blue-200 dark:border-blue-800">
                 Nợ TK 632 / Có TK 156
               </span>
               . Giá vốn này kết chuyển vào Báo cáo KQKD (Mã 11).
             </p>
             <p>
               • <strong>Điều chuyển / Gửi đại lý (Phiếu XK kiêm VCNB Mẫu 03/XKNB)</strong>: Tuân thủ Nghị định 254/2026, chỉ phản ánh luân chuyển hàng gửi bán hoặc điều chuyển kho, hạch toán{' '}
-              <span className="font-mono font-semibold text-purple-700 bg-purple-50 px-1 py-0.5 rounded border border-purple-200">
+              <span className="font-mono font-semibold text-purple-700 bg-purple-50 dark:bg-purple-950/30 px-1 py-0.5 rounded border border-purple-200 dark:border-purple-800">
                 Nợ TK 157 / Có TK 156
               </span>
               . Không ghi nhận giá vốn TK 632 tại thời điểm lập phiếu xuất.
@@ -926,10 +938,13 @@ export const StockCardSimulator: FC<StockCardSimulatorProps> = ({
       {/* 8. Add / Edit Transaction Modal */}
       {isModalOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-xs"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Chứng từ thẻ kho"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm"
           data-testid="transaction-modal"
         >
-          <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-200 animate-in fade-in zoom-in-95 duration-150">
+          <div className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-200 dark:border-slate-800 animate-in fade-in zoom-in-95 duration-150">
             <div className="bg-slate-900 text-white p-4 flex items-center justify-between">
               <h3 className="text-base font-bold flex items-center gap-2">
                 <Edit2 className="w-4 h-4 text-blue-400" />
@@ -948,7 +963,7 @@ export const StockCardSimulator: FC<StockCardSimulatorProps> = ({
             <form onSubmit={handleSaveTransaction} className="p-5 space-y-4">
               {formError && (
                 <div
-                  className="p-3 bg-red-50 border border-red-300 text-red-700 text-xs rounded-lg flex items-center gap-2"
+                  className="p-3 bg-red-50 dark:bg-red-950/30 border border-red-300 dark:border-red-800 text-red-700 dark:text-red-300 text-xs rounded-lg flex items-center gap-2"
                   data-testid="form-error-alert"
                 >
                   <AlertTriangle className="w-4 h-4 text-red-500 flex-shrink-0" />
@@ -958,7 +973,7 @@ export const StockCardSimulator: FC<StockCardSimulatorProps> = ({
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                     Ngày chứng từ
                   </label>
                   <input
@@ -966,13 +981,13 @@ export const StockCardSimulator: FC<StockCardSimulatorProps> = ({
                     value={formDate}
                     onChange={(e) => setFormDate(e.target.value)}
                     required
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs font-mono focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-hidden"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-lg text-xs font-mono focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                     data-testid="input-date"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                     Số hiệu chứng từ
                   </label>
                   <input
@@ -981,14 +996,14 @@ export const StockCardSimulator: FC<StockCardSimulatorProps> = ({
                     onChange={(e) => setFormVoucherCode(e.target.value)}
                     placeholder="PNK-xxx, PXK-xxx, XKNB-xxx"
                     required
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs font-mono font-semibold focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-hidden uppercase"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-lg text-xs font-mono font-semibold focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none uppercase"
                     data-testid="input-voucher-code"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                   Loại chứng từ
                 </label>
                 <select
@@ -1007,7 +1022,7 @@ export const StockCardSimulator: FC<StockCardSimulatorProps> = ({
                       setFormVoucherCode(`PXK-${String(transactions.length + 1).padStart(3, '0')}`);
                     }
                   }}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs font-semibold focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-hidden"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-lg text-xs font-semibold focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                   data-testid="select-voucher-type"
                 >
                   <option value="PNK">PNK - Phiếu nhập kho (Có 152/156)</option>
@@ -1019,7 +1034,7 @@ export const StockCardSimulator: FC<StockCardSimulatorProps> = ({
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                   Diễn giải nội dung kinh tế
                 </label>
                 <input
@@ -1028,14 +1043,14 @@ export const StockCardSimulator: FC<StockCardSimulatorProps> = ({
                   onChange={(e) => setFormDescription(e.target.value)}
                   placeholder="Ghi rõ nội dung nghiệp vụ kinh tế phát sinh"
                   required
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-hidden"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-lg text-xs focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                   data-testid="input-description"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                     Số lượng (tấn)
                   </label>
                   <input
@@ -1044,13 +1059,13 @@ export const StockCardSimulator: FC<StockCardSimulatorProps> = ({
                     value={formQuantity}
                     onChange={(e) => setFormQuantity(Number(e.target.value))}
                     required
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs font-mono font-bold focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-hidden"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-lg text-xs font-mono font-bold focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                     data-testid="input-quantity"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                     Đơn giá nhập (đ/tấn)
                   </label>
                   <input
@@ -1060,19 +1075,21 @@ export const StockCardSimulator: FC<StockCardSimulatorProps> = ({
                     value={formVoucherType === 'PNK' ? formUnitPrice : ''}
                     onChange={(e) => setFormUnitPrice(Number(e.target.value))}
                     placeholder={formVoucherType !== 'PNK' ? 'Tự động tính theo phương pháp' : '0'}
-                    className={`w-full px-3 py-2 border border-slate-300 rounded-lg text-xs font-mono focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-hidden ${
-                      formVoucherType !== 'PNK' ? 'bg-slate-100 text-slate-400 cursor-not-allowed' : ''
+                    className={`w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg text-xs font-mono focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none ${
+                      formVoucherType !== 'PNK'
+                        ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed'
+                        : 'bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100'
                     }`}
                     data-testid="input-unit-price"
                   />
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-slate-200 flex items-center justify-end gap-2">
+              <div className="pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 border border-slate-300 hover:bg-slate-100 text-slate-700 rounded-lg text-xs font-medium transition-colors"
+                  className="px-4 py-2 border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-medium transition-colors"
                   data-testid="cancel-btn"
                 >
                   Hủy
@@ -1093,7 +1110,10 @@ export const StockCardSimulator: FC<StockCardSimulatorProps> = ({
       {/* 9. Statutory LIFO Audit Modal */}
       {showLifoModal && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-xs"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Quy Định Bãi Bỏ Phương Pháp LIFO"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm"
           data-testid="lifo-modal"
         >
           <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full overflow-hidden border border-amber-300 animate-in fade-in zoom-in-95 duration-150">
@@ -1112,16 +1132,16 @@ export const StockCardSimulator: FC<StockCardSimulatorProps> = ({
               </button>
             </div>
 
-            <div className="p-5 space-y-3 text-xs text-slate-700 leading-relaxed">
-              <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-900 font-medium">
+            <div className="p-5 space-y-3 text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
+              <div className="p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg text-amber-900 dark:text-amber-200 font-medium">
                 {LIFO_PROHIBITED_EXPLANATION_VI}
               </div>
 
               <div className="space-y-2 pt-2">
-                <h4 className="font-bold text-slate-800 uppercase tracking-wide text-[11px]">
+                <h4 className="font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wide text-[11px]">
                   Căn cứ pháp lý bãi bỏ:
                 </h4>
-                <ul className="list-disc list-inside space-y-1 text-slate-600 pl-1">
+                <ul className="list-disc list-inside space-y-1 text-slate-600 dark:text-slate-400 pl-1">
                   <li>
                     <strong>Chuẩn mực Kế toán Việt Nam VAS 02</strong>: Hàng tồn kho chỉ cho phép 3 phương pháp (FIFO, Bình quân gia quyền, Giá thực tế đích danh).
                   </li>
@@ -1138,15 +1158,15 @@ export const StockCardSimulator: FC<StockCardSimulatorProps> = ({
               </div>
 
               <div className="space-y-1 pt-2">
-                <h4 className="font-bold text-slate-800 uppercase tracking-wide text-[11px]">
+                <h4 className="font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wide text-[11px]">
                   Tác động kinh tế nếu vi phạm:
                 </h4>
-                <p className="text-slate-600">
+                <p className="text-slate-600 dark:text-slate-400">
                   Trong chu kỳ giá tăng, LIFO đẩy giá vốn lên cao giả tạo và hạ thấp giá trị hàng tồn kho trên Bảng cân đối kế toán, dẫn đến sai lệch nghiêm trọng các chỉ tiêu tài chính (Hệ số thanh toán hiện hành, ROA, ROE) và rủi ro bị cơ quan Thuế thanh tra truy thu thuế TNDN.
                 </p>
               </div>
 
-              <div className="pt-3 border-t border-slate-200 flex justify-end">
+              <div className="pt-3 border-t border-slate-200 dark:border-slate-800 flex justify-end">
                 <button
                   type="button"
                   onClick={() => setShowLifoModal(false)}

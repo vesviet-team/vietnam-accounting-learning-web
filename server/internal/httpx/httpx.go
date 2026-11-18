@@ -33,6 +33,9 @@ func JSON(w http.ResponseWriter, status int, v any) {
 // Error writes an OAuth2/RFC 6749-style JSON error. description must never
 // contain internal details (stack traces, SQL, secrets).
 func OAuthError(w http.ResponseWriter, status int, code, description string) {
+	if status == http.StatusUnauthorized && w.Header().Get("WWW-Authenticate") == "" {
+		w.Header().Set("WWW-Authenticate", `Bearer realm="hoa.tanhdev.com", error="`+code+`", resource_metadata="https://hoa.tanhdev.com/.well-known/oauth-protected-resource"`)
+	}
 	body := map[string]string{"error": code}
 	if description != "" {
 		body["error_description"] = description

@@ -63,10 +63,20 @@ export class LocalStorageAdapter implements IStorageAdapter {
     return keys;
   }
 
+  private static readonly NON_BACKUP_KEYS = new Set([
+    'session_hint',
+    'merge_asked',
+    'last_account_id',
+    'oauth_state',
+    'pkce_verifier',
+    'rt',
+  ]);
+
   async exportBackup(): Promise<string> {
     const keys = await this.getAllKeys();
     const data: Record<string, unknown> = {};
     for (const key of keys) {
+      if (LocalStorageAdapter.NON_BACKUP_KEYS.has(key)) continue;
       data[key] = await this.getItem(key);
     }
 

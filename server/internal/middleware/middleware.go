@@ -12,6 +12,7 @@ import (
 	"log/slog"
 	"net"
 	"net/http"
+	"net/netip"
 	"strconv"
 	"strings"
 	"sync"
@@ -205,13 +206,9 @@ func RateLimit(limit int, window time.Duration) func(http.Handler) http.Handler 
 	return rateLimitBy(limit, window, ClientIP)
 }
 
-// RateLimitRemoteAddr limits requests per remote address (TCP peer) ONLY —
-// X-Forwarded-For is deliberately ignored. Used for credential endpoints
-// (login/register) where a spoofed XFF must not rotate the bucket key.
-//
-// TODO: the effective key behind the nginx proxy is the proxy pod IP, so all
-// clients share one bucket per replica; move to a trusted-proxy-aware key
-// (or a shared limiter) when needed.
+// RateLimitRemoteAddr limits requests per raw TCP peer ONLY without honoring
+// forwarding headers. Kept as a helper for non-proxied deployments; behind
+// trusted cluster proxies use RateLimit (which uses trusted-proxy ClientIP).
 func RateLimitRemoteAddr(limit int, window time.Duration) func(http.Handler) http.Handler {
 	return rateLimitBy(limit, window, remoteAddrHost)
 }
@@ -232,7 +229,7 @@ func rateLimitBy(limit int, window time.Duration, keyFn func(*http.Request) stri
 }
 
 // remoteAddrHost returns the host part of RemoteAddr without honoring any
-// forwarding headers (untrusted for rate-limit keys).
+// forwarding headers.
 func remoteAddrHost(r *http.Request) string {
 	host, _, err := net.SplitHostPort(r.RemoteAddr)
 	if err != nil {
@@ -241,19 +238,65 @@ func remoteAddrHost(r *http.Request) string {
 	return host
 }
 
-// ClientIP extracts the remote client IP (X-Forwarded-For first hop when
-// present, otherwise RemoteAddr). Trusted because the service sits behind
-// the cluster ingress.
+// isTrustedProxyIP returns true when addr belongs to loopback, private RFC 1918 /
+// ULA cluster networks, or link-local hops operated by the reverse proxy chain.
+func isTrustedProxyIP(addr netip.Addr) bool {
+	addr = addr.Unmap()
+	return addr.IsLoopback() || addr.IsPrivate() || addr.IsLinkLocalUnicast()
+}
+
+// ClientIP extracts the caller IP safely across the cluster proxy chain:
+// forwarding headers are inspected ONLY when the immediate TCP peer is a
+// trusted internal proxy, and X-Forwarded-For is scanned from right to left to
+// select the first non-proxy hop (preventing leftmost header spoofing).
 func ClientIP(r *http.Request) string {
-	if xff := r.Header.Get("X-Forwarded-For"); xff != "" {
-		if i := strings.IndexByte(xff, ','); i >= 0 {
-			xff = xff[:i]
+	peerHost := remoteAddrHost(r)
+	peerAddr, err := netip.ParseAddr(strings.TrimSpace(peerHost))
+	if err != nil || !isTrustedProxyIP(peerAddr) {
+		return peerHost
+	}
+
+	if cfIP := strings.TrimSpace(r.Header.Get("CF-Connecting-IP")); cfIP != "" {
+		if addr, err := netip.ParseAddr(cfIP); err == nil && !isTrustedProxyIP(addr) {
+			return addr.Unmap().String()
 		}
-		return strings.TrimSpace(xff)
 	}
-	host, _, err := net.SplitHostPort(r.RemoteAddr)
-	if err != nil {
-		return r.RemoteAddr
+
+	if xff := r.Header.Get("X-Forwarded-For"); xff != "" {
+		parts := strings.Split(xff, ",")
+		var lastValid string
+		for i := len(parts) - 1; i >= 0; i-- {
+			candidate := strings.TrimSpace(parts[i])
+			if candidate == "" {
+				continue
+			}
+			addr, err := netip.ParseAddr(candidate)
+			if err != nil {
+				continue
+			}
+			addr = addr.Unmap()
+			if lastValid == "" {
+				lastValid = addr.String()
+			}
+			if !isTrustedProxyIP(addr) {
+				return addr.String()
+			}
+		}
+		if xRealIP := strings.TrimSpace(r.Header.Get("X-Real-IP")); xRealIP != "" {
+			if addr, err := netip.ParseAddr(xRealIP); err == nil {
+				return addr.Unmap().String()
+			}
+		}
+		if lastValid != "" {
+			return lastValid
+		}
 	}
-	return host
+
+	if xRealIP := strings.TrimSpace(r.Header.Get("X-Real-IP")); xRealIP != "" {
+		if addr, err := netip.ParseAddr(xRealIP); err == nil {
+			return addr.Unmap().String()
+		}
+	}
+
+	return peerHost
 }

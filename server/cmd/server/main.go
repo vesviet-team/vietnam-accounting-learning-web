@@ -20,6 +20,7 @@ import (
 	"github.com/vesviet-team/vietnam-accounting-api/internal/backup"
 	"github.com/vesviet-team/vietnam-accounting-api/internal/config"
 	"github.com/vesviet-team/vietnam-accounting-api/internal/db"
+	"github.com/vesviet-team/vietnam-accounting-api/internal/mcp"
 	"github.com/vesviet-team/vietnam-accounting-api/internal/middleware"
 	"github.com/vesviet-team/vietnam-accounting-api/internal/sync"
 	"github.com/vesviet-team/vietnam-accounting-api/internal/user"
@@ -124,10 +125,10 @@ func run() error {
 	})
 
 	mux.HandleFunc("GET /oauth2/auth", authorizeHandler.Authorize)
-	// Login submit verifies argon2id hashes: rate-limit per remote address
-	// (XFF ignored — untrusted key until trusted-proxy support lands).
+	// Login submit verifies argon2id hashes: rate-limit per trusted client IP
+	// (rightmost non-proxy hop behind Nginx/ingress; ignores spoofed leftmost XFF).
 	mux.Handle("POST /oauth2/auth",
-		middleware.RateLimitRemoteAddr(5, time.Minute)(http.HandlerFunc(authorizeHandler.AuthorizeSubmit)))
+		middleware.RateLimit(5, time.Minute)(http.HandlerFunc(authorizeHandler.AuthorizeSubmit)))
 	mux.Handle("POST /oauth2/token", middleware.RateLimit(30, time.Minute)(tokenHandler))
 	mux.HandleFunc("GET /oauth2/jwks", keys.JWKSHandler)
 	mux.Handle("POST /oauth2/revoke", middleware.RateLimit(30, time.Minute)(http.HandlerFunc(tokenHandler.Revoke)))
@@ -135,10 +136,10 @@ func run() error {
 	mux.Handle("POST /oauth2/logout-all", middleware.RateLimit(10, time.Minute)(http.HandlerFunc(tokenHandler.LogoutAll)))
 
 	mux.Handle("GET /me", middleware.RateLimit(120, time.Minute)(http.HandlerFunc(userHandler.Me)))
-	// Register is unauthenticated and open in production: strict per-IP limit
-	// to blunt email-squatting / scripted account creation.
+	// Register is unauthenticated and open in production: strict per-client-IP limit
+	// to blunt email-squatting without collapsing all users into the proxy pod IP.
 	mux.Handle("POST /auth/register",
-		middleware.RateLimitRemoteAddr(3, time.Minute)(http.HandlerFunc(userHandler.Register)))
+		middleware.RateLimit(3, time.Minute)(http.HandlerFunc(userHandler.Register)))
 
 	mux.Handle("PUT /sync/backup", middleware.RateLimit(60, time.Minute)(http.HandlerFunc(backupHandler.Put)))
 	mux.Handle("GET /sync/backup", middleware.RateLimit(120, time.Minute)(http.HandlerFunc(backupHandler.Get)))
@@ -153,6 +154,9 @@ func run() error {
 	mux.Handle("POST /me/sessions/revoke", middleware.RateLimit(30, time.Minute)(http.HandlerFunc(accountHandler.RevokeSession)))
 	mux.Handle("GET /me/export", middleware.RateLimit(10, time.Minute)(http.HandlerFunc(accountHandler.Export)))
 	mux.Handle("POST /me/delete", middleware.RateLimit(10, time.Minute)(http.HandlerFunc(accountHandler.Delete)))
+
+	mcpHandler := &mcp.Handler{}
+	mux.Handle("/mcp", middleware.RateLimit(60, time.Minute)(mcpHandler))
 
 	// Middleware chain: recover -> logging -> request-id -> CORS -> mux.
 	handler := middleware.Recover(logger)(

@@ -54,27 +54,28 @@ export const Header: FC<HeaderProps> = ({
 }) => {
   return (
     <header className="sticky top-0 z-40 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 transition-colors">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between gap-2 h-16">
           {/* Left: Mobile Toggle & Brand */}
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-1.5 sm:space-x-3 min-w-0">
             <button
+              type="button"
               onClick={onToggleMobileMenu}
-              className="md:hidden p-2 rounded-lg text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
+              className="md:hidden p-1.5 sm:p-2 rounded-lg text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0"
               aria-label="Toggle navigation"
             >
               {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
 
-            <div className="flex items-center space-x-2.5">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white shadow-md shadow-emerald-500/20">
-                <BookOpen className="w-5 h-5" />
+            <div className="flex items-center space-x-1.5 sm:space-x-2 min-w-0">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white shadow-md shadow-emerald-500/20 shrink-0">
+                <BookOpen className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
-              <div>
-                <span className="text-base sm:text-lg font-bold bg-gradient-to-r from-emerald-700 to-teal-600 dark:from-emerald-400 dark:to-teal-300 bg-clip-text text-transparent">
+              <div className="min-w-0 flex items-center">
+                <span className="text-[13px] sm:text-lg font-bold bg-gradient-to-r from-emerald-700 to-teal-600 dark:from-emerald-400 dark:to-teal-300 bg-clip-text text-transparent whitespace-nowrap truncate">
                   Kế Toán Việt Nam
                 </span>
-                <span className="hidden sm:inline-block ml-1.5 px-2 py-0.5 text-xs font-semibold bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 rounded-full border border-emerald-200 dark:border-emerald-800">
+                <span className="hidden lg:inline-block ml-1.5 px-2 py-0.5 text-xs font-semibold bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 rounded-full border border-emerald-200 dark:border-emerald-800 whitespace-nowrap">
                   30 Ngày
                 </span>
               </div>
@@ -82,7 +83,7 @@ export const Header: FC<HeaderProps> = ({
           </div>
 
           {/* Center: Regime Quick Selector */}
-          <div className="hidden xl:flex items-center space-x-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700 whitespace-nowrap">
+          <div className="hidden lg:flex items-center space-x-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700 whitespace-nowrap">
             <button
               type="button"
               onClick={() => onRegimeChange('CIRCULAR_200')}
@@ -134,7 +135,7 @@ export const Header: FC<HeaderProps> = ({
           </div>
 
           {/* Right: Actions */}
-          <div className="flex items-center space-x-1.5 sm:space-x-2.5">
+          <div className="flex items-center space-x-1 sm:space-x-2 shrink-0">
             {/* Streak Badge */}
             <div className="hidden sm:flex items-center space-x-1.5 px-2.5 py-1 bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800/80 rounded-lg text-amber-700 dark:text-amber-400 text-xs font-semibold whitespace-nowrap">
               <Flame className="w-4 h-4 fill-amber-500 text-amber-500 animate-pulse shrink-0" />
@@ -144,7 +145,7 @@ export const Header: FC<HeaderProps> = ({
             {/* Career Title Badge */}
             {careerLevel && (
               <div
-                className={`hidden 2xl:flex items-center space-x-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold border shadow-xs whitespace-nowrap ${careerLevel.colorClass}`}
+                className={`hidden 2xl:flex items-center space-x-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold border shadow-sm whitespace-nowrap ${careerLevel.colorClass}`}
                 title={`Cấp bậc nghề nghiệp: ${careerLevel.titleVi} (${careerLevel.titleEn}) - ${careerLevel.descriptionVi}`}
               >
                 <Award className="w-3.5 h-3.5 shrink-0" />
@@ -158,7 +159,7 @@ export const Header: FC<HeaderProps> = ({
                 type="button"
                 onClick={() => onOpenMilestoneTest()}
                 title="Làm bài kiểm tra Cột mốc định kỳ 3 ngày"
-                className="flex items-center space-x-1.5 px-2.5 py-1.5 bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 dark:hover:bg-emerald-900 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 rounded-lg text-xs font-bold transition-all shadow-xs whitespace-nowrap"
+                className="hidden sm:flex items-center space-x-1.5 px-2.5 py-1.5 bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 dark:hover:bg-emerald-900 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 rounded-lg text-xs font-bold transition-all shadow-sm whitespace-nowrap"
               >
                 <Award className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
                 <span className="hidden md:inline">Bài Test Định Kỳ</span>
@@ -167,13 +168,13 @@ export const Header: FC<HeaderProps> = ({
 
             {/* Auth Controls: Login / Register or User + Logout */}
             {user ? (
-              <div className="flex items-center space-x-1.5" data-testid="header-auth-controls">
+              <div className="flex items-center space-x-1 sm:space-x-1.5" data-testid="header-auth-controls">
                 <button
                   type="button"
                   data-testid="header-account-btn"
                   onClick={onOpenAccount}
                   title={`Tài khoản: ${user.email} — Nhấn để quản lý đồng bộ & thiết bị`}
-                  className="flex items-center space-x-1.5 px-2.5 py-1.5 bg-emerald-50 dark:bg-emerald-950/50 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-emerald-800 dark:text-emerald-200 border border-emerald-200 dark:border-emerald-800 rounded-lg text-xs font-semibold transition-colors max-w-[160px]"
+                  className="flex items-center space-x-1.5 px-2 sm:px-2.5 py-1.5 bg-emerald-50 dark:bg-emerald-950/50 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-emerald-800 dark:text-emerald-200 border border-emerald-200 dark:border-emerald-800 rounded-lg text-xs font-semibold transition-colors max-w-[110px] sm:max-w-[160px]"
                 >
                   {syncStatus?.status === 'syncing' ? (
                     <Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-600 shrink-0" />
@@ -192,20 +193,21 @@ export const Header: FC<HeaderProps> = ({
                   data-testid="header-logout-btn"
                   onClick={onLogout}
                   title="Đăng xuất khỏi thiết bị này"
-                  className="flex items-center space-x-1 px-2.5 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-slate-700 dark:text-slate-200 hover:text-rose-700 dark:hover:text-rose-300 border border-slate-200 dark:border-slate-700 hover:border-rose-200 dark:hover:border-rose-800 rounded-lg text-xs font-semibold transition-colors whitespace-nowrap"
+                  aria-label="Đăng xuất"
+                  className="flex items-center space-x-1 px-2 sm:px-2.5 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-slate-700 dark:text-slate-200 hover:text-rose-700 dark:hover:text-rose-300 border border-slate-200 dark:border-slate-700 hover:border-rose-200 dark:hover:border-rose-800 rounded-lg text-xs font-semibold transition-colors whitespace-nowrap"
                 >
                   <LogOut className="w-3.5 h-3.5 shrink-0" />
                   <span className="hidden sm:inline">Đăng xuất</span>
                 </button>
               </div>
             ) : (
-              <div className="flex items-center space-x-1.5" data-testid="header-auth-controls">
+              <div className="flex items-center space-x-1 sm:space-x-1.5" data-testid="header-auth-controls">
                 <button
                   type="button"
                   data-testid="header-login-btn"
                   onClick={onLogin}
                   title="Đăng nhập để đồng bộ tiến độ & bài học"
-                  className="flex items-center space-x-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow-xs transition-colors whitespace-nowrap"
+                  className="flex items-center space-x-1 px-2 sm:px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[11px] sm:text-xs font-bold shadow-sm transition-colors whitespace-nowrap"
                 >
                   <LogIn className="w-3.5 h-3.5 shrink-0" />
                   <span>Đăng nhập</span>
@@ -230,7 +232,8 @@ export const Header: FC<HeaderProps> = ({
               type="button"
               onClick={onOpenBackup}
               title="Sao lưu & Khôi phục dữ liệu"
-              className="p-2 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 transition-colors"
+              aria-label="Sao lưu & Khôi phục dữ liệu"
+              className="hidden sm:inline-flex p-2 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 transition-colors"
             >
               <HardDrive className="w-4 h-4" />
             </button>

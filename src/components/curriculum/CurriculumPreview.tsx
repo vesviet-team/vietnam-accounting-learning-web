@@ -104,7 +104,7 @@ export const CurriculumPreview: FC<CurriculumPreviewProps> = ({
           <button
             type="button"
             onClick={() => setSelectedDay(resumeDay)}
-            className="inline-flex items-center space-x-2 px-4 py-2.5 bg-white text-emerald-800 text-xs font-bold rounded-xl shadow-xs hover:bg-emerald-50 transition-colors"
+            className="inline-flex items-center space-x-2 px-4 py-2.5 bg-white text-emerald-800 text-xs font-bold rounded-xl shadow-sm hover:bg-emerald-50 transition-colors"
           >
             <BookOpen className="w-4 h-4" />
             <span>{resumeDay > 1 || completedDays.length > 0 ? `Tiếp tục học Ngày ${resumeDay}` : 'Bắt đầu học Ngày 1 ngay'}</span>
@@ -126,7 +126,7 @@ export const CurriculumPreview: FC<CurriculumPreviewProps> = ({
       {/* Progress & Saved Lessons Summary Card */}
       <div
         data-testid="curriculum-progress-summary"
-        className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-4"
+        className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4"
       >
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="space-y-1">
@@ -197,11 +197,11 @@ export const CurriculumPreview: FC<CurriculumPreviewProps> = ({
         {MODULE_METADATA.map((m) => (
           <div
             key={m.moduleNumber}
-            className="p-5 rounded-2xl border bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xs hover:border-emerald-300 dark:hover:border-emerald-700 transition-all space-y-3"
+            className="p-5 rounded-2xl border bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-sm hover:border-emerald-300 dark:hover:border-emerald-700 transition-all space-y-3"
           >
             <div className="flex items-start justify-between">
               <div className="flex items-center space-x-2.5">
-                <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white font-bold text-xs flex items-center justify-center shadow-xs">
+                <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white font-bold text-xs flex items-center justify-center shadow-sm">
                   M{m.moduleNumber}
                 </div>
                 <div>

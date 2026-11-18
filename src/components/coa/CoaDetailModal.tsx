@@ -1,4 +1,4 @@
-import type { FC } from 'react';
+import { useEffect, type FC } from 'react';
 import {
   X,
   AlertTriangle,
@@ -21,6 +21,15 @@ export const CoaDetailModal: FC<CoaDetailModalProps> = ({
   onClose,
   onSelectSubstitute,
 }) => {
+  useEffect(() => {
+    if (!account) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [account, onClose]);
+
   if (!account) return null;
 
   const prohibition = getProhibitionRule(account.code);
@@ -60,13 +69,18 @@ export const CoaDetailModal: FC<CoaDetailModalProps> = ({
   const balanceInfo = getBalanceBadge();
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={`Chi tiết tài khoản TK ${account.code}`}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in"
+    >
       <div className="relative w-full max-w-2xl max-h-[90vh] flex flex-col bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
         {/* Header */}
         <div className="flex items-start justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40">
           <div className="space-y-1">
             <div className="flex items-center space-x-3">
-              <span className="px-3 py-1 bg-emerald-600 text-white font-mono font-bold text-lg rounded-xl shadow-xs">
+              <span className="px-3 py-1 bg-emerald-600 text-white font-mono font-bold text-lg rounded-xl shadow-sm">
                 TK {account.code}
               </span>
               <span
@@ -174,12 +188,12 @@ export const CoaDetailModal: FC<CoaDetailModalProps> = ({
           </div>
 
           {/* Regimes Supported */}
-          <div className="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-800/30 rounded-xl border border-slate-200 dark:border-slate-800 text-xs">
+          <div className="flex flex-wrap items-center justify-between gap-2 p-3.5 bg-slate-50 dark:bg-slate-800/30 rounded-xl border border-slate-200 dark:border-slate-800 text-xs">
             <div className="flex items-center space-x-2 text-slate-600 dark:text-slate-400">
               <HelpCircle className="w-4 h-4" />
               <span>Áp dụng trong hệ thống:</span>
             </div>
-            <div className="flex items-center space-x-2">
+            <div className="flex flex-wrap items-center gap-1.5">
               <span
                 className={`px-2 py-0.5 rounded-md font-medium ${
                   account.regimes.includes('CIRCULAR_200')
@@ -199,6 +213,24 @@ export const CoaDetailModal: FC<CoaDetailModalProps> = ({
                 }`}
               >
                 Thông tư 133 {isProhibited && '(Bị cấm)'}
+              </span>
+              <span
+                className={`px-2 py-0.5 rounded-md font-medium ${
+                  account.regimes.includes('CIRCULAR_99')
+                    ? 'bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300'
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-400 line-through'
+                }`}
+              >
+                Thông tư 99/2025
+              </span>
+              <span
+                className={`px-2 py-0.5 rounded-md font-medium ${
+                  account.regimes.includes('CIRCULAR_58')
+                    ? 'bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300'
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-400 line-through'
+                }`}
+              >
+                Thông tư 58/2026
               </span>
             </div>
           </div>

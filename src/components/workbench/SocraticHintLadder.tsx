@@ -104,13 +104,13 @@ export const SocraticHintLadder: FC<SocraticHintLadderProps> = ({
 
   return (
     <div
-      className={`rounded-2xl border border-indigo-200 dark:border-indigo-900/60 bg-gradient-to-br from-indigo-50/70 via-white to-slate-50 dark:from-slate-900 dark:via-slate-900 dark:to-indigo-950/30 shadow-xs overflow-hidden transition-all ${className}`}
+      className={`rounded-2xl border border-indigo-200 dark:border-indigo-900/60 bg-gradient-to-br from-indigo-50/70 via-white to-slate-50 dark:from-slate-900 dark:via-slate-900 dark:to-indigo-950/30 shadow-sm overflow-hidden transition-all ${className}`}
       data-testid="socratic-hint-ladder"
     >
       {/* Ladder Header Bar */}
-      <div className="px-4 sm:px-5 py-3.5 flex items-center justify-between border-b border-indigo-100 dark:border-indigo-950/60 bg-white/70 dark:bg-slate-900/80 backdrop-blur-xs">
+      <div className="px-4 sm:px-5 py-3.5 flex items-center justify-between border-b border-indigo-100 dark:border-indigo-950/60 bg-white/70 dark:bg-slate-900/80 backdrop-blur-sm">
         <div className="flex items-center space-x-2.5">
-          <div className="p-1.5 rounded-lg bg-indigo-600 text-white shadow-xs">
+          <div className="p-1.5 rounded-lg bg-indigo-600 text-white shadow-sm">
             <Sparkles className="w-4 h-4" />
           </div>
           <div>
@@ -177,9 +177,9 @@ export const SocraticHintLadder: FC<SocraticHintLadderProps> = ({
                   data-testid={`hint-step-button-${lvl}`}
                   className={`relative py-2 px-2.5 sm:px-3 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1.5 sm:gap-2 ${
                     isActive
-                      ? `${badgeInfo.activeBg} shadow-xs scale-[1.01]`
+                      ? `${badgeInfo.activeBg} shadow-sm scale-[1.01]`
                       : isUnlocked
-                      ? 'bg-white dark:bg-slate-700/90 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-600/80 shadow-2xs'
+                      ? 'bg-white dark:bg-slate-700/90 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-600/80 shadow-sm'
                       : 'bg-transparent text-slate-400 dark:text-slate-500 cursor-not-allowed opacity-70'
                   }`}
                   title={
@@ -215,7 +215,7 @@ export const SocraticHintLadder: FC<SocraticHintLadderProps> = ({
 
           {/* Active Hint Content Card */}
           {activeHint && (
-            <div className="bg-white dark:bg-slate-800/90 rounded-xl border border-slate-200/90 dark:border-slate-700 p-4 sm:p-5 space-y-4 shadow-2xs">
+            <div className="bg-white dark:bg-slate-800/90 rounded-xl border border-slate-200/90 dark:border-slate-700 p-4 sm:p-5 space-y-4 shadow-sm">
               {/* Badge & Title */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-700/60 pb-3">
                 <div className="flex items-center gap-2">
@@ -376,7 +376,7 @@ export const SocraticHintLadder: FC<SocraticHintLadderProps> = ({
                     type="button"
                     onClick={handleUnlockNext}
                     data-testid="unlock-level-2-button"
-                    className="px-3.5 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 shrink-0"
+                    className="px-3.5 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 shrink-0"
                   >
                     <span>Tiếp theo: Gợi ý bản chất (Nấc 2)</span>
                     <ChevronRight className="w-3.5 h-3.5" />
@@ -388,7 +388,7 @@ export const SocraticHintLadder: FC<SocraticHintLadderProps> = ({
                     type="button"
                     onClick={handleUnlockNext}
                     data-testid="unlock-level-3-button"
-                    className="px-3.5 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 shrink-0"
+                    className="px-3.5 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 shrink-0"
                   >
                     <span>Tiếp theo: Nghiệp vụ mẫu song sinh (Nấc 3)</span>
                     <ChevronRight className="w-3.5 h-3.5" />

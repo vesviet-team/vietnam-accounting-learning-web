@@ -38,8 +38,26 @@ import { StreakEngine, CareerLevel } from '@/engine/streak-engine';
 
 export type AppNavTab = NavTab | 'financial-statements' | 'bctc' | 'cogs';
 
+const HASH_TO_TAB = new Set<AppNavTab>([
+  'coa',
+  'curriculum',
+  'workbench',
+  'cogs',
+  'financial-statements',
+  'bctc',
+  'voucher',
+  'tax',
+  'settings',
+]);
+
+function readTabFromHash(): AppNavTab {
+  if (typeof window === 'undefined') return 'coa';
+  const raw = window.location.hash.replace(/^#\/?/, '').trim() as AppNavTab;
+  return HASH_TO_TAB.has(raw) ? raw : 'coa';
+}
+
 export function App() {
-  const [activeTab, setActiveTab] = useState<AppNavTab>('coa');
+  const [activeTab, setActiveTabState] = useState<AppNavTab>(readTabFromHash);
   const [currentRegime, setCurrentRegime] = useState<AccountingRegime>('CIRCULAR_200');
   const [isBackupModalOpen, setIsBackupModalOpen] = useState(false);
   const [activeMilestoneQuizDay, setActiveMilestoneQuizDay] = useState<number | null>(null);
@@ -49,6 +67,25 @@ export function App() {
   const [user, setUser] = useState<AuthUser | null>(authService.getUser());
   const [syncStatus, setSyncStatus] = useState<SyncStatusState>(syncService.getStatus());
   const [openRegisterSignal, setOpenRegisterSignal] = useState(0);
+
+  const setActiveTab = (tab: AppNavTab) => {
+    setActiveTabState(tab);
+    try {
+      if (typeof window !== 'undefined' && window.location.hash !== `#${tab}`) {
+        window.history.replaceState(null, '', `#${tab}`);
+      }
+    } catch {
+      /* ignore */
+    }
+  };
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      setActiveTabState(readTabFromHash());
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
 
   // Load preferred regime, streak, and career level on mount + refresh on remote sync
   useEffect(() => {
@@ -156,8 +193,8 @@ export function App() {
         {/* Dynamic Main Workspace Content */}
         <main className="flex-1 p-4 sm:p-6 lg:p-8 min-w-0 overflow-y-auto">
           {/* Quick Navigation Tab Bar for Financial Statements */}
-          <div className="mb-6 flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-slate-900 px-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xs">
-            <div className="flex items-center space-x-2">
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-slate-900 px-3 sm:px-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+            <div className="flex flex-wrap items-center gap-2">
               <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                 Mô-đun Kế Toán:
               </span>
@@ -166,7 +203,7 @@ export function App() {
                 onClick={() => setActiveTab('workbench')}
                 className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
                   activeTab === 'workbench'
-                    ? 'bg-emerald-600 text-white shadow-xs'
+                    ? 'bg-emerald-600 text-white shadow-sm'
                     : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
                 }`}
               >
@@ -178,7 +215,7 @@ export function App() {
                 onClick={() => setActiveTab('financial-statements')}
                 className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
                   activeTab === 'financial-statements' || activeTab === 'bctc'
-                    ? 'bg-emerald-600 text-white shadow-xs'
+                    ? 'bg-emerald-600 text-white shadow-sm'
                     : 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 hover:bg-emerald-100'
                 }`}
               >
@@ -190,7 +227,7 @@ export function App() {
                 onClick={() => setActiveTab('cogs')}
                 className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
                   activeTab === 'cogs'
-                    ? 'bg-emerald-600 text-white shadow-xs'
+                    ? 'bg-emerald-600 text-white shadow-sm'
                     : 'bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800 hover:bg-amber-100'
                 }`}
               >
@@ -202,7 +239,7 @@ export function App() {
                 onClick={() => setActiveTab('tax')}
                 className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
                   activeTab === 'tax'
-                    ? 'bg-emerald-600 text-white shadow-xs'
+                    ? 'bg-emerald-600 text-white shadow-sm'
                     : 'bg-purple-50 dark:bg-purple-950/60 text-purple-800 dark:text-purple-300 border border-purple-300 dark:border-purple-800 hover:bg-purple-100'
                 }`}
               >
@@ -283,6 +320,25 @@ export function App() {
           )}
         </main>
       </div>
+
+      <footer className="border-t border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/70 py-3 px-4 sm:px-6 text-xs text-slate-500 dark:text-slate-400">
+        <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
+          <span>
+            Học Kế Toán Việt Nam 30 Ngày &bull; Chuẩn mực TT 99/2025, TT 58/2026, TT 200 &amp; TT 133
+          </span>
+          <nav aria-label="Footer navigation" className="flex items-center gap-4">
+            <a href="#coa" onClick={() => setActiveTab('coa')} className="hover:text-emerald-600 dark:hover:text-emerald-400">
+              Hệ thống TK
+            </a>
+            <a href="#curriculum" onClick={() => setActiveTab('curriculum')} className="hover:text-emerald-600 dark:hover:text-emerald-400">
+              Lộ trình 30 ngày
+            </a>
+            <a href="#settings" onClick={() => setActiveTab('settings')} className="hover:text-emerald-600 dark:hover:text-emerald-400">
+              Tài khoản &amp; Sao lưu
+            </a>
+          </nav>
+        </div>
+      </footer>
 
       {/* Backup & Restore Modal */}
       <BackupModal

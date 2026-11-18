@@ -416,3 +416,18 @@ jobs:
           for i in 1 2 3 4 5; do
             git pull --rebase origin main && git push origin main && break || sleep $((i * 2))
           done
+
+      - name: Verify API Health After Deploy
+        run: |
+          echo "Waiting 45s for ArgoCD auto-sync and vnacc-api rollout..."
+          sleep 45
+          for i in {1..15}; do
+            if curl --connect-timeout 3 -fsS http://vietnam-accounting-web.vietnam-accounting.svc.cluster.local:8810/oauth2/jwks; then
+              echo "✅ vnacc-api proxy health probe (/oauth2/jwks) passed!"
+              exit 0
+            fi
+            echo "Retry $i/15 (every 5s)..."
+            sleep 5
+          done
+          echo "⚠️ vnacc-api health probe timed out — check ArgoCD for sync status."
+          exit 1

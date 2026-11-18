@@ -27,7 +27,7 @@ export const RuleOfOneCard: FC<RuleOfOneCardProps> = ({
   if (isPerfect) {
     return (
       <div
-        className={`p-5 sm:p-6 bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-emerald-500/10 dark:from-emerald-950/40 dark:via-teal-950/30 dark:to-emerald-950/40 border border-emerald-300 dark:border-emerald-800 rounded-2xl shadow-xs space-y-3 ${className}`}
+        className={`p-5 sm:p-6 bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-emerald-500/10 dark:from-emerald-950/40 dark:via-teal-950/30 dark:to-emerald-950/40 border border-emerald-300 dark:border-emerald-800 rounded-2xl shadow-sm space-y-3 ${className}`}
       >
         <div className="flex items-center space-x-2 text-emerald-700 dark:text-emerald-300 font-bold text-sm sm:text-base">
           <Sparkles className="w-5 h-5 text-emerald-500 animate-pulse" />
@@ -78,7 +78,7 @@ export const RuleOfOneCard: FC<RuleOfOneCardProps> = ({
 
   return (
     <div
-      className={`p-5 sm:p-6 bg-gradient-to-br from-amber-500/10 via-slate-50 to-amber-500/5 dark:from-amber-950/30 dark:via-slate-900 dark:to-slate-950 border border-amber-300 dark:border-amber-800/70 rounded-2xl shadow-xs space-y-4 ${className}`}
+      className={`p-5 sm:p-6 bg-gradient-to-br from-amber-500/10 via-slate-50 to-amber-500/5 dark:from-amber-950/30 dark:via-slate-900 dark:to-slate-950 border border-amber-300 dark:border-amber-800/70 rounded-2xl shadow-sm space-y-4 ${className}`}
     >
       {/* Header & Principle Label */}
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -121,7 +121,7 @@ export const RuleOfOneCard: FC<RuleOfOneCardProps> = ({
             <button
               type="button"
               onClick={onTakeAction}
-              className="inline-flex items-center space-x-1.5 px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition-colors shadow-xs"
+              className="inline-flex items-center space-x-1.5 px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition-colors shadow-sm"
             >
               <span>Xem bài học & thực hành ngay</span>
               <ArrowRight className="w-3.5 h-3.5" />

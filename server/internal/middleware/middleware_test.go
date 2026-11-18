@@ -132,9 +132,53 @@ func TestClientIP_XForwardedFor(t *testing.T) {
 	if got := ClientIP(req); got != "203.0.113.7" {
 		t.Fatalf("ClientIP = %q, want 203.0.113.7", got)
 	}
+	// Rightmost non-proxy hop prevents leftmost client-injected spoofing.
+	req.Header.Set("X-Forwarded-For", "198.51.100.99, 203.0.113.7, 10.42.0.108")
+	if got := ClientIP(req); got != "203.0.113.7" {
+		t.Fatalf("ClientIP spoof check = %q, want 203.0.113.7", got)
+	}
 	req.Header.Del("X-Forwarded-For")
 	if got := ClientIP(req); got != "192.168.1.1" {
 		t.Fatalf("ClientIP = %q, want 192.168.1.1", got)
+	}
+
+	// Untrusted public peer must not honor forwarding headers.
+	pubReq := httptest.NewRequest(http.MethodGet, "/", nil)
+	pubReq.RemoteAddr = "198.51.100.50:4444"
+	pubReq.Header.Set("X-Forwarded-For", "203.0.113.7")
+	pubReq.Header.Set("CF-Connecting-IP", "203.0.113.8")
+	if got := ClientIP(pubReq); got != "198.51.100.50" {
+		t.Fatalf("ClientIP untrusted peer = %q, want 198.51.100.50", got)
+	}
+}
+
+func TestRateLimit_BehindTrustedProxySeparatesClientsAndBlocksSpoof(t *testing.T) {
+	h := RateLimit(2, time.Minute)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+
+	// Distinct real clients behind the same nginx pod IP must get separate buckets.
+	for i := 1; i <= 5; i++ {
+		req := httptest.NewRequest(http.MethodPost, "/auth/register", nil)
+		req.RemoteAddr = "10.42.0.108:39000"
+		req.Header.Set("X-Forwarded-For", fmt.Sprintf("203.0.113.%d, 10.42.0.108", i))
+		rec := httptest.NewRecorder()
+		h.ServeHTTP(rec, req)
+		if rec.Code != http.StatusOK {
+			t.Fatalf("distinct client %d behind proxy got %d, want 200", i, rec.Code)
+		}
+	}
+
+	// Same real client rotating a spoofed leftmost XFF hop must still hit 429 on 3rd attempt.
+	for attempt, want := range []int{http.StatusOK, http.StatusOK, http.StatusTooManyRequests} {
+		req := httptest.NewRequest(http.MethodPost, "/auth/register", nil)
+		req.RemoteAddr = "10.42.0.108:39001"
+		req.Header.Set("X-Forwarded-For", fmt.Sprintf("198.51.100.%d, 203.0.113.77, 10.42.0.108", attempt+10))
+		rec := httptest.NewRecorder()
+		h.ServeHTTP(rec, req)
+		if rec.Code != want {
+			t.Fatalf("attempt %d status = %d, want %d", attempt+1, rec.Code, want)
+		}
 	}
 }
 

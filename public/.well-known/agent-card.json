@@ -3,7 +3,6 @@
   "description": "Interactive Vietnamese Accounting 30-Day Curriculum, COA Explorer (Circular 99/2025, Circular 58/2026, Circular 200/2014, Circular 133/2016), B01/B02/B03-DN Financial Statement Engine, and Tax Guardrails Agent",
   "url": "https://hoa.tanhdev.com",
   "version": "1.1.0",
-  "protocol_version": "1.0",
   "protocolVersion": "1.0.0",
   "defaultInputModes": [
     "text",

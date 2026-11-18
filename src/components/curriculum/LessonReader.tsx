@@ -213,7 +213,7 @@ export const LessonReader: FC<LessonReaderProps> = ({
   return (
     <div className="space-y-6 animate-fade-in pb-16 max-w-5xl mx-auto">
       {/* Top Header Card & Quick Day Jump */}
-      <div className="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-2xl shadow-xs border border-slate-200 dark:border-slate-800 space-y-4">
+      <div className="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 space-y-4">
         {/* Upper Breadcrumb Bar */}
         <div className="flex flex-wrap items-center justify-between gap-3 text-xs">
           <div className="flex items-center space-x-2">
@@ -340,7 +340,7 @@ export const LessonReader: FC<LessonReaderProps> = ({
             <button
               type="button"
               onClick={() => handleOpenQuiz(lockedDayAlert.prereqMilestone)}
-              className="px-3.5 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-bold shrink-0 transition-colors shadow-xs"
+              className="px-3.5 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-bold shrink-0 transition-colors shadow-sm"
             >
               Làm bài test Ngày {lockedDayAlert.prereqMilestone}
             </button>
@@ -426,9 +426,9 @@ export const LessonReader: FC<LessonReaderProps> = ({
 
         {/* Milestone Alert & Action Banner */}
         {lesson.isMilestoneDay && (
-          <div className="p-4 sm:p-5 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/40 dark:to-orange-950/30 border border-amber-300 dark:border-amber-800/80 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs text-amber-900 dark:text-amber-200 shadow-xs">
+          <div className="p-4 sm:p-5 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/40 dark:to-orange-950/30 border border-amber-300 dark:border-amber-800/80 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs text-amber-900 dark:text-amber-200 shadow-sm">
             <div className="flex items-start space-x-3">
-              <div className="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-xs">
+              <div className="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-sm">
                 <Award className="w-5 h-5" />
               </div>
               <div className="space-y-1">
@@ -466,7 +466,7 @@ export const LessonReader: FC<LessonReaderProps> = ({
 
       {/* If Day is strictly locked (e.g. initialDay locked or accessed improperly), show Locked Screen */}
       {!isCurrentDayAccessible ? (
-        <div className="p-8 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 text-center space-y-4 shadow-xs">
+        <div className="p-8 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 text-center space-y-4 shadow-sm">
           <div className="w-16 h-16 rounded-full bg-rose-100 dark:bg-rose-950 text-rose-600 flex items-center justify-center mx-auto">
             <Lock className="w-8 h-8" />
           </div>
@@ -483,7 +483,7 @@ export const LessonReader: FC<LessonReaderProps> = ({
             <button
               type="button"
               onClick={() => handleOpenQuiz(getPrerequisiteMilestone(currentDay) || 3)}
-              className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-all shadow-xs inline-flex items-center space-x-1.5"
+              className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-all shadow-sm inline-flex items-center space-x-1.5"
             >
               <Award className="w-4 h-4" />
               <span>Làm bài test Ngày {getPrerequisiteMilestone(currentDay) || 3} ngay</span>
@@ -510,7 +510,7 @@ export const LessonReader: FC<LessonReaderProps> = ({
                 onClick={() => setActiveConceptIndex(idx)}
                 className={`px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center space-x-1.5 ${
                   activeConceptIndex === idx
-                    ? 'bg-slate-900 text-white dark:bg-emerald-600 dark:text-white shadow-xs'
+                    ? 'bg-slate-900 text-white dark:bg-emerald-600 dark:text-white shadow-sm'
                     : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800'
                 }`}
               >
@@ -521,7 +521,7 @@ export const LessonReader: FC<LessonReaderProps> = ({
 
           {/* Active Concept Body Card */}
           {lesson.concepts[activeConceptIndex] && (
-            <div className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-2xl shadow-xs border border-slate-200 dark:border-slate-800 space-y-6">
+            <div className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 space-y-6">
               <div className="space-y-2 border-b border-slate-100 dark:border-slate-800 pb-4">
                 <div className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
                   Khái niệm {activeConceptIndex + 1} / {lesson.concepts.length}
@@ -583,7 +583,7 @@ export const LessonReader: FC<LessonReaderProps> = ({
           )}
 
           {/* Completion & Navigation Footer Controls */}
-          <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <button
               type="button"
               onClick={handlePrevDay}
@@ -599,7 +599,7 @@ export const LessonReader: FC<LessonReaderProps> = ({
               <button
                 type="button"
                 onClick={handleToggleComplete}
-                className={`inline-flex items-center justify-center space-x-2 px-5 py-2.5 rounded-xl text-xs font-bold transition-all shadow-xs ${
+                className={`inline-flex items-center justify-center space-x-2 px-5 py-2.5 rounded-xl text-xs font-bold transition-all shadow-sm ${
                   isCurrentDayCompleted
                     ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 hover:bg-emerald-200'
                     : 'bg-emerald-600 hover:bg-emerald-700 text-white'
@@ -615,7 +615,7 @@ export const LessonReader: FC<LessonReaderProps> = ({
                 <button
                   type="button"
                   onClick={() => handleOpenQuiz(currentDay)}
-                  className="inline-flex items-center justify-center space-x-1.5 px-4 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-xs transition-all shadow-xs"
+                  className="inline-flex items-center justify-center space-x-1.5 px-4 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-xs transition-all shadow-sm"
                 >
                   <Award className="w-4 h-4" />
                   <span>Làm bài kiểm tra Cột mốc #{lesson.moduleNumber}</span>

@@ -15,8 +15,9 @@ import {
 import { AccountingRegime } from '@/types/coa';
 import { JournalEntryRow, JournalBalanceValidation } from '@/types/workbench';
 import { TAccountData } from '@/types/curriculum';
-import { searchAccounts, findAccountByCode, ensureAccountsLoaded } from '@/data/coa-service';
+import { searchAccounts, findAccountByCode, ensureAccountsLoaded, hasAccountsLoaded } from '@/data/coa-service';
 import { isProhibitedInCircular133, getProhibitedAccountInfo } from '@/data/prohibited-accounts';
+import { getRegimeDisplayMeta } from '@/data/regime-meta';
 import { TAccountView, formatVnd, determineAccountNature } from '@/components/curriculum/TAccountView';
 import { storageService } from '@/services/storage/storage-service';
 import { SocraticHintLadder } from '@/components/workbench/SocraticHintLadder';
@@ -253,6 +254,7 @@ export const Journalizer: FC<JournalizerProps> = ({
   // import tĩnh nên có sẵn ngay; các regime khác tải xong sẽ re-render qua tick.
   const [, bumpCoaLoadTick] = useState(0);
   useEffect(() => {
+    if (hasAccountsLoaded(currentRegime)) return;
     let alive = true;
     ensureAccountsLoaded(currentRegime).then(() => {
       if (alive) bumpCoaLoadTick((t) => t + 1);
@@ -500,6 +502,7 @@ export const Journalizer: FC<JournalizerProps> = ({
 
   // Search filtered accounts for picker popup
   const searchedAccounts = useMemo(() => {
+    if (!hasAccountsLoaded(currentRegime)) return [];
     if (!searchQuery.trim()) {
       return searchAccounts('', currentRegime).slice(0, 10);
     }
@@ -621,20 +624,18 @@ export const Journalizer: FC<JournalizerProps> = ({
   return (
     <div className="max-w-6xl mx-auto space-y-6 animate-fade-in pb-16">
       {/* Header Banner */}
-      <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-xs border border-slate-200 dark:border-slate-800 space-y-3">
+      <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center space-x-2 text-xs font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
             <Scale className="w-4 h-4" />
             <span>Bàn Định Khoản Kế Toán Trực Quan (Journalizing Workbench)</span>
           </div>
           <span
-            className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
-              currentRegime === 'CIRCULAR_200'
-                ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800'
-                : 'bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300 border border-blue-300 dark:border-blue-800'
+            className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${
+              getRegimeDisplayMeta(currentRegime).badgeClass
             }`}
           >
-            Đang áp dụng: {currentRegime === 'CIRCULAR_200' ? 'Thông tư 200 (DN Lớn)' : 'Thông tư 133 (DN Vừa & Nhỏ)'}
+            Đang áp dụng: {getRegimeDisplayMeta(currentRegime).fullLabel}
           </span>
         </div>
 
@@ -665,7 +666,7 @@ export const Journalizer: FC<JournalizerProps> = ({
                 onClick={() => handleSelectScenario(scen.id)}
                 className={`p-3 rounded-xl text-left border transition-all flex flex-col justify-between ${
                   isSelected
-                    ? 'bg-white dark:bg-slate-800 border-emerald-500 ring-2 ring-emerald-500/20 shadow-xs'
+                    ? 'bg-white dark:bg-slate-800 border-emerald-500 ring-2 ring-emerald-500/20 shadow-sm'
                     : 'bg-white/60 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700/80 hover:border-slate-300 dark:hover:border-slate-600'
                 }`}
               >
@@ -698,7 +699,7 @@ export const Journalizer: FC<JournalizerProps> = ({
               <button
                 type="button"
                 onClick={handleResetRows}
-                className="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 border border-emerald-300 dark:border-emerald-700 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/40 text-[11px] font-semibold shadow-2xs transition-all flex items-center gap-1"
+                className="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 border border-emerald-300 dark:border-emerald-700 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/40 text-[11px] font-semibold shadow-sm transition-all flex items-center gap-1"
                 title="Xóa các dòng định khoản mẫu để tự thử thách với gợi ý Socratic"
               >
                 <RotateCcw className="w-3 h-3" />
@@ -708,7 +709,7 @@ export const Journalizer: FC<JournalizerProps> = ({
                 <button
                   type="button"
                   onClick={handleReloadScenarioRows}
-                  className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-semibold shadow-2xs transition-all flex items-center gap-1"
+                  className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-semibold shadow-sm transition-all flex items-center gap-1"
                   title="Tải lại các dòng gợi ý mẫu của tình huống"
                 >
                   <BookOpen className="w-3 h-3" />
@@ -745,11 +746,11 @@ export const Journalizer: FC<JournalizerProps> = ({
       >
         <div className="flex items-start sm:items-center space-x-3">
           {validation.isBalanced ? (
-            <div className="p-2 bg-emerald-600 text-white rounded-xl shadow-xs shrink-0">
+            <div className="p-2 bg-emerald-600 text-white rounded-xl shadow-sm shrink-0">
               <CheckCircle2 className="w-6 h-6" />
             </div>
           ) : (
-            <div className="p-2 bg-rose-600 text-white rounded-xl shadow-xs shrink-0">
+            <div className="p-2 bg-rose-600 text-white rounded-xl shadow-sm shrink-0">
               <AlertTriangle className="w-6 h-6" />
             </div>
           )}
@@ -770,7 +771,7 @@ export const Journalizer: FC<JournalizerProps> = ({
             </div>
             <div className="text-xs opacity-90 mt-0.5">
               {validation.isBalanced
-                ? 'Đã thỏa mãn bất biến &Sigma; Nợ = &Sigma; Có. Bạn có thể nhấn "Ghi sổ" để cập nhật vào Sổ cái và Sơ đồ chữ T.'
+                ? 'Đã thỏa mãn bất biến Σ Nợ = Σ Có. Bạn có thể nhấn "Ghi sổ" để cập nhật vào Sổ cái và Sơ đồ chữ T.'
                 : validation.errorMessageVi || 'Hãy kiểm tra lại số tiền các tài khoản bên Nợ và bên Có.'}
             </div>
           </div>
@@ -793,7 +794,7 @@ export const Journalizer: FC<JournalizerProps> = ({
       </div>
 
       {/* Main Journal Entry Builder Table */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xs border border-slate-200 dark:border-slate-800 overflow-hidden">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
         {/* Table Header Controls */}
         <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex-1 max-w-md">
@@ -822,7 +823,7 @@ export const Journalizer: FC<JournalizerProps> = ({
             <button
               type="button"
               onClick={handleAddRow}
-              className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg transition-colors shadow-xs"
+              className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg transition-colors shadow-sm"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Thêm dòng</span>
@@ -894,7 +895,7 @@ export const Journalizer: FC<JournalizerProps> = ({
                         <div className="absolute left-4 top-12 z-20 w-80 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl p-2 space-y-2">
                           <div className="flex items-center justify-between pb-1 border-b border-slate-100 dark:border-slate-700">
                             <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
-                              Chọn tài khoản ({currentRegime === 'CIRCULAR_200' ? 'TT 200' : 'TT 133'})
+                              Chọn tài khoản ({getRegimeDisplayMeta(currentRegime).shortLabel})
                             </span>
                             <button
                               type="button"
@@ -1079,7 +1080,7 @@ export const Journalizer: FC<JournalizerProps> = ({
               <button
                 type="button"
                 onClick={onNavigateToFinancialStatements}
-                className="inline-flex items-center space-x-1.5 px-3.5 py-2 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 rounded-xl text-xs font-bold transition-all shadow-2xs"
+                className="inline-flex items-center space-x-1.5 px-3.5 py-2 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 rounded-xl text-xs font-bold transition-all shadow-sm"
                 title="Chuyển đến Bảng Cân Đối Kế Toán (B01-DN) & Báo Cáo KQKD (B02-DN)"
               >
                 <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
@@ -1135,7 +1136,7 @@ export const Journalizer: FC<JournalizerProps> = ({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {Object.values(ledgerTAccounts).map((tData) => (
-              <div key={tData.accountCode} className="border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-xs">
+              <div key={tData.accountCode} className="border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm">
                 <TAccountView initialData={tData} allowInteractive={false} />
               </div>
             ))}
@@ -1145,7 +1146,7 @@ export const Journalizer: FC<JournalizerProps> = ({
 
       {/* General Journal Log Table (Sổ Nhật Ký Chung) */}
       {postedEntries.length > 0 && (
-        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xs border border-slate-200 dark:border-slate-800 overflow-hidden space-y-2">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden space-y-2">
           <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <FileSpreadsheet className="w-4 h-4 text-emerald-600" />

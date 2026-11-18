@@ -8,6 +8,7 @@ import {
   Info,
   Factory,
   Calculator,
+  BarChart3,
   LogIn,
   LogOut,
   UserPlus,
@@ -16,7 +17,15 @@ import { AccountingRegime } from '@/types/coa';
 import type { AuthUser } from '@/types/auth';
 import type { SyncStatusState } from '@/services/sync/sync-service';
 
-export type NavTab = 'coa' | 'curriculum' | 'workbench' | 'cogs' | 'voucher' | 'tax' | 'settings';
+export type NavTab =
+  | 'coa'
+  | 'curriculum'
+  | 'workbench'
+  | 'cogs'
+  | 'financial-statements'
+  | 'voucher'
+  | 'tax'
+  | 'settings';
 
 interface SidebarProps {
   activeTab: NavTab;
@@ -86,6 +95,14 @@ export const Sidebar: FC<SidebarProps> = ({
       milestone: 'M6',
     },
     {
+      id: 'financial-statements',
+      labelVi: 'Báo Cáo Tài Chính',
+      subtextVi: 'B01-DN, B02-DN & B03-DN',
+      icon: BarChart3,
+      badge: 'TT 99',
+      milestone: 'M7',
+    },
+    {
       id: 'voucher',
       labelVi: 'Kiểm Tra Chứng Từ',
       subtextVi: 'Hóa đơn GTGT & Ngưỡng 20M',
@@ -115,13 +132,13 @@ export const Sidebar: FC<SidebarProps> = ({
       {/* Mobile backdrop */}
       {isOpenMobile && (
         <div
-          className="fixed inset-0 z-30 bg-slate-900/50 backdrop-blur-xs md:hidden"
+          className="fixed inset-0 z-30 bg-slate-900/50 backdrop-blur-sm md:hidden"
           onClick={onCloseMobile}
         />
       )}
 
       <aside
-        className={`fixed md:sticky top-16 z-30 inset-y-0 left-0 w-72 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col justify-between transition-transform duration-200 ease-in-out md:translate-x-0 ${
+        className={`fixed md:sticky top-16 bottom-0 left-0 z-30 w-72 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col justify-between transition-transform duration-200 ease-in-out md:translate-x-0 ${
           isOpenMobile ? 'translate-x-0' : '-translate-x-full'
         } h-[calc(100vh-4rem)] overflow-y-auto`}
       >
@@ -131,7 +148,7 @@ export const Sidebar: FC<SidebarProps> = ({
             <label className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
               Chế Độ Kế Toán
             </label>
-            <div className="grid grid-cols-3 gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
+            <div className="grid grid-cols-2 gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
               <button
                 type="button"
                 onClick={() => onRegimeChange('CIRCULAR_200')}
@@ -200,7 +217,7 @@ export const Sidebar: FC<SidebarProps> = ({
                   }}
                   className={`w-full flex items-start space-x-3 px-3 py-2.5 rounded-xl text-left transition-all ${
                     isActive
-                      ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-300 font-medium border border-emerald-200 dark:border-emerald-800/80 shadow-xs'
+                      ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-300 font-medium border border-emerald-200 dark:border-emerald-800/80 shadow-sm'
                       : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100'
                   }`}
                 >
@@ -242,7 +259,7 @@ export const Sidebar: FC<SidebarProps> = ({
         <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 space-y-3">
           <div
             data-testid="sidebar-auth-card"
-            className="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/80 space-y-2.5 shadow-2xs"
+            className="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/80 space-y-2.5 shadow-sm"
           >
             {user ? (
               <>
@@ -302,7 +319,7 @@ export const Sidebar: FC<SidebarProps> = ({
                       onLogin?.();
                       onCloseMobile();
                     }}
-                    className="inline-flex items-center justify-center space-x-1 px-2 py-1.5 rounded-lg text-[11px] font-bold bg-emerald-600 hover:bg-emerald-700 text-white transition-colors shadow-2xs"
+                    className="inline-flex items-center justify-center space-x-1 px-2 py-1.5 rounded-lg text-[11px] font-bold bg-emerald-600 hover:bg-emerald-700 text-white transition-colors shadow-sm"
                   >
                     <LogIn className="w-3 h-3" />
                     <span>Đăng nhập</span>

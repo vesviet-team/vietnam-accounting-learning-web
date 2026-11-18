@@ -97,7 +97,7 @@ export const SettingsView: FC<SettingsViewProps> = ({
       {/* P1: Account & multi-device sync section */}
       <AccountSection openRegisterSignal={openRegisterSignal} />
 
-      <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-xs border border-slate-200 dark:border-slate-800 space-y-1">
+      <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 space-y-1">
         <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
           Cài Đặt & Lưu Trữ Dữ Liệu
         </h1>
@@ -124,15 +124,16 @@ export const SettingsView: FC<SettingsViewProps> = ({
       )}
 
       {/* Accounting Regime Setting */}
-      <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-xs border border-slate-200 dark:border-slate-800 space-y-4">
+      <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 space-y-4">
         <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center space-x-2">
           <ShieldCheck className="w-5 h-5 text-emerald-600" />
           <span>Chế Độ Kế Toán Doanh Nghiệp Mặc Định</span>
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div
+          <button
+            type="button"
             onClick={() => onRegimeChange('CIRCULAR_200')}
-            className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
+            className={`p-4 rounded-xl border-2 cursor-pointer transition-all text-left ${
               currentRegime === 'CIRCULAR_200'
                 ? 'border-emerald-600 bg-emerald-50/40 dark:bg-emerald-950/20'
                 : 'border-slate-200 dark:border-slate-800 hover:border-slate-300'
@@ -144,11 +145,12 @@ export const SettingsView: FC<SettingsViewProps> = ({
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
               Doanh nghiệp quy mô lớn và vừa, áp dụng đầy đủ 9 loại tài khoản với hệ thống tài khoản chi tiết 4 chữ số.
             </p>
-          </div>
+          </button>
 
-          <div
+          <button
+            type="button"
             onClick={() => onRegimeChange('CIRCULAR_133')}
-            className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
+            className={`p-4 rounded-xl border-2 cursor-pointer transition-all text-left ${
               currentRegime === 'CIRCULAR_133'
                 ? 'border-blue-600 bg-blue-50/40 dark:bg-blue-950/20'
                 : 'border-slate-200 dark:border-slate-800 hover:border-slate-300'
@@ -160,11 +162,12 @@ export const SettingsView: FC<SettingsViewProps> = ({
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
               Doanh nghiệp vừa và nhỏ (SME), tài khoản tinh giản 3 chữ số, cấm các tài khoản TK 621, 622, 623, 627, 641, 521.
             </p>
-          </div>
+          </button>
 
-          <div
+          <button
+            type="button"
             onClick={() => onRegimeChange('CIRCULAR_99')}
-            className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
+            className={`p-4 rounded-xl border-2 cursor-pointer transition-all text-left ${
               currentRegime === 'CIRCULAR_99'
                 ? 'border-purple-600 bg-purple-50/40 dark:bg-purple-950/20'
                 : 'border-slate-200 dark:border-slate-800 hover:border-slate-300'
@@ -176,11 +179,12 @@ export const SettingsView: FC<SettingsViewProps> = ({
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
               Chế độ kế toán mới hiệu lực từ 01/01/2026 thay thế TT 200: Báo cáo tình hình tài chính (B01-DN), kiểm soát nội bộ & chứng từ số.
             </p>
-          </div>
+          </button>
 
-          <div
+          <button
+            type="button"
             onClick={() => onRegimeChange('CIRCULAR_58')}
-            className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
+            className={`p-4 rounded-xl border-2 cursor-pointer transition-all text-left ${
               currentRegime === 'CIRCULAR_58'
                 ? 'border-amber-600 bg-amber-50/40 dark:bg-amber-950/20'
                 : 'border-slate-200 dark:border-slate-800 hover:border-slate-300'
@@ -192,12 +196,12 @@ export const SettingsView: FC<SettingsViewProps> = ({
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
               TT 58/2026 — DN siêu nhỏ, hiệu lực 01/07/2026: bãi bỏ hệ thống tài khoản Nợ/Có, ghi sổ trực tiếp theo 11 mẫu sổ đơn giản; được bố trí người thân trong gia đình làm kế toán.
             </p>
-          </div>
+          </button>
         </div>
       </div>
 
       {/* Theme Setting */}
-      <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-xs border border-slate-200 dark:border-slate-800 space-y-4">
+      <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 space-y-4">
         <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">
           Giao Diện & Chế Độ Màu Sắc
         </h2>
@@ -222,7 +226,7 @@ export const SettingsView: FC<SettingsViewProps> = ({
       </div>
 
       {/* Backup & Storage Layer */}
-      <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-xs border border-slate-200 dark:border-slate-800 space-y-4">
+      <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 space-y-4">
         <div className="flex items-center space-x-2">
           <HardDrive className="w-5 h-5 text-emerald-600" />
           <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">
@@ -238,7 +242,7 @@ export const SettingsView: FC<SettingsViewProps> = ({
             type="button"
             onClick={handleExport}
             disabled={isProcessing}
-            className="flex items-center space-x-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl shadow-xs transition-colors disabled:opacity-50"
+            className="flex items-center space-x-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl shadow-sm transition-colors disabled:opacity-50"
           >
             <Download className="w-4 h-4" />
             <span>Xuất file JSON sao lưu</span>

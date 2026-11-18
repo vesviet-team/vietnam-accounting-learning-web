@@ -33,6 +33,7 @@ import { CostingComparisonMatrix } from './CostingComparisonMatrix';
 import { CogsSocraticLadder } from './CogsSocraticLadder';
 import { storageService } from '@/services/storage/storage-service';
 import { DokBadge } from '@/components/assessment/DokBadge';
+import { getRegimeDisplayMeta, getNextRegime } from '@/data/regime-meta';
 
 export interface CogsWorkbenchProps {
   currentRegime: CogsAccountingRegime | CoaAccountingRegime;
@@ -209,7 +210,7 @@ export const CogsWorkbench: FC<CogsWorkbenchProps> = ({
       className="space-y-6 max-w-7xl mx-auto transition-colors"
     >
       {/* 1. Header Banner & Executive Overview */}
-      <div className="relative overflow-hidden rounded-3xl bg-linear-to-r from-emerald-800 via-teal-900 to-slate-900 text-white p-6 sm:p-8 shadow-xl">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-800 via-teal-900 to-slate-900 text-white p-6 sm:p-8 shadow-xl">
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2 max-w-2xl">
             <div className="flex flex-wrap items-center gap-2.5">
@@ -218,7 +219,7 @@ export const CogsWorkbench: FC<CogsWorkbenchProps> = ({
                 <span>Phân Hệ Kế Toán COGS &amp; Costing</span>
               </span>
               <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-white/10 text-white/90 border border-white/10">
-                VAS 02 / IAS 2 &bull; TT 200 &bull; TT 99/2025 &bull; TT 133
+                VAS 02 / IAS 2 &bull; TT 200 &bull; TT 99/2025 &bull; TT 133 &bull; TT 58/2026
               </span>
             </div>
 
@@ -278,7 +279,7 @@ export const CogsWorkbench: FC<CogsWorkbenchProps> = ({
               data-testid="scenario-selector-select"
               value={selectedScenarioId}
               onChange={(e) => handleSelectScenario(e.target.value)}
-              className="text-xs font-semibold px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-hidden focus:ring-2 focus:ring-emerald-500"
+              className="text-xs font-semibold px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500"
             >
               {COGS_SCENARIOS.map((scen) => (
                 <option key={scen.id} value={scen.id}>
@@ -301,7 +302,7 @@ export const CogsWorkbench: FC<CogsWorkbenchProps> = ({
                 onClick={() => handleSelectScenario(scen.id)}
                 className={`p-3.5 rounded-xl border text-left transition-all flex flex-col justify-between gap-2 ${
                   isSelected
-                    ? 'bg-emerald-50/80 dark:bg-emerald-950/40 border-emerald-500 dark:border-emerald-600 ring-2 ring-emerald-500/20 shadow-xs'
+                    ? 'bg-emerald-50/80 dark:bg-emerald-950/40 border-emerald-500 dark:border-emerald-600 ring-2 ring-emerald-500/20 shadow-sm'
                     : 'bg-slate-50/60 dark:bg-slate-800/40 border-slate-200 dark:border-slate-700/80 hover:border-slate-300 dark:hover:border-slate-600'
                 }`}
               >
@@ -464,18 +465,16 @@ export const CogsWorkbench: FC<CogsWorkbenchProps> = ({
             <button
               type="button"
               data-testid="cogs-regime-toggle-btn"
-              onClick={() =>
-                onRegimeChange(
-                  currentRegime === 'CIRCULAR_200' ? 'CIRCULAR_133' : 'CIRCULAR_200'
-                )
-              }
+              onClick={() => onRegimeChange(getNextRegime(currentRegime))}
               className="px-2 py-0.5 rounded-md font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-100/70 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800 hover:bg-emerald-200 transition-colors"
               title="Chuyển đổi chế độ kế toán"
             >
-              {currentRegime}
+              {getRegimeDisplayMeta(currentRegime).shortLabel}
             </button>
           ) : (
-            <span className="font-bold text-slate-800 dark:text-slate-200">{currentRegime}</span>
+            <span className="font-bold text-slate-800 dark:text-slate-200">
+              {getRegimeDisplayMeta(currentRegime).shortLabel}
+            </span>
           )}
         </div>
       </div>

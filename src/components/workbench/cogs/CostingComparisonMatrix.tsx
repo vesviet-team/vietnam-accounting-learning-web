@@ -192,28 +192,28 @@ export const CostingComparisonMatrix: FC<CostingComparisonMatrixProps> = ({
 
   return (
     <div
-      className={`space-y-6 bg-slate-900 text-slate-100 p-4 md:p-6 rounded-xl border border-slate-800 shadow-xl ${className}`}
+      className={`space-y-6 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 p-4 md:p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xl ${className}`}
       data-testid="costing-comparison-matrix-container"
     >
       {/* 1. Header & Statutory References */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 border-b border-slate-800 pb-5">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-5">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="px-2.5 py-0.5 rounded text-xs font-semibold bg-emerald-950/80 text-emerald-400 border border-emerald-700/60">
+            <span className="px-2.5 py-0.5 rounded text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-700/60">
               VAS 02 / IAS 2 (Hàng tồn kho)
             </span>
-            <span className="px-2.5 py-0.5 rounded text-xs font-semibold bg-blue-950/80 text-blue-400 border border-blue-700/60">
+            <span className="px-2.5 py-0.5 rounded text-xs font-semibold bg-blue-50 dark:bg-blue-950/80 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-700/60">
               Thông tư 200/2014 & 99/2025/TT-BTC
             </span>
-            <span className="px-2.5 py-0.5 rounded text-xs font-semibold bg-purple-950/80 text-purple-400 border border-purple-700/60">
+            <span className="px-2.5 py-0.5 rounded text-xs font-semibold bg-purple-50 dark:bg-purple-950/80 text-purple-700 dark:text-purple-400 border border-purple-200 dark:border-purple-700/60">
               BCTC B01-DN & B02-DN
             </span>
           </div>
-          <h2 className="text-xl md:text-2xl font-bold tracking-tight text-white flex items-center gap-2">
-            <BarChart3 className="w-6 h-6 text-amber-400" />
+          <h2 className="text-xl md:text-2xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
+            <BarChart3 className="w-6 h-6 text-amber-700 dark:text-amber-400" />
             Ma Trận So Sánh Đa Phương Pháp & Tác Động Báo Cáo Tài Chính
           </h2>
-          <p className="text-sm text-slate-400 mt-1 max-w-3xl">
+          <p className="text-sm text-slate-600 dark:text-slate-400 mt-1 max-w-3xl">
             Đánh giá song song 3 phương pháp xuất kho hợp pháp (FIFO, Bình quân cả kỳ, Bình quân liên hoàn)
             trên cùng tập dữ liệu thực tế. Phân tích sự phân kỳ của 4 chỉ tiêu tài chính then chốt và gợi mở
             chiến lược điều hành vốn vay ngân hàng vs tối ưu dòng tiền thuế TNDN.
@@ -226,33 +226,33 @@ export const CostingComparisonMatrix: FC<CostingComparisonMatrixProps> = ({
             data-testid="trend-badge"
             className={`px-3.5 py-2 rounded-lg border flex items-center gap-2 shadow-sm ${
               trend === 'INFLATION'
-                ? 'bg-amber-950/40 border-amber-600/50 text-amber-300'
+                ? 'bg-amber-50 dark:bg-amber-950/40 border-amber-600/50 text-amber-700 dark:text-amber-300'
                 : trend === 'DEFLATION'
-                ? 'bg-blue-950/40 border-blue-600/50 text-blue-300'
-                : 'bg-slate-800/80 border-slate-700 text-slate-300'
+                ? 'bg-blue-50 dark:bg-blue-950/40 border-blue-600/50 text-blue-700 dark:text-blue-300'
+                : 'bg-slate-100 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300'
             }`}
           >
             {trend === 'INFLATION' ? (
               <>
-                <TrendingUp className="w-4 h-4 text-amber-400 animate-pulse" />
+                <TrendingUp className="w-4 h-4 text-amber-700 dark:text-amber-400 animate-pulse" />
                 <div>
-                  <div className="text-xs text-amber-400 font-medium">Xu hướng thị trường</div>
+                  <div className="text-xs text-amber-700 dark:text-amber-400 font-medium">Xu hướng thị trường</div>
                   <div className="text-sm font-bold">Giá Tăng (Lạm phát / Inflation)</div>
                 </div>
               </>
             ) : trend === 'DEFLATION' ? (
               <>
-                <TrendingDown className="w-4 h-4 text-blue-400 animate-pulse" />
+                <TrendingDown className="w-4 h-4 text-blue-700 dark:text-blue-400 animate-pulse" />
                 <div>
-                  <div className="text-xs text-blue-400 font-medium">Xu hướng thị trường</div>
+                  <div className="text-xs text-blue-700 dark:text-blue-400 font-medium">Xu hướng thị trường</div>
                   <div className="text-sm font-bold">Giá Giảm (Giảm phát / Deflation)</div>
                 </div>
               </>
             ) : (
               <>
-                <Minus className="w-4 h-4 text-slate-400" />
+                <Minus className="w-4 h-4 text-slate-600 dark:text-slate-400" />
                 <div>
-                  <div className="text-xs text-slate-400 font-medium">Xu hướng thị trường</div>
+                  <div className="text-xs text-slate-600 dark:text-slate-400 font-medium">Xu hướng thị trường</div>
                   <div className="text-sm font-bold">Giá Bình Ổn (Flat Price)</div>
                 </div>
               </>
@@ -262,33 +262,33 @@ export const CostingComparisonMatrix: FC<CostingComparisonMatrixProps> = ({
       </div>
 
       {/* Revenue Control Bar */}
-      <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/60 flex flex-wrap items-center justify-between gap-3 text-sm">
+      <div className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-3 border border-slate-200 dark:border-slate-700/60 flex flex-wrap items-center justify-between gap-3 text-sm">
         <div className="flex items-center gap-2">
-          <DollarSign className="w-4 h-4 text-emerald-400" />
-          <span className="text-slate-300 font-medium">
+          <DollarSign className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
+          <span className="text-slate-700 dark:text-slate-300 font-medium">
             Doanh thu bán hàng kỳ tính (Mã 01 / Mã 10 trên B02):
           </span>
-          <span className="font-bold text-white px-2 py-0.5 rounded bg-slate-700/80 border border-slate-600">
+          <span className="font-bold text-slate-900 dark:text-white px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-700/80 border border-slate-300 dark:border-slate-600">
             {formatVnd(revenue)}
           </span>
-          <span className="text-xs text-slate-400 hidden sm:inline">
+          <span className="text-xs text-slate-600 dark:text-slate-400 hidden sm:inline">
             (Cơ sở tính Lợi nhuận gộp Mã 20 = Doanh thu - Giá vốn)
           </span>
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="text-xs text-slate-400">Doanh thu giả định tùy chỉnh:</span>
+          <span className="text-xs text-slate-600 dark:text-slate-400">Doanh thu giả định tùy chỉnh:</span>
           <input
             type="text"
             placeholder="Nhập số tiền..."
             value={customRevenueInput}
             onChange={(e) => setCustomRevenueInput(e.target.value)}
-            className="w-36 px-2 py-1 text-xs rounded bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-amber-500"
+            className="w-36 px-2 py-1 text-xs rounded bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-500 focus:outline-none focus:border-amber-500"
           />
           {customRevenueInput && (
             <button
               onClick={() => setCustomRevenueInput('')}
-              className="text-xs px-2 py-1 rounded bg-slate-700 text-slate-300 hover:bg-slate-600 transition"
+              className="text-xs px-2 py-1 rounded bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600 transition"
               title="Đặt lại doanh thu tự động"
             >
               <RefreshCw className="w-3 h-3" />
@@ -300,178 +300,178 @@ export const CostingComparisonMatrix: FC<CostingComparisonMatrixProps> = ({
       {/* 2. 4 Key Indicator Financial KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* KPI 1: Giá vốn TK 632 */}
-        <div className="bg-slate-800/60 rounded-xl p-4 border border-amber-500/30 shadow-md">
-          <div className="flex items-center justify-between text-xs text-amber-400 font-semibold mb-1">
+        <div className="bg-slate-50 dark:bg-slate-800/60 rounded-xl p-4 border border-amber-500/30 shadow-md">
+          <div className="flex items-center justify-between text-xs text-amber-700 dark:text-amber-400 font-semibold mb-1">
             <span>CHỈ TIÊU 1 • B02 MÃ 11</span>
             <span className="px-1.5 py-0.5 rounded bg-amber-950 border border-amber-700 text-[10px]">
               TK 632
             </span>
           </div>
-          <div className="text-base font-bold text-white">Tổng Giá Vốn Xuất Kho</div>
+          <div className="text-base font-bold text-slate-900 dark:text-white">Tổng Giá Vốn Xuất Kho</div>
           <div className="mt-3 space-y-1.5 text-xs">
-            <div className="flex justify-between items-center text-slate-300">
-              <span className="text-slate-400">FIFO:</span>
+            <div className="flex justify-between items-center text-slate-700 dark:text-slate-300">
+              <span className="text-slate-600 dark:text-slate-400">FIFO:</span>
               <span
                 data-testid="kpi-cogs-FIFO"
                 className={`font-mono font-bold ${
-                  minCogsMethod === 'FIFO' ? 'text-amber-400' : 'text-slate-200'
+                  minCogsMethod === 'FIFO' ? 'text-amber-700 dark:text-amber-400' : 'text-slate-800 dark:text-slate-200'
                 }`}
               >
                 {formatVnd(fifoRow.cogsAmount)}
               </span>
             </div>
-            <div className="flex justify-between items-center text-slate-300">
-              <span className="text-slate-400">BQ Cả kỳ:</span>
+            <div className="flex justify-between items-center text-slate-700 dark:text-slate-300">
+              <span className="text-slate-600 dark:text-slate-400">BQ Cả kỳ:</span>
               <span
                 data-testid="kpi-cogs-PERIODIC_WEIGHTED_AVERAGE"
-                className="font-mono font-bold text-slate-200"
+                className="font-mono font-bold text-slate-800 dark:text-slate-200"
               >
                 {formatVnd(periodicRow.cogsAmount)}
               </span>
             </div>
-            <div className="flex justify-between items-center text-slate-300">
-              <span className="text-slate-400">BQ Liên hoàn:</span>
+            <div className="flex justify-between items-center text-slate-700 dark:text-slate-300">
+              <span className="text-slate-600 dark:text-slate-400">BQ Liên hoàn:</span>
               <span
                 data-testid="kpi-cogs-MOVING_WEIGHTED_AVERAGE"
-                className="font-mono font-bold text-slate-200"
+                className="font-mono font-bold text-slate-800 dark:text-slate-200"
               >
                 {formatVnd(movingRow.cogsAmount)}
               </span>
             </div>
           </div>
-          <div className="mt-2.5 pt-2 border-t border-slate-700/60 text-[11px] text-amber-300/80 flex justify-between">
+          <div className="mt-2.5 pt-2 border-t border-slate-200 dark:border-slate-700/60 text-[11px] text-amber-700 dark:text-amber-300/80 flex justify-between">
             <span>Độ lệch tối đa (Δ):</span>
             <span className="font-mono font-semibold">{formatVnd(deltaCogs)}</span>
           </div>
         </div>
 
         {/* KPI 2: Tồn kho cuối kỳ TK 156 */}
-        <div className="bg-slate-800/60 rounded-xl p-4 border border-emerald-500/30 shadow-md">
-          <div className="flex items-center justify-between text-xs text-emerald-400 font-semibold mb-1">
+        <div className="bg-slate-50 dark:bg-slate-800/60 rounded-xl p-4 border border-emerald-500/30 shadow-md">
+          <div className="flex items-center justify-between text-xs text-emerald-700 dark:text-emerald-400 font-semibold mb-1">
             <span>CHỈ TIÊU 2 • B01 MÃ 140</span>
-            <span className="px-1.5 py-0.5 rounded bg-emerald-950 border border-emerald-700 text-[10px]">
+            <span className="px-1.5 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950 border border-emerald-700 text-[10px]">
               TK 156
             </span>
           </div>
-          <div className="text-base font-bold text-white">Tồn Kho Cuối Kỳ</div>
+          <div className="text-base font-bold text-slate-900 dark:text-white">Tồn Kho Cuối Kỳ</div>
           <div className="mt-3 space-y-1.5 text-xs">
-            <div className="flex justify-between items-center text-slate-300">
-              <span className="text-slate-400">FIFO:</span>
+            <div className="flex justify-between items-center text-slate-700 dark:text-slate-300">
+              <span className="text-slate-600 dark:text-slate-400">FIFO:</span>
               <span
                 data-testid="kpi-ending-FIFO"
-                className="font-mono font-bold text-emerald-400"
+                className="font-mono font-bold text-emerald-700 dark:text-emerald-400"
               >
                 {formatVnd(fifoRow.endingInventoryValue)}
               </span>
             </div>
-            <div className="flex justify-between items-center text-slate-300">
-              <span className="text-slate-400">BQ Cả kỳ:</span>
+            <div className="flex justify-between items-center text-slate-700 dark:text-slate-300">
+              <span className="text-slate-600 dark:text-slate-400">BQ Cả kỳ:</span>
               <span
                 data-testid="kpi-ending-PERIODIC_WEIGHTED_AVERAGE"
-                className="font-mono font-bold text-slate-200"
+                className="font-mono font-bold text-slate-800 dark:text-slate-200"
               >
                 {formatVnd(periodicRow.endingInventoryValue)}
               </span>
             </div>
-            <div className="flex justify-between items-center text-slate-300">
-              <span className="text-slate-400">BQ Liên hoàn:</span>
+            <div className="flex justify-between items-center text-slate-700 dark:text-slate-300">
+              <span className="text-slate-600 dark:text-slate-400">BQ Liên hoàn:</span>
               <span
                 data-testid="kpi-ending-MOVING_WEIGHTED_AVERAGE"
-                className="font-mono font-bold text-slate-200"
+                className="font-mono font-bold text-slate-800 dark:text-slate-200"
               >
                 {formatVnd(movingRow.endingInventoryValue)}
               </span>
             </div>
           </div>
-          <div className="mt-2.5 pt-2 border-t border-slate-700/60 text-[11px] text-emerald-300/80 flex justify-between">
+          <div className="mt-2.5 pt-2 border-t border-slate-200 dark:border-slate-700/60 text-[11px] text-emerald-700 dark:text-emerald-300/80 flex justify-between">
             <span>Độ lệch tài sản (Δ):</span>
             <span className="font-mono font-semibold">{formatVnd(deltaEnding)}</span>
           </div>
         </div>
 
         {/* KPI 3: Lợi nhuận gộp Mã 20 */}
-        <div className="bg-slate-800/60 rounded-xl p-4 border border-blue-500/30 shadow-md">
-          <div className="flex items-center justify-between text-xs text-blue-400 font-semibold mb-1">
+        <div className="bg-slate-50 dark:bg-slate-800/60 rounded-xl p-4 border border-blue-500/30 shadow-md">
+          <div className="flex items-center justify-between text-xs text-blue-700 dark:text-blue-400 font-semibold mb-1">
             <span>CHỈ TIÊU 3 • B02 MÃ 20</span>
             <span className="px-1.5 py-0.5 rounded bg-blue-950 border border-blue-700 text-[10px]">
               Mã 10 - Mã 11
             </span>
           </div>
-          <div className="text-base font-bold text-white">Lợi Nhuận Gộp (Gross Profit)</div>
+          <div className="text-base font-bold text-slate-900 dark:text-white">Lợi Nhuận Gộp (Gross Profit)</div>
           <div className="mt-3 space-y-1.5 text-xs">
-            <div className="flex justify-between items-center text-slate-300">
-              <span className="text-slate-400">FIFO:</span>
+            <div className="flex justify-between items-center text-slate-700 dark:text-slate-300">
+              <span className="text-slate-600 dark:text-slate-400">FIFO:</span>
               <span
                 data-testid="kpi-profit-FIFO"
-                className="font-mono font-bold text-blue-400"
+                className="font-mono font-bold text-blue-700 dark:text-blue-400"
               >
                 {formatVnd(fifoRow.grossProfit)}
               </span>
             </div>
-            <div className="flex justify-between items-center text-slate-300">
-              <span className="text-slate-400">BQ Cả kỳ:</span>
+            <div className="flex justify-between items-center text-slate-700 dark:text-slate-300">
+              <span className="text-slate-600 dark:text-slate-400">BQ Cả kỳ:</span>
               <span
                 data-testid="kpi-profit-PERIODIC_WEIGHTED_AVERAGE"
-                className="font-mono font-bold text-slate-200"
+                className="font-mono font-bold text-slate-800 dark:text-slate-200"
               >
                 {formatVnd(periodicRow.grossProfit)}
               </span>
             </div>
-            <div className="flex justify-between items-center text-slate-300">
-              <span className="text-slate-400">BQ Liên hoàn:</span>
+            <div className="flex justify-between items-center text-slate-700 dark:text-slate-300">
+              <span className="text-slate-600 dark:text-slate-400">BQ Liên hoàn:</span>
               <span
                 data-testid="kpi-profit-MOVING_WEIGHTED_AVERAGE"
-                className="font-mono font-bold text-slate-200"
+                className="font-mono font-bold text-slate-800 dark:text-slate-200"
               >
                 {formatVnd(movingRow.grossProfit)}
               </span>
             </div>
           </div>
-          <div className="mt-2.5 pt-2 border-t border-slate-700/60 text-[11px] text-blue-300/80 flex justify-between">
+          <div className="mt-2.5 pt-2 border-t border-slate-200 dark:border-slate-700/60 text-[11px] text-blue-700 dark:text-blue-300/80 flex justify-between">
             <span>Độ lệch LN gộp (Δ):</span>
             <span className="font-mono font-semibold">{formatVnd(deltaProfit)}</span>
           </div>
         </div>
 
         {/* KPI 4: Thuế TNDN tạm tính 20% & LNST */}
-        <div className="bg-slate-800/60 rounded-xl p-4 border border-rose-500/30 shadow-md">
-          <div className="flex items-center justify-between text-xs text-rose-400 font-semibold mb-1">
+        <div className="bg-slate-50 dark:bg-slate-800/60 rounded-xl p-4 border border-rose-500/30 shadow-md">
+          <div className="flex items-center justify-between text-xs text-rose-700 dark:text-rose-400 font-semibold mb-1">
             <span>CHỈ TIÊU 4 • B02 MÃ 51 & 60</span>
-            <span className="px-1.5 py-0.5 rounded bg-rose-950 border border-rose-700 text-[10px]">
+            <span className="px-1.5 py-0.5 rounded bg-rose-50 dark:bg-rose-950 border border-rose-700 text-[10px]">
               CIT 20% & LNST
             </span>
           </div>
-          <div className="text-base font-bold text-white">Thuế TNDN & Sau Thuế</div>
+          <div className="text-base font-bold text-slate-900 dark:text-white">Thuế TNDN & Sau Thuế</div>
           <div className="mt-3 space-y-1.5 text-xs">
-            <div className="flex justify-between items-center text-slate-300">
-              <span className="text-slate-400">FIFO (Thuế/LNST):</span>
+            <div className="flex justify-between items-center text-slate-700 dark:text-slate-300">
+              <span className="text-slate-600 dark:text-slate-400">FIFO (Thuế/LNST):</span>
               <span
                 data-testid="kpi-cit-FIFO"
-                className="font-mono font-bold text-rose-400"
+                className="font-mono font-bold text-rose-700 dark:text-rose-400"
               >
                 {formatVnd(fifoRow.citExpense)}
               </span>
             </div>
-            <div className="flex justify-between items-center text-slate-300">
-              <span className="text-slate-400">BQ Cả kỳ:</span>
+            <div className="flex justify-between items-center text-slate-700 dark:text-slate-300">
+              <span className="text-slate-600 dark:text-slate-400">BQ Cả kỳ:</span>
               <span
                 data-testid="kpi-cit-PERIODIC_WEIGHTED_AVERAGE"
-                className="font-mono font-bold text-slate-200"
+                className="font-mono font-bold text-slate-800 dark:text-slate-200"
               >
                 {formatVnd(periodicRow.citExpense)}
               </span>
             </div>
-            <div className="flex justify-between items-center text-slate-300">
-              <span className="text-slate-400">BQ Liên hoàn:</span>
+            <div className="flex justify-between items-center text-slate-700 dark:text-slate-300">
+              <span className="text-slate-600 dark:text-slate-400">BQ Liên hoàn:</span>
               <span
                 data-testid="kpi-cit-MOVING_WEIGHTED_AVERAGE"
-                className="font-mono font-bold text-slate-200"
+                className="font-mono font-bold text-slate-800 dark:text-slate-200"
               >
                 {formatVnd(movingRow.citExpense)}
               </span>
             </div>
           </div>
-          <div className="mt-2.5 pt-2 border-t border-slate-700/60 text-[11px] text-rose-300/80 flex justify-between">
+          <div className="mt-2.5 pt-2 border-t border-slate-200 dark:border-slate-700/60 text-[11px] text-rose-700 dark:text-rose-300/80 flex justify-between">
             <span>Dòng tiền thuế lệch (Δ):</span>
             <span className="font-mono font-semibold">{formatVnd(deltaCit)}</span>
           </div>
@@ -479,15 +479,15 @@ export const CostingComparisonMatrix: FC<CostingComparisonMatrixProps> = ({
       </div>
 
       {/* 3. Side-by-Side Comparison Matrix Table */}
-      <div className="bg-slate-800/40 rounded-xl border border-slate-700 overflow-hidden shadow-lg">
-        <div className="px-4 py-3 bg-slate-800/80 border-b border-slate-700 flex flex-wrap items-center justify-between gap-2">
+      <div className="bg-white dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-lg">
+        <div className="px-4 py-3 bg-slate-100 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700 flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <FileText className="w-4 h-4 text-emerald-400" />
-            <span className="font-semibold text-white text-sm">
+            <FileText className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
+            <span className="font-semibold text-slate-900 dark:text-white text-sm">
               BẢNG MA TRẬN ĐỐI CHIẾU 3 PHƯƠNG PHÁP XUẤT KHO VÀ TÁC ĐỘNG BÁO CÁO TÀI CHÍNH
             </span>
           </div>
-          <span className="text-xs text-slate-400 italic">
+          <span className="text-xs text-slate-600 dark:text-slate-400 italic">
             Đơn vị tính: Đồng Việt Nam (VND)
           </span>
         </div>
@@ -498,69 +498,69 @@ export const CostingComparisonMatrix: FC<CostingComparisonMatrixProps> = ({
             data-testid="comparison-matrix-table"
           >
             <thead>
-              <tr className="bg-slate-800/90 text-slate-300 border-b border-slate-700 text-xs">
+              <tr className="bg-slate-100 dark:bg-slate-800/90 text-slate-700 dark:text-slate-300 border-b border-slate-200 dark:border-slate-700 text-xs">
                 <th className="py-3 px-4 font-semibold w-1/4">Chỉ Tiêu Tài Chính</th>
                 <th className="py-3 px-3 font-semibold text-center w-28">Ký Hiệu / Mã Số</th>
                 <th
-                  className="py-3 px-4 font-semibold text-right text-amber-300 bg-amber-950/20"
+                  className="py-3 px-4 font-semibold text-right text-amber-700 dark:text-amber-300 bg-amber-50/70 dark:bg-amber-950/20"
                   data-testid="col-method-FIFO"
                 >
                   Nhập Trước - Xuất Trước (FIFO)
                 </th>
                 <th
-                  className="py-3 px-4 font-semibold text-right text-blue-300 bg-blue-950/20"
+                  className="py-3 px-4 font-semibold text-right text-blue-700 dark:text-blue-300 bg-blue-50/70 dark:bg-blue-950/20"
                   data-testid="col-method-PERIODIC_WEIGHTED_AVERAGE"
                 >
                   Bình Quân Cả Kỳ Dự Trữ
                 </th>
                 <th
-                  className="py-3 px-4 font-semibold text-right text-purple-300 bg-purple-950/20"
+                  className="py-3 px-4 font-semibold text-right text-purple-700 dark:text-purple-300 bg-purple-50/70 dark:bg-purple-950/20"
                   data-testid="col-method-MOVING_WEIGHTED_AVERAGE"
                 >
                   Bình Quân Gia Quyền Liên Hoàn
                 </th>
-                <th className="py-3 px-4 font-semibold text-right text-slate-400 bg-slate-800/40">
+                <th className="py-3 px-4 font-semibold text-right text-slate-600 dark:text-slate-400 bg-white dark:bg-slate-800/40">
                   Chênh Lệch (Δ Max - Min)
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-700/60 font-mono">
+            <tbody className="divide-y divide-slate-200 dark:divide-slate-700/60 font-mono">
               {/* Row 1: COGS */}
               <tr
-                className="hover:bg-slate-800/40 transition"
+                className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition"
                 data-testid="row-cogs"
               >
-                <td className="py-3 px-4 font-sans font-medium text-slate-200">
+                <td className="py-3 px-4 font-sans font-medium text-slate-800 dark:text-slate-200">
                   1. Tổng Giá vốn hàng bán trong kỳ
-                  <span className="block text-[11px] font-normal text-slate-400">
+                  <span className="block text-[11px] font-normal text-slate-600 dark:text-slate-400">
                     Phản ánh toàn bộ giá trị hàng xuất bán ghi nhận vào chi phí hoạt động
                   </span>
                 </td>
                 <td className="py-3 px-3 text-center font-sans">
-                  <span className="px-2 py-0.5 rounded bg-slate-700 text-amber-300 text-xs font-semibold">
+                  <span className="px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-amber-700 dark:text-amber-300 text-xs font-semibold">
                     TK 632 / Mã 11 B02
                   </span>
                 </td>
                 <td
-                  className="py-3 px-4 text-right font-bold text-amber-400 bg-amber-950/10"
+                  className="py-3 px-4 text-right font-bold text-amber-700 dark:text-amber-400 bg-amber-50/40 dark:bg-amber-950/10"
                   data-testid="cogs-FIFO"
                 >
                   {formatVnd(fifoRow.cogsAmount)}
                 </td>
                 <td
-                  className="py-3 px-4 text-right text-slate-200 bg-blue-950/10"
+                  className="py-3 px-4 text-right text-slate-800 dark:text-slate-200 bg-blue-50/40 dark:bg-blue-950/10"
                   data-testid="cogs-PERIODIC_WEIGHTED_AVERAGE"
                 >
                   {formatVnd(periodicRow.cogsAmount)}
                 </td>
                 <td
-                  className="py-3 px-4 text-right text-slate-200 bg-purple-950/10"
+                  className="py-3 px-4 text-right text-slate-800 dark:text-slate-200 bg-purple-50/40 dark:bg-purple-950/10"
                   data-testid="cogs-MOVING_WEIGHTED_AVERAGE"
                 >
                   {formatVnd(movingRow.cogsAmount)}
                 </td>
                 <td
-                  className="py-3 px-4 text-right font-bold text-amber-300 bg-slate-800/30"
+                  className="py-3 px-4 text-right font-bold text-amber-700 dark:text-amber-300 bg-slate-50/70 dark:bg-slate-800/30"
                   data-testid="delta-cogs"
                 >
                   {formatVnd(deltaCogs)}
@@ -569,40 +569,40 @@ export const CostingComparisonMatrix: FC<CostingComparisonMatrixProps> = ({
 
               {/* Row 2: Ending Inventory */}
               <tr
-                className="hover:bg-slate-800/40 transition"
+                className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition"
                 data-testid="row-ending-inventory"
               >
-                <td className="py-3 px-4 font-sans font-medium text-slate-200">
+                <td className="py-3 px-4 font-sans font-medium text-slate-800 dark:text-slate-200">
                   2. Giá trị Hàng tồn kho cuối kỳ
-                  <span className="block text-[11px] font-normal text-slate-400">
+                  <span className="block text-[11px] font-normal text-slate-600 dark:text-slate-400">
                     Tài sản ngắn hạn trình bày trên Báo cáo tình hình tài chính
                   </span>
                 </td>
                 <td className="py-3 px-3 text-center font-sans">
-                  <span className="px-2 py-0.5 rounded bg-slate-700 text-emerald-300 text-xs font-semibold">
+                  <span className="px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-emerald-700 dark:text-emerald-300 text-xs font-semibold">
                     TK 156 / Mã 140 B01
                   </span>
                 </td>
                 <td
-                  className="py-3 px-4 text-right font-bold text-emerald-400 bg-amber-950/10"
+                  className="py-3 px-4 text-right font-bold text-emerald-700 dark:text-emerald-400 bg-amber-50/40 dark:bg-amber-950/10"
                   data-testid="ending-FIFO"
                 >
                   {formatVnd(fifoRow.endingInventoryValue)}
                 </td>
                 <td
-                  className="py-3 px-4 text-right text-slate-200 bg-blue-950/10"
+                  className="py-3 px-4 text-right text-slate-800 dark:text-slate-200 bg-blue-50/40 dark:bg-blue-950/10"
                   data-testid="ending-PERIODIC_WEIGHTED_AVERAGE"
                 >
                   {formatVnd(periodicRow.endingInventoryValue)}
                 </td>
                 <td
-                  className="py-3 px-4 text-right text-slate-200 bg-purple-950/10"
+                  className="py-3 px-4 text-right text-slate-800 dark:text-slate-200 bg-purple-50/40 dark:bg-purple-950/10"
                   data-testid="ending-MOVING_WEIGHTED_AVERAGE"
                 >
                   {formatVnd(movingRow.endingInventoryValue)}
                 </td>
                 <td
-                  className="py-3 px-4 text-right font-bold text-emerald-300 bg-slate-800/30"
+                  className="py-3 px-4 text-right font-bold text-emerald-700 dark:text-emerald-300 bg-slate-50/70 dark:bg-slate-800/30"
                   data-testid="delta-ending"
                 >
                   {formatVnd(deltaEnding)}
@@ -611,40 +611,40 @@ export const CostingComparisonMatrix: FC<CostingComparisonMatrixProps> = ({
 
               {/* Row 3: Gross Profit */}
               <tr
-                className="hover:bg-slate-800/40 transition"
+                className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition"
                 data-testid="row-gross-profit"
               >
-                <td className="py-3 px-4 font-sans font-medium text-slate-200">
+                <td className="py-3 px-4 font-sans font-medium text-slate-800 dark:text-slate-200">
                   3. Lợi nhuận gộp về bán hàng & CCDV
-                  <span className="block text-[11px] font-normal text-slate-400">
+                  <span className="block text-[11px] font-normal text-slate-600 dark:text-slate-400">
                     Mã số 20 = Doanh thu thuần (Mã 10) - Giá vốn hàng bán (Mã 11)
                   </span>
                 </td>
                 <td className="py-3 px-3 text-center font-sans">
-                  <span className="px-2 py-0.5 rounded bg-slate-700 text-blue-300 text-xs font-semibold">
+                  <span className="px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-blue-700 dark:text-blue-300 text-xs font-semibold">
                     Mã số 20 B02
                   </span>
                 </td>
                 <td
-                  className="py-3 px-4 text-right font-bold text-blue-400 bg-amber-950/10"
+                  className="py-3 px-4 text-right font-bold text-blue-700 dark:text-blue-400 bg-amber-50/40 dark:bg-amber-950/10"
                   data-testid="profit-FIFO"
                 >
                   {formatVnd(fifoRow.grossProfit)}
                 </td>
                 <td
-                  className="py-3 px-4 text-right text-slate-200 bg-blue-950/10"
+                  className="py-3 px-4 text-right text-slate-800 dark:text-slate-200 bg-blue-50/40 dark:bg-blue-950/10"
                   data-testid="profit-PERIODIC_WEIGHTED_AVERAGE"
                 >
                   {formatVnd(periodicRow.grossProfit)}
                 </td>
                 <td
-                  className="py-3 px-4 text-right text-slate-200 bg-purple-950/10"
+                  className="py-3 px-4 text-right text-slate-800 dark:text-slate-200 bg-purple-50/40 dark:bg-purple-950/10"
                   data-testid="profit-MOVING_WEIGHTED_AVERAGE"
                 >
                   {formatVnd(movingRow.grossProfit)}
                 </td>
                 <td
-                  className="py-3 px-4 text-right font-bold text-blue-300 bg-slate-800/30"
+                  className="py-3 px-4 text-right font-bold text-blue-700 dark:text-blue-300 bg-slate-50/70 dark:bg-slate-800/30"
                   data-testid="delta-profit"
                 >
                   {formatVnd(deltaProfit)}
@@ -653,40 +653,40 @@ export const CostingComparisonMatrix: FC<CostingComparisonMatrixProps> = ({
 
               {/* Row 4: CIT Tax Expense */}
               <tr
-                className="hover:bg-slate-800/40 transition"
+                className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition"
                 data-testid="row-cit-tax"
               >
-                <td className="py-3 px-4 font-sans font-medium text-slate-200">
+                <td className="py-3 px-4 font-sans font-medium text-slate-800 dark:text-slate-200">
                   4. Chi phí thuế TNDN hiện hành tạm tính (20%)
-                  <span className="block text-[11px] font-normal text-slate-400">
+                  <span className="block text-[11px] font-normal text-slate-600 dark:text-slate-400">
                     Dòng tiền thuế doanh nghiệp có nghĩa vụ nộp cho NSNN theo luật định
                   </span>
                 </td>
                 <td className="py-3 px-3 text-center font-sans">
-                  <span className="px-2 py-0.5 rounded bg-slate-700 text-rose-300 text-xs font-semibold">
+                  <span className="px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-rose-700 dark:text-rose-300 text-xs font-semibold">
                     Mã số 51 B02
                   </span>
                 </td>
                 <td
-                  className="py-3 px-4 text-right font-bold text-rose-400 bg-amber-950/10"
+                  className="py-3 px-4 text-right font-bold text-rose-700 dark:text-rose-400 bg-amber-50/40 dark:bg-amber-950/10"
                   data-testid="cit-FIFO"
                 >
                   {formatVnd(fifoRow.citExpense)}
                 </td>
                 <td
-                  className="py-3 px-4 text-right text-slate-200 bg-blue-950/10"
+                  className="py-3 px-4 text-right text-slate-800 dark:text-slate-200 bg-blue-50/40 dark:bg-blue-950/10"
                   data-testid="cit-PERIODIC_WEIGHTED_AVERAGE"
                 >
                   {formatVnd(periodicRow.citExpense)}
                 </td>
                 <td
-                  className="py-3 px-4 text-right text-slate-200 bg-purple-950/10"
+                  className="py-3 px-4 text-right text-slate-800 dark:text-slate-200 bg-purple-50/40 dark:bg-purple-950/10"
                   data-testid="cit-MOVING_WEIGHTED_AVERAGE"
                 >
                   {formatVnd(movingRow.citExpense)}
                 </td>
                 <td
-                  className="py-3 px-4 text-right font-bold text-rose-300 bg-slate-800/30"
+                  className="py-3 px-4 text-right font-bold text-rose-700 dark:text-rose-300 bg-slate-50/70 dark:bg-slate-800/30"
                   data-testid="delta-cit"
                 >
                   {formatVnd(deltaCit)}
@@ -695,40 +695,40 @@ export const CostingComparisonMatrix: FC<CostingComparisonMatrixProps> = ({
 
               {/* Row 5: Net Profit After Tax */}
               <tr
-                className="hover:bg-slate-800/40 transition"
+                className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition"
                 data-testid="row-net-profit"
               >
-                <td className="py-3 px-4 font-sans font-medium text-slate-200">
+                <td className="py-3 px-4 font-sans font-medium text-slate-800 dark:text-slate-200">
                   5. Lợi nhuận sau thuế TNDN (LNST)
-                  <span className="block text-[11px] font-normal text-slate-400">
+                  <span className="block text-[11px] font-normal text-slate-600 dark:text-slate-400">
                     Mã 60 = Lợi nhuận gộp (Mã 20) - Chi phí thuế TNDN (Mã 51)
                   </span>
                 </td>
                 <td className="py-3 px-3 text-center font-sans">
-                  <span className="px-2 py-0.5 rounded bg-slate-700 text-purple-300 text-xs font-semibold">
+                  <span className="px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-purple-700 dark:text-purple-300 text-xs font-semibold">
                     Mã số 60 B02
                   </span>
                 </td>
                 <td
-                  className="py-3 px-4 text-right font-bold text-purple-400 bg-amber-950/10"
+                  className="py-3 px-4 text-right font-bold text-purple-700 dark:text-purple-400 bg-amber-50/40 dark:bg-amber-950/10"
                   data-testid="npat-FIFO"
                 >
                   {formatVnd(fifoRow.netProfitAfterTax)}
                 </td>
                 <td
-                  className="py-3 px-4 text-right text-slate-200 bg-blue-950/10"
+                  className="py-3 px-4 text-right text-slate-800 dark:text-slate-200 bg-blue-50/40 dark:bg-blue-950/10"
                   data-testid="npat-PERIODIC_WEIGHTED_AVERAGE"
                 >
                   {formatVnd(periodicRow.netProfitAfterTax)}
                 </td>
                 <td
-                  className="py-3 px-4 text-right text-slate-200 bg-purple-950/10"
+                  className="py-3 px-4 text-right text-slate-800 dark:text-slate-200 bg-purple-50/40 dark:bg-purple-950/10"
                   data-testid="npat-MOVING_WEIGHTED_AVERAGE"
                 >
                   {formatVnd(movingRow.netProfitAfterTax)}
                 </td>
                 <td
-                  className="py-3 px-4 text-right font-bold text-purple-300 bg-slate-800/30"
+                  className="py-3 px-4 text-right font-bold text-purple-700 dark:text-purple-300 bg-slate-50/70 dark:bg-slate-800/30"
                   data-testid="delta-npat"
                 >
                   {formatVnd(deltaNpat)}
@@ -737,40 +737,40 @@ export const CostingComparisonMatrix: FC<CostingComparisonMatrixProps> = ({
 
               {/* Row 6: Gross Margin % */}
               <tr
-                className="hover:bg-slate-800/40 transition bg-slate-800/20"
+                className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition bg-slate-50/50 dark:bg-slate-800/20"
                 data-testid="row-gross-margin"
               >
-                <td className="py-3 px-4 font-sans font-medium text-slate-200">
+                <td className="py-3 px-4 font-sans font-medium text-slate-800 dark:text-slate-200">
                   6. Tỷ suất Biên Lợi Nhuận Gộp (Gross Margin)
-                  <span className="block text-[11px] font-normal text-slate-400">
+                  <span className="block text-[11px] font-normal text-slate-600 dark:text-slate-400">
                     Tỷ lệ % = Lợi nhuận gộp (Mã 20) / Doanh thu thuần (Mã 10)
                   </span>
                 </td>
                 <td className="py-3 px-3 text-center font-sans">
-                  <span className="px-2 py-0.5 rounded bg-slate-700 text-teal-300 text-xs font-semibold">
+                  <span className="px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-teal-700 dark:text-teal-300 text-xs font-semibold">
                     Biên LN %
                   </span>
                 </td>
                 <td
-                  className="py-3 px-4 text-right font-bold text-teal-400 bg-amber-950/10"
+                  className="py-3 px-4 text-right font-bold text-teal-700 dark:text-teal-400 bg-amber-50/40 dark:bg-amber-950/10"
                   data-testid="margin-FIFO"
                 >
                   {formatPercent(fifoRow.grossMarginPercent)}
                 </td>
                 <td
-                  className="py-3 px-4 text-right text-slate-200 bg-blue-950/10"
+                  className="py-3 px-4 text-right text-slate-800 dark:text-slate-200 bg-blue-50/40 dark:bg-blue-950/10"
                   data-testid="margin-PERIODIC_WEIGHTED_AVERAGE"
                 >
                   {formatPercent(periodicRow.grossMarginPercent)}
                 </td>
                 <td
-                  className="py-3 px-4 text-right text-slate-200 bg-purple-950/10"
+                  className="py-3 px-4 text-right text-slate-800 dark:text-slate-200 bg-purple-50/40 dark:bg-purple-950/10"
                   data-testid="margin-MOVING_WEIGHTED_AVERAGE"
                 >
                   {formatPercent(movingRow.grossMarginPercent)}
                 </td>
                 <td
-                  className="py-3 px-4 text-right font-bold text-teal-300 bg-slate-800/30"
+                  className="py-3 px-4 text-right font-bold text-teal-700 dark:text-teal-300 bg-slate-50/70 dark:bg-slate-800/30"
                   data-testid="delta-margin"
                 >
                   {formatPercent(deltaMargin)}
@@ -782,28 +782,28 @@ export const CostingComparisonMatrix: FC<CostingComparisonMatrixProps> = ({
       </div>
 
       {/* 4. Native SVG Comparison Chart */}
-      <div className="bg-slate-800/40 rounded-xl border border-slate-700 p-4 md:p-6 shadow-lg">
+      <div className="bg-white dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-700 p-4 md:p-6 shadow-lg">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
           <div>
             <div className="flex items-center gap-2">
-              <BarChart3 className="w-5 h-5 text-amber-400" />
-              <h3 className="font-bold text-white text-base">
+              <BarChart3 className="w-5 h-5 text-amber-700 dark:text-amber-400" />
+              <h3 className="font-bold text-slate-900 dark:text-white text-base">
                 Biểu Đồ Trực Quan So Sánh Các Chỉ Số Tài Chính (Native SVG Chart)
               </h3>
             </div>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
               So sánh quy mô Giá vốn, Tồn kho cuối kỳ, Lợi nhuận gộp và Thuế TNDN trên cùng tỷ lệ
             </p>
           </div>
 
           {/* Interactive Metric Filter */}
-          <div className="flex items-center gap-1.5 bg-slate-900/80 p-1 rounded-lg border border-slate-700/60 text-xs">
+          <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-900/80 p-1 rounded-lg border border-slate-200 dark:border-slate-700/60 text-xs">
             <button
               onClick={() => setActiveChartMetric('all')}
               className={`px-2.5 py-1 rounded transition ${
                 activeChartMetric === 'all'
                   ? 'bg-amber-600 text-white font-medium'
-                  : 'text-slate-400 hover:text-white'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
               Tất Cả
@@ -813,7 +813,7 @@ export const CostingComparisonMatrix: FC<CostingComparisonMatrixProps> = ({
               className={`px-2.5 py-1 rounded transition ${
                 activeChartMetric === 'cogs'
                   ? 'bg-amber-600 text-white font-medium'
-                  : 'text-slate-400 hover:text-white'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
               Giá Vốn
@@ -823,7 +823,7 @@ export const CostingComparisonMatrix: FC<CostingComparisonMatrixProps> = ({
               className={`px-2.5 py-1 rounded transition ${
                 activeChartMetric === 'ending'
                   ? 'bg-emerald-600 text-white font-medium'
-                  : 'text-slate-400 hover:text-white'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
               Tồn Kho
@@ -833,7 +833,7 @@ export const CostingComparisonMatrix: FC<CostingComparisonMatrixProps> = ({
               className={`px-2.5 py-1 rounded transition ${
                 activeChartMetric === 'profit'
                   ? 'bg-blue-600 text-white font-medium'
-                  : 'text-slate-400 hover:text-white'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
               Lợi Nhuận
@@ -842,28 +842,28 @@ export const CostingComparisonMatrix: FC<CostingComparisonMatrixProps> = ({
         </div>
 
         {/* Legend */}
-        <div className="flex flex-wrap items-center gap-4 text-xs mb-3 px-2 py-1.5 bg-slate-900/50 rounded-lg border border-slate-800">
-          <span className="text-slate-400 font-medium">Bảng màu kế toán:</span>
+        <div className="flex flex-wrap items-center gap-4 text-xs mb-3 px-2 py-1.5 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-slate-200 dark:border-slate-800">
+          <span className="text-slate-600 dark:text-slate-400 font-medium">Bảng màu kế toán:</span>
           <div className="flex items-center gap-1.5">
             <span className="w-3 h-3 rounded-sm bg-[#d97706]" />
-            <span className="text-slate-300">Giá vốn xuất kho (TK 632 / #d97706)</span>
+            <span className="text-slate-700 dark:text-slate-300">Giá vốn xuất kho (TK 632 / #d97706)</span>
           </div>
           <div className="flex items-center gap-1.5">
             <span className="w-3 h-3 rounded-sm bg-[#059669]" />
-            <span className="text-slate-300">Tồn kho cuối kỳ (TK 156 / #059669)</span>
+            <span className="text-slate-700 dark:text-slate-300">Tồn kho cuối kỳ (TK 156 / #059669)</span>
           </div>
           <div className="flex items-center gap-1.5">
             <span className="w-3 h-3 rounded-sm bg-[#2563eb]" />
-            <span className="text-slate-300">Lợi nhuận gộp (Mã 20 / #2563eb)</span>
+            <span className="text-slate-700 dark:text-slate-300">Lợi nhuận gộp (Mã 20 / #2563eb)</span>
           </div>
           <div className="flex items-center gap-1.5">
             <span className="w-3 h-3 rounded-sm bg-[#dc2626]" />
-            <span className="text-slate-300">Thuế TNDN 20% (Mã 51 / #dc2626)</span>
+            <span className="text-slate-700 dark:text-slate-300">Thuế TNDN 20% (Mã 51 / #dc2626)</span>
           </div>
         </div>
 
         {/* SVG Visualization Canvas */}
-        <div className="relative w-full overflow-x-auto bg-slate-950/60 rounded-lg border border-slate-800/80 p-2">
+        <div className="relative w-full overflow-x-auto bg-slate-50 dark:bg-slate-950/60 rounded-lg border border-slate-200 dark:border-slate-800/80 p-2">
           <svg
             viewBox={`0 0 ${svgWidth} ${svgHeight}`}
             className="w-full h-auto min-w-[580px]"
@@ -880,7 +880,7 @@ export const CostingComparisonMatrix: FC<CostingComparisonMatrixProps> = ({
                     y1={y}
                     x2={svgWidth - paddingRight}
                     y2={y}
-                    stroke="#334155"
+                    stroke="currentColor" className="text-slate-200 dark:text-slate-700"
                     strokeDasharray="4 4"
                     strokeWidth="1"
                   />
@@ -963,7 +963,7 @@ export const CostingComparisonMatrix: FC<CostingComparisonMatrixProps> = ({
                   <text
                     x={groupCenterX}
                     y={svgHeight - paddingBottom + 20}
-                    fill="#e2e8f0"
+                    fill="currentColor" className="text-slate-700 dark:text-slate-200"
                     fontSize="11"
                     fontWeight="bold"
                     textAnchor="middle"
@@ -1016,7 +1016,7 @@ export const CostingComparisonMatrix: FC<CostingComparisonMatrixProps> = ({
                           <text
                             x={barX + actualBarWidth / 2}
                             y={barY - 4}
-                            fill="#cbd5e1"
+                            fill="currentColor" className="text-slate-600 dark:text-slate-300"
                             fontSize="9"
                             fontFamily="monospace"
                             textAnchor="middle"
@@ -1079,25 +1079,25 @@ export const CostingComparisonMatrix: FC<CostingComparisonMatrixProps> = ({
         </div>
 
         {/* Gross Margin Divergence Progress Visual */}
-        <div className="mt-4 pt-4 border-t border-slate-800 grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-800 grid grid-cols-1 md:grid-cols-3 gap-3">
           {rows.map((r) => (
             <div
               key={r.method}
-              className="bg-slate-900/60 p-2.5 rounded-lg border border-slate-800 flex flex-col justify-between"
+              className="bg-slate-50 dark:bg-slate-900/60 p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 flex flex-col justify-between"
             >
-              <div className="flex justify-between items-center text-xs text-slate-300 mb-1">
+              <div className="flex justify-between items-center text-xs text-slate-700 dark:text-slate-300 mb-1">
                 <span className="font-semibold">{r.methodLabelVi}</span>
-                <span className="font-mono text-emerald-400 font-bold">
+                <span className="font-mono text-emerald-700 dark:text-emerald-400 font-bold">
                   {formatPercent(r.grossMarginPercent)}
                 </span>
               </div>
-              <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+              <div className="w-full h-2 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-gradient-to-r from-blue-500 to-emerald-400 rounded-full"
                   style={{ width: `${Math.min(100, Math.max(0, r.grossMarginPercent))}%` }}
                 />
               </div>
-              <div className="flex justify-between text-[10px] text-slate-400 mt-1">
+              <div className="flex justify-between text-[10px] text-slate-600 dark:text-slate-400 mt-1">
                 <span>Giá vốn: {formatVnd(r.cogsAmount)}</span>
                 <span>LNST: {formatVnd(r.netProfitAfterTax)}</span>
               </div>
@@ -1108,48 +1108,48 @@ export const CostingComparisonMatrix: FC<CostingComparisonMatrixProps> = ({
 
       {/* 5. Executive Insights Cards (Nhận định Quản trị Tài chính) */}
       <div
-        className="bg-slate-800/40 rounded-xl border border-slate-700 p-4 md:p-6 shadow-lg space-y-4"
+        className="bg-white dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-700 p-4 md:p-6 shadow-lg space-y-4"
         data-testid="executive-insights-section"
       >
-        <div className="flex items-center gap-2 border-b border-slate-700 pb-3">
-          <Building2 className="w-5 h-5 text-amber-400" />
-          <h3 className="font-bold text-white text-base">
+        <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-700 pb-3">
+          <Building2 className="w-5 h-5 text-amber-700 dark:text-amber-400" />
+          <h3 className="font-bold text-slate-900 dark:text-white text-base">
             Nhận Định Quản Trị Tài Chính & Khuyến Nghị Quyết Định (Executive Insights)
           </h3>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Card 1: Vay vốn Ngân hàng & Tối ưu hóa BCTC */}
-          <div className="bg-slate-800/60 rounded-xl p-4 border border-blue-500/30 flex flex-col justify-between space-y-3">
+          <div className="bg-slate-50 dark:bg-slate-800/60 rounded-xl p-4 border border-blue-500/30 flex flex-col justify-between space-y-3">
             <div>
-              <div className="flex items-center gap-2 text-blue-400 font-semibold text-sm mb-1">
+              <div className="flex items-center gap-2 text-blue-700 dark:text-blue-400 font-semibold text-sm mb-1">
                 <Building2 className="w-4 h-4" />
                 <span>Chiến Lược 1: Hỗ Trợ Hồ Sơ Vay Vốn & Cải Thiện BCTC</span>
               </div>
-              <p className="text-xs text-slate-300 leading-relaxed">
+              <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
                 {trend === 'INFLATION' ? (
                   <>
-                    <strong className="text-white">Khuyến nghị phương pháp FIFO:</strong> Trong chu kỳ
+                    <strong className="text-slate-900 dark:text-white">Khuyến nghị phương pháp FIFO:</strong> Trong chu kỳ
                     đơn giá đầu vào tăng, FIFO xuất các lô hàng giá thấp trước nên{' '}
-                    <span className="text-amber-300 font-semibold">Giá vốn TK 632 thấp nhất</span>,{' '}
-                    <span className="text-blue-300 font-semibold">Lợi nhuận gộp (Mã 20) và LNST cao nhất</span>,{' '}
-                    đồng thời <span className="text-emerald-300 font-semibold">Tồn kho TK 156 phản ánh giá trị cao nhất</span>{' '}
+                    <span className="text-amber-700 dark:text-amber-300 font-semibold">Giá vốn TK 632 thấp nhất</span>,{' '}
+                    <span className="text-blue-700 dark:text-blue-300 font-semibold">Lợi nhuận gộp (Mã 20) và LNST cao nhất</span>,{' '}
+                    đồng thời <span className="text-emerald-700 dark:text-emerald-300 font-semibold">Tồn kho TK 156 phản ánh giá trị cao nhất</span>{' '}
                     sát với giá thị trường hiện hành.
                   </>
                 ) : trend === 'DEFLATION' ? (
                   <>
-                    <strong className="text-white">Trong chu kỳ giá giảm:</strong> Phương pháp Bình quân
+                    <strong className="text-slate-900 dark:text-white">Trong chu kỳ giá giảm:</strong> Phương pháp Bình quân
                     gia quyền liên hoàn hoặc Bình quân cả kỳ giúp hạn chế sụt giảm lợi nhuận kế toán so với FIFO.
                   </>
                 ) : (
                   <>
-                    <strong className="text-white">Đơn giá ổn định:</strong> Cả 3 phương pháp đều mang lại
+                    <strong className="text-slate-900 dark:text-white">Đơn giá ổn định:</strong> Cả 3 phương pháp đều mang lại
                     chỉ số tài chính đồng nhất, không gây biến động đến hệ số tín dụng.
                   </>
                 )}
               </p>
             </div>
-            <div className="bg-blue-950/40 p-2.5 rounded-lg border border-blue-800/50 text-[11px] text-blue-300">
+            <div className="bg-blue-50 dark:bg-blue-950/40 p-2.5 rounded-lg border border-blue-200 dark:border-blue-800/50 text-[11px] text-blue-700 dark:text-blue-300">
               <strong>Tác động Covenants Ngân hàng:</strong> Tối ưu hóa Hệ số thanh toán hiện hành
               (Current Ratio &gt; 1.5), Tỷ suất sinh lời trên vốn chủ sở hữu (ROE), và EBITDA,
               đáp ứng điều kiện giải ngân và nâng hạn mức tín dụng tại các NHTM.
@@ -1157,37 +1157,37 @@ export const CostingComparisonMatrix: FC<CostingComparisonMatrixProps> = ({
           </div>
 
           {/* Card 2: Tối ưu Hóa Dòng Tiền Thuế TNDN */}
-          <div className="bg-slate-800/60 rounded-xl p-4 border border-emerald-500/30 flex flex-col justify-between space-y-3">
+          <div className="bg-slate-50 dark:bg-slate-800/60 rounded-xl p-4 border border-emerald-500/30 flex flex-col justify-between space-y-3">
             <div>
-              <div className="flex items-center gap-2 text-emerald-400 font-semibold text-sm mb-1">
+              <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-400 font-semibold text-sm mb-1">
                 <Coins className="w-4 h-4" />
                 <span>Chiến Lược 2: Tối Ưu Hóa Dòng Tiền Thuế TNDN (Tax Cash Flow)</span>
               </div>
-              <p className="text-xs text-slate-300 leading-relaxed">
+              <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
                 {trend === 'INFLATION' ? (
                   <>
-                    <strong className="text-white">Khuyến nghị phương pháp Bình Quân Gia Quyền:</strong>{' '}
+                    <strong className="text-slate-900 dark:text-white">Khuyến nghị phương pháp Bình Quân Gia Quyền:</strong>{' '}
                     Trong chu kỳ giá tăng, đưa đơn giá trung bình vào giá vốn giúp{' '}
-                    <span className="text-amber-300 font-semibold">tăng chi phí Giá vốn TK 632</span> hợp pháp,{' '}
-                    từ đó <span className="text-slate-200 font-semibold">giảm lợi nhuận kế toán trước thuế</span>{' '}
-                    và <span className="text-emerald-300 font-semibold">giảm ngay số thuế TNDN 20% phải nộp</span>{' '}
+                    <span className="text-amber-700 dark:text-amber-300 font-semibold">tăng chi phí Giá vốn TK 632</span> hợp pháp,{' '}
+                    từ đó <span className="text-slate-800 dark:text-slate-200 font-semibold">giảm lợi nhuận kế toán trước thuế</span>{' '}
+                    và <span className="text-emerald-700 dark:text-emerald-300 font-semibold">giảm ngay số thuế TNDN 20% phải nộp</span>{' '}
                     trong kỳ tính thuế hiện hành.
                   </>
                 ) : trend === 'DEFLATION' ? (
                   <>
-                    <strong className="text-white">Trong chu kỳ giá giảm:</strong> Phương pháp FIFO lại đưa
+                    <strong className="text-slate-900 dark:text-white">Trong chu kỳ giá giảm:</strong> Phương pháp FIFO lại đưa
                     các lô giá cao trước đây vào chi phí, giúp tối đa hóa chi phí được trừ và giảm số thuế TNDN
                     tạm nộp.
                   </>
                 ) : (
                   <>
-                    <strong className="text-white">Đơn giá ổn định:</strong> Nghĩa vụ thuế TNDN phát sinh hoàn
+                    <strong className="text-slate-900 dark:text-white">Đơn giá ổn định:</strong> Nghĩa vụ thuế TNDN phát sinh hoàn
                     toàn ngang bằng nhau giữa các phương pháp.
                   </>
                 )}
               </p>
             </div>
-            <div className="bg-emerald-950/40 p-2.5 rounded-lg border border-emerald-800/50 text-[11px] text-emerald-300">
+            <div className="bg-emerald-50 dark:bg-emerald-950/40 p-2.5 rounded-lg border border-emerald-200 dark:border-emerald-800/50 text-[11px] text-emerald-700 dark:text-emerald-300">
               <strong>Bảo toàn Vốn Lưu Động:</strong> Trì hoãn nộp nghĩa vụ thuế TNDN tương đương với một
               khoản vay lãi suất 0% từ dòng tiền hoạt động kinh doanh, bảo toàn dòng tiền mặt cho doanh nghiệp.
             </div>
@@ -1195,12 +1195,12 @@ export const CostingComparisonMatrix: FC<CostingComparisonMatrixProps> = ({
         </div>
 
         {/* Dynamic Engine Insight Bullet Points */}
-        <div className="bg-slate-900/60 rounded-lg p-3.5 border border-slate-800 text-xs space-y-2">
-          <div className="font-semibold text-slate-300 flex items-center gap-2">
-            <Info className="w-4 h-4 text-amber-400" />
+        <div className="bg-slate-50 dark:bg-slate-900/60 rounded-lg p-3.5 border border-slate-200 dark:border-slate-800 text-xs space-y-2">
+          <div className="font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+            <Info className="w-4 h-4 text-amber-700 dark:text-amber-400" />
             <span>Phân tích Tác Động Chi Tiết Từ Bộ Máy Tính Toán:</span>
           </div>
-          <ul className="list-disc list-inside space-y-1 text-slate-300">
+          <ul className="list-disc list-inside space-y-1 text-slate-700 dark:text-slate-300">
             {executiveInsightsVi.map((insight, idx) => (
               <li key={idx} className="leading-relaxed">
                 {insight}
@@ -1210,17 +1210,17 @@ export const CostingComparisonMatrix: FC<CostingComparisonMatrixProps> = ({
         </div>
 
         {/* Regulatory & Consistency Principle Warning */}
-        <div className="p-3 bg-amber-950/30 border border-amber-800/60 rounded-lg text-xs text-amber-300/90 flex items-start gap-2.5">
-          <ShieldCheck className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+        <div className="p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/60 rounded-lg text-xs text-amber-800 dark:text-amber-300/90 flex items-start gap-2.5">
+          <ShieldCheck className="w-5 h-5 text-amber-700 dark:text-amber-400 shrink-0 mt-0.5" />
           <div className="space-y-1">
-            <div className="font-semibold text-amber-200">
+            <div className="font-semibold text-amber-800 dark:text-amber-200">
               Nguyên Tắc Nhất Quán (Consistency Principle) — Chuẩn Mực VAS 01 & Thông Tư 200/99:
             </div>
-            <p className="text-slate-300 leading-relaxed">
+            <p className="text-slate-700 dark:text-slate-300 leading-relaxed">
               Doanh nghiệp phải áp dụng thống nhất phương pháp tính giá trị hàng tồn kho đã chọn trong ít nhất
               một niên độ kế toán (năm tài chính). Trường hợp thay đổi phương pháp phải trình bày đầy đủ lý do
               và ảnh hưởng tài chính trong{' '}
-              <strong className="text-white">Bản Thuyết minh Báo cáo tài chính</strong> theo quy định của
+              <strong className="text-slate-900 dark:text-white">Bản Thuyết minh Báo cáo tài chính</strong> theo quy định của
               Bộ Tài chính.
             </p>
           </div>

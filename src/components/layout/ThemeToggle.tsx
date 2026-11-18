@@ -10,38 +10,41 @@ export const ThemeToggle: FC = () => {
       <button
         type="button"
         title="Giao diện sáng"
+        aria-label="Giao diện sáng"
         onClick={() => setTheme('light')}
-        className={`p-1.5 rounded-md transition-colors ${
+        className={`p-1 sm:p-1.5 rounded-md transition-colors ${
           theme === 'light'
             ? 'bg-white dark:bg-slate-700 text-amber-500 shadow-sm'
             : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
         }`}
       >
-        <Sun className="w-4 h-4" />
+        <Sun className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
       </button>
       <button
         type="button"
         title="Giao diện tối"
+        aria-label="Giao diện tối"
         onClick={() => setTheme('dark')}
-        className={`p-1.5 rounded-md transition-colors ${
+        className={`p-1 sm:p-1.5 rounded-md transition-colors ${
           theme === 'dark'
             ? 'bg-white dark:bg-slate-700 text-indigo-400 shadow-sm'
             : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
         }`}
       >
-        <Moon className="w-4 h-4" />
+        <Moon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
       </button>
       <button
         type="button"
         title="Theo hệ thống"
+        aria-label="Theo hệ thống"
         onClick={() => setTheme('system')}
-        className={`p-1.5 rounded-md transition-colors ${
+        className={`p-1 sm:p-1.5 rounded-md transition-colors ${
           theme === 'system'
             ? 'bg-white dark:bg-slate-700 text-emerald-500 shadow-sm'
             : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
         }`}
       >
-        <Laptop className="w-4 h-4" />
+        <Laptop className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
       </button>
     </div>
   );

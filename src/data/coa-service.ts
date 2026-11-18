@@ -73,6 +73,10 @@ export async function ensureAllRegimesLoaded(): Promise<void> {
   ]);
 }
 
+export function hasAccountsLoaded(regime: AccountingRegime): boolean {
+  return Boolean(ACCOUNTS_CACHE[regime]);
+}
+
 export function getAccountsByRegime(regime: AccountingRegime): AccountItem[] {
   const cached = ACCOUNTS_CACHE[regime];
   if (cached) return cached;

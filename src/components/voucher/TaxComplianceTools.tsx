@@ -42,7 +42,7 @@ export const STATUTORY_BASIS_CIT_RATE_20 =
 
 // Ngưỡng đối chiếu doanh thu 5% hiện CHƯA có statutoryBasis (TODO verify của engine).
 export const RECONCILIATION_THRESHOLD_NOTE =
-  `Ngưỡng ${RECONCILIATION_VARIANCE_THRESHOLD_PERCENT}% là ngưỡng tham khảo, chưa có statutoryBasis (TODO verify — chưa tìm được văn bản quy định số %.`;
+  `Ngưỡng ${RECONCILIATION_VARIANCE_THRESHOLD_PERCENT}% là ngưỡng tham khảo, chưa có statutoryBasis (TODO verify — chưa tìm được văn bản quy định số %).`;
 
 function formatVnd(amount: number): string {
   return new Intl.NumberFormat('vi-VN').format(Math.round(amount)) + ' đ';
@@ -171,7 +171,7 @@ const EcommerceInspector: FC = () => {
       return { error: 'Số liệu nhập vào phải là số không âm hợp lệ. Vui lòng kiểm tra lại các ô nhập liệu.' };
     }
     if (fee > gross) {
-      return { error: 'Phí sàn không được lớn hơn doanh thu gộm. Vui lòng kiểm tra lại.' };
+      return { error: 'Phí sàn không được lớn hơn doanh thu gộp. Vui lòng kiểm tra lại.' };
     }
 
     const hasRevenueInput = gross > 0 || declared > 0 || platformReported > 0;
@@ -229,7 +229,7 @@ const EcommerceInspector: FC = () => {
             onClick={() => update({ sellerType: 'HOUSEHOLD_BUSINESS' })}
             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
               form.sellerType === 'HOUSEHOLD_BUSINESS'
-                ? 'bg-emerald-600 text-white shadow-xs'
+                ? 'bg-emerald-600 text-white shadow-sm'
                 : 'text-slate-600 dark:text-slate-400'
             }`}
           >
@@ -241,7 +241,7 @@ const EcommerceInspector: FC = () => {
             onClick={() => update({ sellerType: 'ENTERPRISE' })}
             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
               form.sellerType === 'ENTERPRISE'
-                ? 'bg-emerald-600 text-white shadow-xs'
+                ? 'bg-emerald-600 text-white shadow-sm'
                 : 'text-slate-600 dark:text-slate-400'
             }`}
           >
@@ -251,11 +251,11 @@ const EcommerceInspector: FC = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <FieldInput
-            label="Doanh thu gộm trên sàn (VNĐ)"
+            label="Doanh thu gộp trên sàn (VNĐ)"
             value={form.grossRevenue}
             onChange={(v) => update({ grossRevenue: v })}
             placeholder="VD: 1200000000"
-            hint="Doanh thu gộm trước khi trừ phí sàn"
+            hint="Doanh thu gộp trước khi trừ phí sàn"
           />
           <FieldInput
             label="Phí sàn TMĐT (VNĐ)"
@@ -339,7 +339,7 @@ const EcommerceInspector: FC = () => {
           </div>
 
           <div className="grid grid-cols-1 gap-2">
-            <ResultRow label="Doanh thu gộm" value={formatVnd(obligation.totalGrossRevenue)} testId="ecom-gross-revenue" />
+            <ResultRow label="Doanh thu gộp" value={formatVnd(obligation.totalGrossRevenue)} testId="ecom-gross-revenue" />
             <ResultRow label="Phí sàn TMĐT" value={formatVnd(obligation.totalPlatformFee)} />
             <ResultRow label="Doanh thu ròng" value={formatVnd(obligation.totalNetRevenue)} testId="ecom-net-revenue" />
             <ResultRow label="GTGT sàn đã khấu trừ & nộp thay" value={formatVnd(obligation.vatWithheldByPlatform)} />
@@ -582,7 +582,7 @@ export const TaxComplianceTools: FC = () => {
   return (
     <div className="space-y-6 animate-fade-in pb-12" data-testid="tax-compliance-tools">
       {/* Header */}
-      <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-xs border border-slate-200 dark:border-slate-800 space-y-4">
+      <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 space-y-4">
         <div className="flex items-center space-x-2 text-xs font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
           <Calculator className="w-4 h-4" />
           <span>Phòng Công Cụ Tuân Thủ Thuế 2025–2026</span>

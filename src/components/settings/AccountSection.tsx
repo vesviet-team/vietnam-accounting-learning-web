@@ -232,7 +232,7 @@ export const AccountSection: FC<AccountSectionProps> = ({ openRegisterSignal = 0
   })();
 
   return (
-    <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-xs border border-slate-200 dark:border-slate-800 space-y-4">
+    <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 space-y-4">
       <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center space-x-2">
         <UserRound className="w-5 h-5 text-emerald-600" />
         <span>Tài Khoản &amp; Đồng Bộ Đa Thiết Bị</span>
@@ -282,7 +282,7 @@ export const AccountSection: FC<AccountSectionProps> = ({ openRegisterSignal = 0
               type="button"
               onClick={handleExport}
               disabled={busy === 'export'}
-              className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl shadow-xs transition-colors disabled:opacity-50"
+              className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl shadow-sm transition-colors disabled:opacity-50"
             >
               <Download className="w-4 h-4" />
               <span>Xuất dữ liệu tài khoản</span>
@@ -295,7 +295,7 @@ export const AccountSection: FC<AccountSectionProps> = ({ openRegisterSignal = 0
               type="button"
               onClick={handleLogin}
               disabled={busy === 'login' || busy === 'register'}
-              className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl shadow-xs transition-colors disabled:opacity-50"
+              className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl shadow-sm transition-colors disabled:opacity-50"
             >
               <LogIn className="w-4 h-4" />
               <span>Đăng nhập</span>
@@ -400,7 +400,7 @@ export const AccountSection: FC<AccountSectionProps> = ({ openRegisterSignal = 0
             type="submit"
             data-testid="register-submit"
             disabled={busy === 'register'}
-            className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl shadow-xs transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl shadow-sm transition-colors disabled:opacity-50"
           >
             {busy === 'register' ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserPlus className="w-4 h-4" />}
             <span>Tạo tài khoản</span>

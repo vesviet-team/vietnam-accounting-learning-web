@@ -47,7 +47,7 @@ export const VoucherCard: FC<VoucherCardProps> = ({ voucher }) => {
             onClick={() => setActiveTab('VISUAL')}
             className={`px-3 py-1 rounded-lg font-medium transition-all ${
               activeTab === 'VISUAL'
-                ? 'bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 shadow-2xs'
+                ? 'bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 shadow-sm'
                 : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100'
             }`}
           >
@@ -58,7 +58,7 @@ export const VoucherCard: FC<VoucherCardProps> = ({ voucher }) => {
             onClick={() => setActiveTab('LEGAL')}
             className={`px-3 py-1 rounded-lg font-medium transition-all ${
               activeTab === 'LEGAL'
-                ? 'bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 shadow-2xs'
+                ? 'bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 shadow-sm'
                 : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100'
             }`}
           >
@@ -70,7 +70,7 @@ export const VoucherCard: FC<VoucherCardProps> = ({ voucher }) => {
               onClick={() => setActiveTab('RAW')}
               className={`px-3 py-1 rounded-lg font-medium transition-all flex items-center space-x-1 ${
                 activeTab === 'RAW'
-                  ? 'bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 shadow-2xs'
+                  ? 'bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 shadow-sm'
                   : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100'
               }`}
             >
@@ -322,7 +322,7 @@ const CashReceiptVisual: FC<{ receipt: CashReceiptData }> = ({ receipt }) => {
       </div>
 
       {/* 5 Signatures */}
-      <div className="grid grid-cols-5 gap-2 text-center text-[10px] pt-4">
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-center text-[10px] pt-4">
         <div><div className="font-bold">Giám đốc</div><div className="h-10"></div><div className="text-slate-600">{receipt.signatures.director}</div></div>
         <div><div className="font-bold">Kế toán trưởng</div><div className="h-10"></div><div className="text-slate-600">{receipt.signatures.chiefAccountant}</div></div>
         <div><div className="font-bold">Người lập phiếu</div><div className="h-10"></div><div className="text-slate-600">{receipt.signatures.preparer}</div></div>
@@ -369,7 +369,7 @@ const CashPaymentVisual: FC<{ payment: CashPaymentData }> = ({ payment }) => {
       </div>
 
       {/* 5 Signatures */}
-      <div className="grid grid-cols-5 gap-2 text-center text-[10px] pt-4">
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-center text-[10px] pt-4">
         <div><div className="font-bold">Giám đốc</div><div className="h-10"></div><div className="text-slate-600">{payment.signatures.director}</div></div>
         <div><div className="font-bold">Kế toán trưởng</div><div className="h-10"></div><div className="text-slate-600">{payment.signatures.chiefAccountant}</div></div>
         <div><div className="font-bold">Người lập phiếu</div><div className="h-10"></div><div className="text-slate-600">{payment.signatures.preparer}</div></div>
@@ -428,7 +428,7 @@ const BankTransferVisual: FC<{ unc: BankTransferData }> = ({ unc }) => {
       </div>
 
       {/* Signatures */}
-      <div className="grid grid-cols-4 gap-2 text-center text-[10px] pt-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-[10px] pt-4">
         <div><div className="font-bold">Kế toán trưởng</div><div className="h-10"></div><div className="text-slate-600">{unc.signatures.chiefAccountant}</div></div>
         <div><div className="font-bold">Chủ tài khoản</div><div className="h-10"></div><div className="text-slate-600">{unc.signatures.accountHolder}</div></div>
         <div><div className="font-bold">Giao dịch viên NH</div><div className="h-10"></div><div className="text-slate-600">{unc.signatures.bankTeller}</div></div>
@@ -489,7 +489,7 @@ const GoodsReceiptVisual: FC<{ grn: GoodsReceiptData }> = ({ grn }) => {
         </table>
       </div>
 
-      <div className="grid grid-cols-4 gap-2 text-center text-[10px] pt-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-[10px] pt-4">
         <div><div className="font-bold">Người lập phiếu</div><div className="h-10"></div><div className="text-slate-600">{grn.signatures.preparer}</div></div>
         <div><div className="font-bold">Người giao hàng</div><div className="h-10"></div><div className="text-slate-600">{grn.signatures.deliverer}</div></div>
         <div><div className="font-bold">Thủ kho</div><div className="h-10"></div><div className="text-slate-600">{grn.signatures.warehouseKeeper}</div></div>
@@ -550,7 +550,7 @@ const GoodsIssueVisual: FC<{ gin: GoodsIssueData }> = ({ gin }) => {
         </table>
       </div>
 
-      <div className="grid grid-cols-5 gap-2 text-center text-[10px] pt-4">
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-center text-[10px] pt-4">
         <div><div className="font-bold">Giám đốc</div><div className="h-10"></div><div className="text-slate-600">{gin.signatures.director}</div></div>
         <div><div className="font-bold">Kế toán trưởng</div><div className="h-10"></div><div className="text-slate-600">{gin.signatures.chiefAccountant}</div></div>
         <div><div className="font-bold">Người lập phiếu</div><div className="h-10"></div><div className="text-slate-600">{gin.signatures.preparer}</div></div>

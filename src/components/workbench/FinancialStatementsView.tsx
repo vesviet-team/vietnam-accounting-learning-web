@@ -132,7 +132,7 @@ export const FinancialStatementsView: FC<FinancialStatementsViewProps> = ({
   return (
     <div className="max-w-6xl mx-auto space-y-6 animate-fade-in pb-16">
       {/* Top Header Card */}
-      <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-xs border border-slate-200 dark:border-slate-800 space-y-4">
+      <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center space-x-2 text-xs font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
             <FileSpreadsheet className="w-4 h-4" />
@@ -152,13 +152,13 @@ export const FinancialStatementsView: FC<FinancialStatementsViewProps> = ({
             )}
 
             {/* Regime Toggle */}
-            <div className="flex items-center p-0.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+            <div className="flex flex-wrap items-center p-0.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
               <button
                 type="button"
                 onClick={() => handleToggleCircular('TT200')}
                 className={`px-3 py-1 text-xs font-bold rounded-lg transition-all ${
-                  selectedCircular === 'TT200'
-                    ? 'bg-white dark:bg-slate-900 text-emerald-700 dark:text-emerald-400 shadow-2xs'
+                  selectedCircular === 'TT200' && currentRegime !== 'CIRCULAR_58'
+                    ? 'bg-white dark:bg-slate-900 text-emerald-700 dark:text-emerald-400 shadow-sm'
                     : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-200'
                 }`}
               >
@@ -168,8 +168,8 @@ export const FinancialStatementsView: FC<FinancialStatementsViewProps> = ({
                 type="button"
                 onClick={() => handleToggleCircular('TT133')}
                 className={`px-3 py-1 text-xs font-bold rounded-lg transition-all ${
-                  selectedCircular === 'TT133'
-                    ? 'bg-white dark:bg-slate-900 text-blue-700 dark:text-blue-400 shadow-2xs'
+                  selectedCircular === 'TT133' && currentRegime !== 'CIRCULAR_58'
+                    ? 'bg-white dark:bg-slate-900 text-blue-700 dark:text-blue-400 shadow-sm'
                     : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-200'
                 }`}
               >
@@ -180,22 +180,38 @@ export const FinancialStatementsView: FC<FinancialStatementsViewProps> = ({
                 onClick={() => handleToggleCircular('TT99')}
                 className={`px-3 py-1 text-xs font-bold rounded-lg transition-all ${
                   selectedCircular === 'TT99'
-                    ? 'bg-white dark:bg-slate-900 text-purple-700 dark:text-purple-400 shadow-2xs'
+                    ? 'bg-white dark:bg-slate-900 text-purple-700 dark:text-purple-400 shadow-sm'
                     : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-200'
                 }`}
               >
                 Thông tư 99/2025
               </button>
+              {onRegimeChange && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedCircular('TT133');
+                    onRegimeChange('CIRCULAR_58');
+                  }}
+                  className={`px-3 py-1 text-xs font-bold rounded-lg transition-all ${
+                    currentRegime === 'CIRCULAR_58'
+                      ? 'bg-white dark:bg-slate-900 text-amber-700 dark:text-amber-400 shadow-sm'
+                      : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-200'
+                  }`}
+                >
+                  Thông tư 58/2026
+                </button>
+              )}
             </div>
           </div>
         </div>
 
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 flex flex-wrap items-center gap-2">
               <span>Hệ Thống Báo Cáo Tài Chính Chuẩn Mực</span>
               <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
-                VAS & {selectedCircular}
+                VAS & {currentRegime === 'CIRCULAR_58' ? 'TT58 (Mẫu DNSN)' : selectedCircular}
               </span>
             </h1>
             <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
@@ -212,7 +228,7 @@ export const FinancialStatementsView: FC<FinancialStatementsViewProps> = ({
             <button
               type="button"
               onClick={handleLoadDay27Data}
-              className="inline-flex items-center space-x-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-xs transition-all"
+              className="inline-flex items-center space-x-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-sm transition-all"
             >
               <Sparkles className="w-4 h-4" />
               <span>Nạp số liệu chuẩn Ngày 27</span>
@@ -255,11 +271,11 @@ export const FinancialStatementsView: FC<FinancialStatementsViewProps> = ({
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="flex items-start space-x-3">
             {balanceSheet.isBalanced ? (
-              <div className="p-2.5 bg-emerald-600 text-white rounded-xl shadow-xs shrink-0">
+              <div className="p-2.5 bg-emerald-600 text-white rounded-xl shadow-sm shrink-0">
                 <CheckCircle2 className="w-7 h-7" />
               </div>
             ) : (
-              <div className="p-2.5 bg-rose-600 text-white rounded-xl shadow-xs shrink-0">
+              <div className="p-2.5 bg-rose-600 text-white rounded-xl shadow-sm shrink-0">
                 <AlertTriangle className="w-7 h-7" />
               </div>
             )}
@@ -327,13 +343,13 @@ export const FinancialStatementsView: FC<FinancialStatementsViewProps> = ({
       </div>
 
       {/* Statement Selector Tabs */}
-      <div className="flex items-center space-x-2 border-b border-slate-200 dark:border-slate-800 pb-2">
+      <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2">
         <button
           type="button"
           onClick={() => setActiveStatement('B01')}
           className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl font-bold text-sm transition-all ${
             activeStatement === 'B01'
-              ? 'bg-emerald-600 text-white shadow-xs'
+              ? 'bg-emerald-600 text-white shadow-sm'
               : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:text-slate-900 border border-slate-200 dark:border-slate-800'
           }`}
         >
@@ -346,7 +362,7 @@ export const FinancialStatementsView: FC<FinancialStatementsViewProps> = ({
           onClick={() => setActiveStatement('B02')}
           className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl font-bold text-sm transition-all ${
             activeStatement === 'B02'
-              ? 'bg-emerald-600 text-white shadow-xs'
+              ? 'bg-emerald-600 text-white shadow-sm'
               : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:text-slate-900 border border-slate-200 dark:border-slate-800'
           }`}
         >
@@ -360,7 +376,7 @@ export const FinancialStatementsView: FC<FinancialStatementsViewProps> = ({
           onClick={() => setActiveStatement('B03')}
           className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl font-bold text-sm transition-all ${
             activeStatement === 'B03'
-              ? 'bg-emerald-600 text-white shadow-xs'
+              ? 'bg-emerald-600 text-white shadow-sm'
               : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:text-slate-900 border border-slate-200 dark:border-slate-800'
           }`}
         >
@@ -372,7 +388,7 @@ export const FinancialStatementsView: FC<FinancialStatementsViewProps> = ({
       {/* STATEMENT CONTENT AREA */}
       {activeStatement === 'B01' ? (
         /* ================= B01-DN: BẢNG CÂN ĐỐI KẾ TOÁN ================= */
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xs space-y-4">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm space-y-4">
           <div className="p-6 border-b border-slate-100 dark:border-slate-800 text-center space-y-1">
             <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-widest block">
               Mẫu số B01 - DN (Ban hành theo {selectedCircular === 'TT99' ? 'TT 99/2025/TT-BTC' : 'TT 200 & TT 133'})
@@ -481,7 +497,7 @@ export const FinancialStatementsView: FC<FinancialStatementsViewProps> = ({
         </div>
       ) : activeStatement === 'B02' ? (
         /* ================= B02-DN: KẾT QUẢ KINH DOANH ================= */
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xs space-y-4">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm space-y-4">
           <div className="p-6 border-b border-slate-100 dark:border-slate-800 text-center space-y-1">
             <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-widest block">
               Mẫu số B02 - DN (Ban hành theo{' '}
@@ -588,7 +604,7 @@ export const FinancialStatementsView: FC<FinancialStatementsViewProps> = ({
         /* ================= B03-DN: LƯU CHUYỂN TIỀN TỆ (GIÁN TIẾP) ================= */
         <div
           data-testid="b03-statement-card"
-          className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xs space-y-4"
+          className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm space-y-4"
         >
           <div className="p-6 border-b border-slate-100 dark:border-slate-800 text-center space-y-1">
             <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-widest block">

@@ -59,6 +59,15 @@ export const MergeAnonymousDialog: FC = () => {
     setOpen(false);
   };
 
+  useEffect(() => {
+    if (!open || busy) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [open, busy]);
+
   if (!user || !open) return null;
 
   return (

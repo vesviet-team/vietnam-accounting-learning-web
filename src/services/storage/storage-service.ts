@@ -270,11 +270,20 @@ export class StorageService implements IStorageAdapter {
 
   // --- Unified 1-Click Backup Export & Import ---
   async exportBackup(): Promise<string> {
+    const NON_BACKUP_LOCAL_KEYS = new Set([
+      'session_hint',
+      'merge_asked',
+      'last_account_id',
+      'oauth_state',
+      'pkce_verifier',
+      'rt',
+    ]);
     const localKeys = await this.localAdapter.getAllKeys();
     const idbKeys = await this.idbAdapter.getAllKeys();
 
     const localData: Record<string, unknown> = {};
     for (const key of localKeys) {
+      if (NON_BACKUP_LOCAL_KEYS.has(key)) continue;
       // Sync metadata is stripped: application data round-trips 100%
       // (FEAT-06) and is re-annotated on the next write.
       localData[key] = SYNCED_KEYS.has(key)
