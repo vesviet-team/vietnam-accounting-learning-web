@@ -1,8 +1,12 @@
 package user
 
 import (
+	"encoding/base64"
+	"fmt"
 	"strings"
 	"testing"
+
+	"golang.org/x/crypto/argon2"
 )
 
 func TestHashPassword_VerifyRoundTrip(t *testing.T) {
@@ -11,8 +15,8 @@ func TestHashPassword_VerifyRoundTrip(t *testing.T) {
 	if err != nil {
 		t.Fatalf("hash: %v", err)
 	}
-	if !strings.HasPrefix(hash, "$argon2id$v=19$m=65536,t=3,p=") {
-		t.Fatalf("unexpected hash format: %q", hash[:30])
+	if !strings.HasPrefix(hash, "$argon2id$v=19$m=19456,t=2,p=1$") {
+		t.Fatalf("unexpected hash format: %q", hash)
 	}
 	ok, err := VerifyPassword(hash, pw)
 	if err != nil {
@@ -20,6 +24,30 @@ func TestHashPassword_VerifyRoundTrip(t *testing.T) {
 	}
 	if !ok {
 		t.Fatal("correct password must verify")
+	}
+}
+
+func TestVerifyPassword_Legacy64MiBHashCompatibility(t *testing.T) {
+	pw := "Legacy-64MiB-Pass!"
+	salt := []byte("0123456789abcdef")
+	key := argon2.IDKey([]byte(pw), salt, 3, 64*1024, 2, 32)
+	legacy := fmt.Sprintf("$argon2id$v=19$m=65536,t=3,p=2$%s$%s",
+		base64.RawStdEncoding.EncodeToString(salt),
+		base64.RawStdEncoding.EncodeToString(key),
+	)
+	ok, err := VerifyPassword(legacy, pw)
+	if err != nil {
+		t.Fatalf("verify legacy hash: %v", err)
+	}
+	if !ok {
+		t.Fatal("legacy 64 MiB hash must verify after parameter tuning")
+	}
+}
+
+func TestVerifyPassword_RejectsOutOfBoundsParams(t *testing.T) {
+	excessive := "$argon2id$v=19$m=1048576,t=3,p=1$AAAAAAAAAAAAAAAAAAAAAA$AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+	if _, err := VerifyPassword(excessive, "pw"); err == nil {
+		t.Fatal("expected error for excessive argon2 memory parameter")
 	}
 }
 

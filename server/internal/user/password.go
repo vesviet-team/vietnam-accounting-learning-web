@@ -6,29 +6,36 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"runtime"
 	"strings"
 
 	"golang.org/x/crypto/argon2"
 )
 
-// argon2id parameters: 64 MiB memory, 3 iterations, parallelism = CPU count.
+// OWASP Password Storage Cheat Sheet baseline for argon2id (19 MiB, t=2, p=1),
+// keeping per-request heap allocation safe inside memory-constrained pods while
+// VerifyPassword remains compatible with legacy higher-cost PHC hashes.
 const (
-	argonMemoryKiB = 64 * 1024
-	argonTime      = 3
-	argonKeyLen    = 32
-	argonSaltLen   = 16
+	argonMemoryKiB   uint32 = 19 * 1024
+	argonTime        uint32 = 2
+	argonParallelism uint8  = 1
+	argonKeyLen      uint32 = 32
+	argonSaltLen            = 16
+
+	maxVerifyMemoryKiB uint32 = 256 * 1024
+	maxVerifyTime      uint32 = 32
+	maxVerifyThreads   uint8  = 16
+	maxVerifyKeyLen           = 128
+	maxVerifySaltLen          = 64
 )
 
-func argonParallelism() uint8 {
-	p := runtime.NumCPU()
-	if p < 1 {
-		p = 1
-	}
-	if p > 4 {
-		p = 4
-	}
-	return uint8(p)
+// argonSem bounds concurrent argon2id memory arenas per process so bursts of
+// login or registration requests cannot spike heap past container cgroup limits.
+var argonSem = make(chan struct{}, 2)
+
+func deriveArgon2Key(password string, salt []byte, timeCost, memoryKiB uint32, threads uint8, keyLen uint32) []byte {
+	argonSem <- struct{}{}
+	defer func() { <-argonSem }()
+	return argon2.IDKey([]byte(password), salt, timeCost, memoryKiB, threads, keyLen)
 }
 
 // HashPassword derives an argon2id PHC-formatted hash of the password.
@@ -37,10 +44,9 @@ func HashPassword(password string) (string, error) {
 	if _, err := rand.Read(salt); err != nil {
 		return "", err
 	}
-	p := argonParallelism()
-	key := argon2.IDKey([]byte(password), salt, argonTime, argonMemoryKiB, p, argonKeyLen)
+	key := deriveArgon2Key(password, salt, argonTime, argonMemoryKiB, argonParallelism, argonKeyLen)
 	return fmt.Sprintf("$argon2id$v=19$m=%d,t=%d,p=%d$%s$%s",
-		argonMemoryKiB, argonTime, p,
+		argonMemoryKiB, argonTime, argonParallelism,
 		base64.RawStdEncoding.EncodeToString(salt),
 		base64.RawStdEncoding.EncodeToString(key),
 	), nil
@@ -63,14 +69,17 @@ func VerifyPassword(storedHash, password string) (bool, error) {
 	if _, err := fmt.Sscanf(parts[3], "m=%d,t=%d,p=%d", &m, &t, &p); err != nil {
 		return false, errors.New("user: malformed argon2 parameters")
 	}
+	if m == 0 || m > maxVerifyMemoryKiB || t == 0 || t > maxVerifyTime || p == 0 || p > maxVerifyThreads {
+		return false, errors.New("user: argon2 parameters out of bounds")
+	}
 	salt, err := base64.RawStdEncoding.DecodeString(parts[4])
-	if err != nil {
+	if err != nil || len(salt) == 0 || len(salt) > maxVerifySaltLen {
 		return false, errors.New("user: malformed salt")
 	}
 	want, err := base64.RawStdEncoding.DecodeString(parts[5])
-	if err != nil {
+	if err != nil || len(want) == 0 || len(want) > maxVerifyKeyLen {
 		return false, errors.New("user: malformed hash")
 	}
-	got := argon2.IDKey([]byte(password), salt, t, m, p, uint32(len(want)))
+	got := deriveArgon2Key(password, salt, t, m, p, uint32(len(want)))
 	return subtle.ConstantTimeCompare(got, want) == 1, nil
 }
