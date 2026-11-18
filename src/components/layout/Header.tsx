@@ -57,7 +57,7 @@ export const Header: FC<HeaderProps> = ({
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between gap-2 h-16">
           {/* Left: Mobile Toggle & Brand */}
-          <div className="flex items-center space-x-1.5 sm:space-x-3 min-w-0">
+          <div className="flex items-center space-x-1.5 sm:space-x-3 min-w-0 sm:shrink-0">
             <button
               type="button"
               onClick={onToggleMobileMenu}
@@ -67,15 +67,15 @@ export const Header: FC<HeaderProps> = ({
               {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
 
-            <div className="flex items-center space-x-1.5 sm:space-x-2 min-w-0">
+            <div className="flex items-center space-x-1.5 sm:space-x-2 min-w-0 sm:shrink-0">
               <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white shadow-md shadow-emerald-500/20 shrink-0">
                 <BookOpen className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
-              <div className="min-w-0 flex items-center">
-                <span className="text-[13px] sm:text-lg font-bold bg-gradient-to-r from-emerald-700 to-teal-600 dark:from-emerald-400 dark:to-teal-300 bg-clip-text text-transparent whitespace-nowrap truncate">
+              <div className="min-w-0 flex items-center sm:shrink-0">
+                <span className="text-[13px] sm:text-lg font-bold bg-gradient-to-r from-emerald-700 to-teal-600 dark:from-emerald-400 dark:to-teal-300 bg-clip-text text-transparent whitespace-nowrap truncate sm:overflow-visible">
                   Kế Toán Việt Nam
                 </span>
-                <span className="hidden lg:inline-block ml-1.5 px-2 py-0.5 text-xs font-semibold bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 rounded-full border border-emerald-200 dark:border-emerald-800 whitespace-nowrap">
+                <span className="hidden 2xl:inline-block ml-1.5 px-2 py-0.5 text-xs font-semibold bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 rounded-full border border-emerald-200 dark:border-emerald-800 whitespace-nowrap">
                   30 Ngày
                 </span>
               </div>
@@ -83,7 +83,7 @@ export const Header: FC<HeaderProps> = ({
           </div>
 
           {/* Center: Regime Quick Selector */}
-          <div className="hidden lg:flex items-center space-x-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700 whitespace-nowrap">
+          <div className="hidden xl:flex items-center space-x-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700 whitespace-nowrap shrink-0">
             <button
               type="button"
               onClick={() => onRegimeChange('CIRCULAR_200')}
@@ -94,7 +94,7 @@ export const Header: FC<HeaderProps> = ({
               }`}
             >
               <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
-              <span>TT 200 (DN Lớn)</span>
+              <span>TT 200</span>
             </button>
             <button
               type="button"
@@ -106,7 +106,7 @@ export const Header: FC<HeaderProps> = ({
               }`}
             >
               <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
-              <span>TT 133 (SME)</span>
+              <span>TT 133</span>
             </button>
             <button
               type="button"
